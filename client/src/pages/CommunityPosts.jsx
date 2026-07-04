@@ -53,6 +53,50 @@ function CommunityPosts() {
     }
   };
 
+  const [commentInputs, setCommentInputs] = useState({});
+  const [commentAnonymity, setCommentAnonymity] = useState({});
+
+  const handleUpvote = async (postId) => {
+    try {
+      await axiosClient.post(`/posts/${postId}/upvote`);
+      fetchPosts();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upvote');
+    }
+  };
+
+  const handleReport = async (postId) => {
+    const reason = prompt('Why are you reporting this post?');
+    if (!reason) return;
+    try {
+      await axiosClient.post(`/posts/${postId}/report`, { reason });
+      fetchPosts();
+      alert('Post reported successfully');
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to report post');
+    }
+  };
+
+  const handleComment = async (postId) => {
+    const text = commentInputs[postId];
+    if (!text || !text.trim()) return;
+
+    try {
+      await axiosClient.post(`/posts/${postId}/comment`, {
+        text,
+        isAnonymous: !!commentAnonymity[postId]
+      });
+      setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+      setCommentAnonymity(prev => ({ ...prev, [postId]: false }));
+      fetchPosts();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to post comment');
+    }
+  };
+
   if (error) return <div>{error}</div>;
   if (!community) return <div>Loading...</div>;
 
@@ -98,6 +142,52 @@ function CommunityPosts() {
                 {' | '} 
                 Posted: {new Date(post.createdAt).toLocaleString()}
               </small>
+
+              <div style={{ marginTop: '10px' }}>
+                <button onClick={() => handleUpvote(post._id)}>
+                  Upvote ({post.upvotes?.length || 0})
+                </button>
+                <button onClick={() => handleReport(post._id)} style={{ marginLeft: '10px' }}>
+                  Report
+                </button>
+              </div>
+
+              <hr style={{ margin: '10px 0' }} />
+              
+              <div style={{ paddingLeft: '1rem', borderLeft: '2px solid #eee' }}>
+                <h4>Comments</h4>
+                {post.comments && post.comments.length > 0 ? (
+                  <ul style={{ paddingLeft: '1rem', marginBottom: '10px' }}>
+                    {post.comments.map(c => (
+                      <li key={c._id} style={{ marginBottom: '5px' }}>
+                        {c.text}
+                        <br />
+                        <small>
+                          - {c.isAnonymous ? 'Anonymous' : (c.authorId?.name || 'Unknown')}, {new Date(c.createdAt).toLocaleString()}
+                        </small>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p style={{ fontSize: '0.9em' }}>No comments yet.</p>}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
+                  <input
+                    type="text"
+                    placeholder="Write a comment..."
+                    value={commentInputs[post._id] || ''}
+                    onChange={e => setCommentInputs(prev => ({ ...prev, [post._id]: e.target.value }))}
+                  />
+                  <label style={{ fontSize: '0.9em' }}>
+                    <input
+                      type="checkbox"
+                      checked={commentAnonymity[post._id] || false}
+                      onChange={e => setCommentAnonymity(prev => ({ ...prev, [post._id]: e.target.checked }))}
+                    />
+                    Comment Anonymously
+                  </label>
+                  <button onClick={() => handleComment(post._id)} style={{ alignSelf: 'flex-start' }}>Submit</button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>

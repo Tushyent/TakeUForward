@@ -107,6 +107,14 @@ function Home() {
       </div>
 
       <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>
+        <h3>Academic Resources</h3>
+        <p>Access notes, previous year question papers, and study materials.</p>
+        <Link to="/resources" style={{ textDecoration: 'none', color: '#007BFF', fontWeight: 'bold' }}>
+          Browse Resources &rarr;
+        </Link>
+      </div>
+
+      <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>
         <h3>Communities List</h3>
         {communities.length === 0 ? <p>No communities found.</p> : (
           <ul>

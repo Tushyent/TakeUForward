@@ -120,4 +120,38 @@ describe('Anonymity Engine (Post Routes)', () => {
     expect(publicPost).toHaveProperty('authorId');
     expect(anonPost).not.toHaveProperty('authorId');
   });
+  it('should explicitly STRIP authorId from anonymous comments, but keep them for public comments', async () => {
+    // 1. Create a public post
+    const createRes = await request(app)
+      .post('/api/posts')
+      .send({ communityId, content: 'Public post for comments', isAnonymous: false });
+    const postId = createRes.body._id;
+
+    // 2. Add an anonymous comment
+    await request(app)
+      .post(`/api/posts/${postId}/comment`)
+      .send({ text: 'Anon comment', isAnonymous: true });
+
+    // 3. Add a public comment
+    await request(app)
+      .post(`/api/posts/${postId}/comment`)
+      .send({ text: 'Public comment', isAnonymous: false });
+
+    // 4. Fetch the post and check comments
+    const fetchRes = await request(app).get(`/api/posts/${postId}`);
+    expect(fetchRes.status).toBe(200);
+
+    const comments = fetchRes.body.comments;
+    expect(comments.length).toBe(2);
+
+    const anonComment = comments.find(c => c.text === 'Anon comment');
+    const publicComment = comments.find(c => c.text === 'Public comment');
+
+    expect(anonComment.isAnonymous).toBe(true);
+    expect(anonComment).not.toHaveProperty('authorId');
+
+    expect(publicComment.isAnonymous).toBe(false);
+    expect(publicComment).toHaveProperty('authorId');
+    expect(publicComment.authorId.name).toBe('Test User');
+  });
 });

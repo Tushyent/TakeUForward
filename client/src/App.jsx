@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import AlumniInvite from './pages/AlumniInvite';
 import CompleteProfile from './pages/CompleteProfile';
 import CommunityPosts from './pages/CommunityPosts';
+import Resources from './pages/Resources';
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
         <Route path="/complete-profile" element={<CompleteProfile />} />
         <Route path="/community/:id" element={<CommunityPosts />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="/home" element={<Home />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
       </Routes>

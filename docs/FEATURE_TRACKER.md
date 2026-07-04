@@ -13,8 +13,8 @@ Status values: Not Started / In Progress / Done / Blocked
 | Sub-Community Feed Structure | 1 | Done | | server/models/Community.js, server/routes/communityRoutes.js, client/src/pages/CommunityPosts.jsx | 2026-07-05 |
 | Discussion/Q&A Posts | 1 | Done | | server/models/Post.js, server/routes/postRoutes.js | 2026-07-05 |
 | Anonymity Engine | 1 | Done (Tested) | | server/routes/postRoutes.js, server/tests/anonymity.test.js | 2026-07-05 |
-| Comments & Upvotes | 1 | Not Started | | | |
-| Academic Resource Repository | 1 | Not Started | | | |
+| Comments & Upvotes | 1 | Done | | server/models/Post.js, server/routes/postRoutes.js, client/src/pages/CommunityPosts.jsx | 2026-07-05 |
+| Academic Resource Repository | 1 | Done (Core Upload/List) | | server/models/Resource.js, server/routes/resourceRoutes.js, client/src/pages/Resources.jsx | 2026-07-05 |
 | Club Pages | 1 | Not Started | | | |
 | Announcements Feed | 1 | Not Started | | | |
 | 1:1 Direct Messaging (polling) | 1 | Not Started | | | |

@@ -13,10 +13,19 @@ const postSchema = new mongoose.Schema(
     },
     content: { type: String, required: true },
     
-    // Future expansion as required by prompt
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+    comments: [{
+      authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      isAnonymous: { type: Boolean, default: false },
+      text: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now }
+    }],
     upvotes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Report' }],
+    reports: [{
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      reason: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now }
+    }],
+    isHidden: { type: Boolean, default: false }
   },
   { timestamps: true }
 );

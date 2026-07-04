@@ -8,11 +8,15 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Added
-- Implemented `Post` model with support for anonymous posting
-- Added `POST /api/posts` for authenticated post creation
-- Added `GET /api/posts` and `GET /api/posts/:id` with strict server-side anonymity stripping
-- Implemented a passing Jest test suite validating anonymity engine behavior
-- Added frontend `/community/:id` page with post listing and post creation UI
+- Implemented `Resource` model for academic materials (notes, PYQs)
+- Added `POST /api/resources/upload-url` to generate AWS S3 presigned URLs for direct uploads
+- Added `POST /api/resources` and `GET /api/resources` for resource metadata tracking and filtering
+- Added `/resources` frontend page to handle direct-to-S3 uploads and resource listing
+- Implemented embedded Post comments with independent anonymity stripping
+- Added `POST /api/posts/:id/comment` for adding new comments
+- Added `POST /api/posts/:id/upvote` to toggle upvotes on a post
+- Added `POST /api/posts/:id/report` for reporting posts, with automatic `isHidden` trigger at 3+ reports
+- Updated frontend `/community/:id` page with comment lists, comment creation, upvote toggling, and reporting UI
 - Added `assignDefaultCommunity` helper to match `dept` and `year` to batch communities
 - Added `PATCH /api/auth/profile` route for updating department and year post-signup
 - Added `/complete-profile` frontend page to collect required `dept` and `year` info
