@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema(
     bio: { type: String },
     isAnonymousDefault: { type: Boolean, default: false },
     reputation: { type: Number, default: 0 },
+    defaultCommunityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' },
   },
   { timestamps: true }
 );

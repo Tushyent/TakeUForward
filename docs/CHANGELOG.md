@@ -8,6 +8,20 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Added
+- Added `assignDefaultCommunity` helper to match `dept` and `year` to batch communities
+- Added `PATCH /api/auth/profile` route for updating department and year post-signup
+- Added `/complete-profile` frontend page to collect required `dept` and `year` info
+- Updated `GET /api/auth/me` to include a `profileComplete` boolean flag
+- Updated frontend routing to redirect to `/complete-profile` if `profileComplete` is false
+- Created `Community` model (dept, batch, general, topic)
+- Added GET `/api/communities` and GET `/api/communities/:id` routes
+- Added `/server/scripts/seedCommunities.js` and `npm run seed:communities` script
+- Modified `User` model to include `defaultCommunityId` and auto-set it on signup if dept/year matched
+- Updated frontend Home page to display a live list of Communities
+- Implemented Alumni Whitelist and invite token system
+- Added `ApprovedAlumniEmail` model
+- Added `POST /api/auth/alumni/invite` and `GET /api/auth/alumni/invite/:token` routes
+- Added `/alumni-invite/:token` frontend page to verify tokens
 - Implemented Google OAuth end-to-end for students with domain restriction (express-session based)
 - Added /api/auth/me route to fetch logged-in user details
 - Base project scaffolding with React/Vite (client) and Node/Express (server)
