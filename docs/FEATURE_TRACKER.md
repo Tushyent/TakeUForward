@@ -8,7 +8,7 @@ Status values: Not Started / In Progress / Done / Blocked
 
 | Feature | Phase | Status | Owner | Files | Last Updated |
 |---|---|---|---|---|---|
-| Google OAuth (SSN-restricted + alumni whitelist) | 1 | In Progress (Stubbed) | | server/config/passport.js, server/routes/authRoutes.js | 2026-07-05 |
+| Google OAuth (SSN-restricted + alumni whitelist) | 1 | In Progress (Student login implemented) | | server/config/passport.js, server/routes/authRoutes.js | 2026-07-05 |
 | Role & Profile System | 1 | In Progress (Model created) | | server/models/User.js | 2026-07-05 |
 | Sub-Community Feed Structure | 1 | Not Started | | | |
 | Discussion/Q&A Posts | 1 | Not Started | | | |

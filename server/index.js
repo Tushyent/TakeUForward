@@ -1,4 +1,5 @@
 import express from 'express';
+import session from 'express-session';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import passport from 'passport';
@@ -20,9 +21,20 @@ app.use(cors({
   credentials: true,
 }));
 
+// Session Middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'dev_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+  }
+}));
+
 app.use(passport.initialize());
-// Note: session middleware (express-session) would be added here in a full implementation
-// For MVP, if using JWT or session cookies, ensure proper setup before production.
+app.use(passport.session());
 
 // Routes
 app.use('/api/auth', authRoutes);

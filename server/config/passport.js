@@ -1,25 +1,34 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import dotenv from 'dotenv';
 import User from '../models/User.js';
+
+dotenv.config();
 
 passport.use(
   new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID || 'stub-client-id',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'stub-client-secret',
-      callbackURL: '/api/auth/google/callback',
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        // Domain restriction + Alumni whitelist logic goes here later.
-        // For now, this is a stub.
+        const email = profile.emails[0].value;
+        const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN || 'ssn.edu.in';
+        
+        // Domain restriction for students
+        if (!email.endsWith(`@${allowedDomain}`)) {
+          return done(null, false, { message: 'Unauthorized domain' });
+        }
+
         let user = await User.findOne({ googleId: profile.id });
         if (!user) {
           user = await User.create({
             googleId: profile.id,
             name: profile.displayName,
-            email: profile.emails[0].value,
-            role: 'student', // Stub
+            email: email,
+            role: 'student',
           });
         }
         return done(null, user);

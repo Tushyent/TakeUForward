@@ -8,6 +8,8 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Added
+- Implemented Google OAuth end-to-end for students with domain restriction (express-session based)
+- Added /api/auth/me route to fetch logged-in user details
 - Base project scaffolding with React/Vite (client) and Node/Express (server)
 - Concurrently script in root package.json to run both client and server
 - Centralized error middleware and MongoDB connection in server
