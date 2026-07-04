@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 
 function Home() {
@@ -111,8 +111,11 @@ function Home() {
         {communities.length === 0 ? <p>No communities found.</p> : (
           <ul>
             {communities.map((comm) => (
-              <li key={comm._id}>
-                <strong>{comm.name}</strong> ({comm.type}) - {comm.memberCount} members
+              <li key={comm._id} style={{ marginBottom: '10px' }}>
+                <Link to={`/community/${comm._id}`} style={{ textDecoration: 'none', color: '#007BFF' }}>
+                  <strong>{comm.name}</strong>
+                </Link> 
+                {' '}({comm.type}) - {comm.memberCount} members
               </li>
             ))}
           </ul>

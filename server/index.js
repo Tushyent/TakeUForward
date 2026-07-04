@@ -10,6 +10,7 @@ import './config/passport.js'; // initialize passport
 import authRoutes from './routes/authRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
 import communityRoutes from './routes/communityRoutes.js';
+import postRoutes from './routes/postRoutes.js';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use(passport.session());
 app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/communities', communityRoutes);
+app.use('/api/posts', postRoutes);
 
 // Error Handling
 app.use(notFound);

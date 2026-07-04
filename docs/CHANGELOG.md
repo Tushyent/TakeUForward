@@ -8,6 +8,11 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Added
+- Implemented `Post` model with support for anonymous posting
+- Added `POST /api/posts` for authenticated post creation
+- Added `GET /api/posts` and `GET /api/posts/:id` with strict server-side anonymity stripping
+- Implemented a passing Jest test suite validating anonymity engine behavior
+- Added frontend `/community/:id` page with post listing and post creation UI
 - Added `assignDefaultCommunity` helper to match `dept` and `year` to batch communities
 - Added `PATCH /api/auth/profile` route for updating department and year post-signup
 - Added `/complete-profile` frontend page to collect required `dept` and `year` info
