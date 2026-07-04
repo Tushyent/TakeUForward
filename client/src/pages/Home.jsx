@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import Navbar from '../components/Navbar';
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -47,15 +48,6 @@ function Home() {
   const [inviteLink, setInviteLink] = useState('');
   const [inviteError, setInviteError] = useState('');
 
-  const handleLogout = async () => {
-    try {
-      await axiosClient.get('/auth/logout');
-      navigate('/login');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const handleGenerateInvite = async () => {
     setInviteError('');
     setInviteLink('');
@@ -75,9 +67,10 @@ function Home() {
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>TakeUForward - Home Feed</h1>
-      <button onClick={handleLogout} style={{ padding: '5px 10px', cursor: 'pointer', marginBottom: '20px' }}>Logout</button>
+    <div>
+      <Navbar />
+      <div style={{ padding: '2rem' }}>
+        <h1>TakeUForward - Home Feed</h1>
       
       <div style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', marginBottom: '20px' }}>
         <h2>Welcome, {user?.name}</h2>
@@ -115,6 +108,24 @@ function Home() {
       </div>
 
       <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>
+        <h3>Campus Clubs</h3>
+        <p>View official clubs and their announcements.</p>
+        <Link to="/clubs" style={{ textDecoration: 'none', color: '#007BFF', fontWeight: 'bold' }}>
+          Browse Clubs &rarr;
+        </Link>
+      </div>
+
+      {user?.isPlatformAdmin && (
+        <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid red', borderRadius: '8px', background: '#ffe6e6' }}>
+          <h3 style={{ color: 'red' }}>Moderation Queue</h3>
+          <p>Review flagged and reported posts.</p>
+          <Link to="/moderation" style={{ textDecoration: 'none', color: 'red', fontWeight: 'bold' }}>
+            Open Moderation Dashboard &rarr;
+          </Link>
+        </div>
+      )}
+
+      <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>
         <h3>Communities List</h3>
         {communities.length === 0 ? <p>No communities found.</p> : (
           <ul>
@@ -128,6 +139,7 @@ function Home() {
             ))}
           </ul>
         )}
+      </div>
       </div>
     </div>
   );

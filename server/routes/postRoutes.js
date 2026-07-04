@@ -1,5 +1,9 @@
 import express from 'express';
 import Post from '../models/Post.js';
+import User from '../models/User.js';
+import Club from '../models/Club.js';
+import { createNotification } from '../services/notificationService.js';
+import { postCreationLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -24,7 +28,7 @@ const applyAnonymity = (post) => {
 };
 
 // POST /api/posts
-router.post('/', async (req, res) => {
+router.post('/', postCreationLimiter, async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
@@ -43,6 +47,32 @@ router.post('/', async (req, res) => {
       content,
       tags: tags || {}
     });
+
+    // Parse @mentions
+    const mentionRegex = /@([\w.-]+)/g;
+    const matches = [...content.matchAll(mentionRegex)].map(m => m[1]);
+    if (matches.length > 0) {
+      const mentionedUsers = await User.find({ handle: { $in: matches } });
+      const mentionedIds = mentionedUsers.map(u => u._id);
+
+      if (mentionedIds.length > 0) {
+        post.mentions = mentionedIds;
+        await post.save();
+
+        // Create notifications for mentioned users
+        for (const userId of mentionedIds) {
+          if (userId.toString() !== req.user._id.toString()) {
+            await createNotification({
+              userId,
+              type: 'mention',
+              refId: post._id,
+              isAnonymousSender: Boolean(isAnonymous),
+              content
+            });
+          }
+        }
+      }
+    }
 
     res.status(201).json(applyAnonymity(post));
   } catch (err) {
@@ -66,8 +96,9 @@ router.get('/', async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit, 10))
-      .populate('authorId', 'name dept role')
-      .populate('comments.authorId', 'name dept role'); // Populate author details
+      .populate('authorId', 'name dept role handle')
+      .populate('comments.authorId', 'name dept role handle')
+      .populate('clubId', 'name'); // Populate club details for announcements
 
     const safePosts = posts.map(applyAnonymity);
 
@@ -82,8 +113,9 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('authorId', 'name dept role')
-      .populate('comments.authorId', 'name dept role');
+      .populate('authorId', 'name dept role handle')
+      .populate('comments.authorId', 'name dept role handle')
+      .populate('clubId', 'name');
     
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
@@ -100,7 +132,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/posts/:id/comment
-router.post('/:id/comment', async (req, res) => {
+router.post('/:id/comment', postCreationLimiter, async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -117,10 +149,54 @@ router.post('/:id/comment', async (req, res) => {
     };
 
     post.comments.push(newComment);
+    
+    // Parse @mentions in comment
+    const mentionRegex = /@([\w.-]+)/g;
+    const matches = [...text.matchAll(mentionRegex)].map(m => m[1]);
+    let mentionedIds = [];
+    if (matches.length > 0) {
+      const mentionedUsers = await User.find({ handle: { $in: matches } });
+      mentionedIds = mentionedUsers.map(u => u._id);
+
+      // We just append new mentions to the post's mentions array, keeping unique
+      if (mentionedIds.length > 0) {
+        const existingMentions = post.mentions.map(id => id.toString());
+        for (const id of mentionedIds) {
+          if (!existingMentions.includes(id.toString())) {
+            post.mentions.push(id);
+          }
+        }
+      }
+    }
+
     await post.save();
 
+    // Create notifications for mentioned users in comment
+    for (const userId of mentionedIds) {
+      if (userId.toString() !== req.user._id.toString()) {
+        await createNotification({
+          userId,
+          type: 'mention',
+          refId: post._id,
+          isAnonymousSender: Boolean(isAnonymous),
+          content: text
+        });
+      }
+    }
+
+    // Notify post author of the new comment
+    if (post.authorId.toString() !== req.user._id.toString()) {
+      await createNotification({
+        userId: post.authorId,
+        type: 'comment', // Treat this as a reply to the post
+        refId: post._id,
+        isAnonymousSender: Boolean(isAnonymous),
+        content: text
+      });
+    }
+
     // Populate the newly added comment author for the response
-    await post.populate('comments.authorId', 'name dept role');
+    await post.populate('comments.authorId', 'name dept role handle');
     
     // Find the newly added comment to apply anonymity just to it, or return the whole post
     res.status(201).json(applyAnonymity(post));

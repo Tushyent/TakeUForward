@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
+    handle: { type: String, unique: true, sparse: true },
     googleId: { type: String, required: true, unique: true },
     role: {
       type: String,
@@ -17,6 +18,7 @@ const userSchema = new mongoose.Schema(
     clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club' },
     bio: { type: String },
     isAnonymousDefault: { type: Boolean, default: false },
+    isPlatformAdmin: { type: Boolean, default: false },
     reputation: { type: Number, default: 0 },
     defaultCommunityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' },
   },

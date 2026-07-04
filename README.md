@@ -1,8 +1,14 @@
 # TakeUForward
 
-Full-stack campus mentorship platform.
+Full-stack campus mentorship platform featuring real-time notifications, @mentions, anonymous posting, academic resource sharing, and admin-managed club pages.
 
-## Setup Instructions
+## Key Features Built So Far
+- **Secure Auth**: Google OAuth restricted to the SSN domain, with a strict invite-only whitelist for Alumni.
+- **Anonymity Engine**: Server-side Identity stripping guarantees true anonymity for sensitive questions.
+- **Notifications & @Mentions**: In-app Notification Bell and automated Email alerts via Nodemailer for mentions and replies, with a dynamic dropdown autocomplete UI.
+- **Academic Resources**: S3-backed storage with automatic Gemini AI summarization of uploaded notes/PYQs.
+- **Club Pages**: Admin-managed announcement spaces for official clubs.
+- **Moderation**: Auto-hiding of reported posts and a dedicated platform admin queue.
 
 1. **Install dependencies**
    ```bash

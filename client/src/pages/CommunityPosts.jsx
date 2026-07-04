@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import MentionTextarea from '../components/MentionTextarea';
+import Navbar from '../components/Navbar';
 
 function CommunityPosts() {
   const { id } = useParams();
@@ -101,8 +103,10 @@ function CommunityPosts() {
   if (!community) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <Link to="/home">← Back to Home</Link>
+    <div>
+      <Navbar />
+      <div style={{ padding: '2rem' }}>
+        <Link to="/home">← Back to Home</Link>
       <h1>{community.name}</h1>
       <p>{community.description}</p>
       
@@ -110,9 +114,9 @@ function CommunityPosts() {
 
       <form onSubmit={handleCreatePost} style={{ marginBottom: '2rem' }}>
         <h3>Create a Post</h3>
-        <textarea 
+        <MentionTextarea 
           value={newPostContent}
-          onChange={(e) => setNewPostContent(e.target.value)}
+          onChange={(val) => setNewPostContent(val)}
           placeholder="What's on your mind?"
           style={{ width: '100%', height: '80px', marginBottom: '10px' }}
         />
@@ -138,8 +142,11 @@ function CommunityPosts() {
             <li key={post._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
               <p><strong>{post.content}</strong></p>
               <small>
-                By: {post.isAnonymous ? 'Anonymous' : (post.authorId?.name || 'Unknown')} 
-                {' | '} 
+                {post.type === 'announcement' && post.clubId ? (
+                  <span style={{ color: '#007BFF', fontWeight: 'bold' }}>📢 Announcement by {post.clubId.name} | </span>
+                ) : (
+                  <span>By: {post.isAnonymous ? 'Anonymous' : `${post.authorId?.name || 'Unknown'} (@${post.authorId?.handle || 'unknown'})`} | </span>
+                )}
                 Posted: {new Date(post.createdAt).toLocaleString()}
               </small>
 
@@ -163,7 +170,7 @@ function CommunityPosts() {
                         {c.text}
                         <br />
                         <small>
-                          - {c.isAnonymous ? 'Anonymous' : (c.authorId?.name || 'Unknown')}, {new Date(c.createdAt).toLocaleString()}
+                          - {c.isAnonymous ? 'Anonymous' : `${c.authorId?.name || 'Unknown'} (@${c.authorId?.handle || 'unknown'})`}, {new Date(c.createdAt).toLocaleString()}
                         </small>
                       </li>
                     ))}
@@ -171,11 +178,10 @@ function CommunityPosts() {
                 ) : <p style={{ fontSize: '0.9em' }}>No comments yet.</p>}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
-                  <input
-                    type="text"
+                  <MentionTextarea
                     placeholder="Write a comment..."
                     value={commentInputs[post._id] || ''}
-                    onChange={e => setCommentInputs(prev => ({ ...prev, [post._id]: e.target.value }))}
+                    onChange={(val) => setCommentInputs(prev => ({ ...prev, [post._id]: val }))}
                   />
                   <label style={{ fontSize: '0.9em' }}>
                     <input
@@ -192,6 +198,7 @@ function CommunityPosts() {
           ))}
         </ul>
       )}
+      </div>
     </div>
   );
 }

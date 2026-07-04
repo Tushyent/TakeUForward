@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import User from '../models/User.js';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
+import crypto from 'crypto';
 
 dotenv.config();
 
@@ -41,10 +42,14 @@ passport.use(
           let year = null;
           let defaultCommunityId = await assignDefaultCommunity(dept, year);
 
+          const baseHandle = profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+          const handle = `${baseHandle}_${crypto.randomBytes(2).toString('hex')}`;
+
           user = await User.create({
             googleId: profile.id,
             name: profile.displayName,
             email: email,
+            handle,
             role: role,
             dept,
             year,

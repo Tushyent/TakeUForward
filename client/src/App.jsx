@@ -6,6 +6,9 @@ import AlumniInvite from './pages/AlumniInvite';
 import CompleteProfile from './pages/CompleteProfile';
 import CommunityPosts from './pages/CommunityPosts';
 import Resources from './pages/Resources';
+import ClubsList from './pages/ClubsList';
+import ClubPage from './pages/ClubPage';
+import ModerationQueue from './pages/ModerationQueue';
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
         <Route path="/complete-profile" element={<CompleteProfile />} />
         <Route path="/community/:id" element={<CommunityPosts />} />
         <Route path="/resources" element={<Resources />} />
+        <Route path="/clubs" element={<ClubsList />} />
+        <Route path="/clubs/:id" element={<ClubPage />} />
+        <Route path="/moderation" element={<ModerationQueue />} />
         <Route path="/home" element={<Home />} />
         <Route path="/" element={<Navigate to="/home" replace />} />
       </Routes>

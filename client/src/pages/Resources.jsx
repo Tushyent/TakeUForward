@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
 
 function Resources() {
   const [resources, setResources] = useState([]);
@@ -83,8 +84,10 @@ function Resources() {
   };
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <Link to="/home">← Back to Home</Link>
+    <div>
+      <Navbar />
+      <div style={{ padding: '2rem' }}>
+        <Link to="/home">← Back to Home</Link>
       <h1>Academic Resources</h1>
 
       <hr />
@@ -123,6 +126,13 @@ function Resources() {
           {resources.map((res) => (
             <li key={res._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
               <p><strong>{res.title}</strong> ({res.courseCode}, Sem {res.semester})</p>
+              
+              {res.aiSummary && (
+                <div style={{ backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '5px', marginBottom: '10px', fontSize: '0.9em' }}>
+                  <strong>✨ AI Summary:</strong> {res.aiSummary}
+                </div>
+              )}
+
               <small>
                 Uploaded by: {res.uploaderId?.name || 'Unknown'} 
                 {' | '} 
@@ -136,6 +146,7 @@ function Resources() {
           ))}
         </ul>
       )}
+    </div>
     </div>
   );
 }

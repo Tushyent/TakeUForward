@@ -14,11 +14,11 @@ Status values: Not Started / In Progress / Done / Blocked
 | Discussion/Q&A Posts | 1 | Done | | server/models/Post.js, server/routes/postRoutes.js | 2026-07-05 |
 | Anonymity Engine | 1 | Done (Tested) | | server/routes/postRoutes.js, server/tests/anonymity.test.js | 2026-07-05 |
 | Comments & Upvotes | 1 | Done | | server/models/Post.js, server/routes/postRoutes.js, client/src/pages/CommunityPosts.jsx | 2026-07-05 |
-| Academic Resource Repository | 1 | Done (Core Upload/List) | | server/models/Resource.js, server/routes/resourceRoutes.js, client/src/pages/Resources.jsx | 2026-07-05 |
-| Club Pages | 1 | Not Started | | | |
+| Academic Resource Repository | 1 | Done (Upload/List/Summarization/Extraction) | | server/models/Resource.js, server/routes/resourceRoutes.js, server/services/geminiService.js | 2026-07-05 |
+| Club Pages | 1 | Done | | server/models/Club.js, server/routes/clubRoutes.js, client/src/pages/ClubsList.jsx, client/src/pages/ClubPage.jsx | 2026-07-05 |
 | Announcements Feed | 1 | Not Started | | | |
 | 1:1 Direct Messaging (polling) | 1 | Not Started | | | |
-| Report/Moderation Queue | 1 | Not Started | | | |
+| Report/Moderation Queue | 1 | Done | | server/routes/moderationRoutes.js, client/src/pages/ModerationQueue.jsx | 2026-07-05 |
 | Search & Filter | 1 | Not Started | | | |
-| Email Notifications | 1 | Not Started | | | |
-| @Mentions | 1 | Not Started | | | |
+| Email Notifications | 1 | Done | | server/config/mailer.js, server/services/notificationService.js | 2026-07-05 |
+| @Mentions | 1 | Done | | server/models/Notification.js, server/routes/postRoutes.js | 2026-07-05 |

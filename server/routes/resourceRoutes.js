@@ -1,6 +1,7 @@
 import express from 'express';
 import Resource from '../models/Resource.js';
 import { generatePresignedUrl } from '../config/s3.js';
+import { summarizeResource } from '../services/geminiService.js';
 
 const router = express.Router();
 
@@ -40,6 +41,17 @@ router.post('/', async (req, res) => {
       fileUrl,
       uploaderId: req.user._id
     });
+
+    try {
+      const summary = await summarizeResource(title, courseCode, tags || [], fileUrl);
+      if (summary) {
+        resource.aiSummary = summary;
+        await resource.save();
+      }
+    } catch (summaryErr) {
+      console.error('Failed to summarize resource (non-fatal):', summaryErr);
+      // We do not throw or fail the response here. The resource is still created.
+    }
 
     res.status(201).json(resource);
   } catch (err) {

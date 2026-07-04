@@ -4,14 +4,16 @@ const postSchema = new mongoose.Schema(
   {
     authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     communityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community', required: true },
+    clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club', default: null },
     isAnonymous: { type: Boolean, default: false },
-    type: { type: String, enum: ['question'], default: 'question' },
+    type: { type: String, enum: ['question', 'announcement', 'resource', 'event'], default: 'question' },
     tags: {
       dept: { type: String },
       year: { type: Number },
       courseCode: { type: String },
     },
     content: { type: String, required: true },
+    mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     
     comments: [{
       authorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

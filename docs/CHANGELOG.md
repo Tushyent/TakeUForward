@@ -8,6 +8,29 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Added
+- Added `Navbar` component to house the brand, Notifications Bell, and Logout button globally
+- Added `NotificationsDropdown` component for real-time in-app notification checking and marking as read
+- Added `MentionTextarea` and `useMentionSearch` hook for frontend `@mention` autocomplete
+- Passed actual post/comment content down through `notificationService` to include in the email body
+- Added `Notification` model and endpoints for tracking mentions and replies
+- Added `@mention` parsing logic in posts and comments, storing unique `handle` references
+- Configured Nodemailer and integrated transactional emails for mentions and replies
+- Implemented `express-rate-limit` to prevent spam on post/comment creation
+- Added `isPlatformAdmin` role and `server/scripts/assignPlatformAdmin.js` script
+- Added `GET /api/moderation/queue` and `POST /api/moderation/:postId/resolve` routes for moderation
+- Created frontend `/moderation` page for platform admins to review reported posts
+- Added `Club` model and routes (`GET /api/clubs`, `GET /api/clubs/:id`) for admin-managed club pages
+- Extended `Post` model with `clubId` and `type: "announcement"` for club posts
+- Added `POST /api/clubs/:id/posts` allowing designated club admins to post announcements to the General community
+- Created frontend `/clubs` (list of all clubs) and `/clubs/:id` (club details with announcements and admin post form)
+- Added `npm run seed:clubs` script to create sample clubs
+- Added `npm run assign:admin` utility script to manually grant a user `club_admin` privileges for a specific club
+- Updated `GET /api/posts` and `CommunityPosts` to correctly format and identify club announcements
+- Upgraded Gemini AI Summarization to extract and read actual PDF file text instead of just relying on metadata
+- Added `pdf-parse` to backend to fetch S3 file bytes and parse text content for the Gemini prompt
+- Integrated `@google/generative-ai` for automatic resource summarization
+- Updated `POST /api/resources` to asynchronously call Gemini with metadata to generate an `aiSummary` with graceful fallback
+- Added frontend rendering for the `aiSummary` field on the `/resources` page
 - Implemented `Resource` model for academic materials (notes, PYQs)
 - Added `POST /api/resources/upload-url` to generate AWS S3 presigned URLs for direct uploads
 - Added `POST /api/resources` and `GET /api/resources` for resource metadata tracking and filtering
