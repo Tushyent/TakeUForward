@@ -2,6 +2,8 @@ import express from 'express';
 import Post from '../models/Post.js';
 import Review from '../models/Review.js';
 import InterviewExperience from '../models/InterviewExperience.js';
+import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
+import CareerRoadmap from '../models/CareerRoadmap.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 
 const router = express.Router();
@@ -52,11 +54,33 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
       .populate('reports.userId', 'name handle')
       .sort({ 'reports.length': -1, createdAt: -1 });
 
+    const flaggedElectives = await ElectiveSuggestion.find({
+      $or: [
+        { isHidden: true },
+        { 'reports.0': { $exists: true } }
+      ]
+    })
+      .populate('authorId', 'name handle role')
+      .populate('reports.userId', 'name handle')
+      .sort({ 'reports.length': -1, createdAt: -1 });
+
+    const flaggedRoadmaps = await CareerRoadmap.find({
+      $or: [
+        { isHidden: true },
+        { 'reports.0': { $exists: true } }
+      ]
+    })
+      .populate('authorId', 'name handle role')
+      .populate('reports.userId', 'name handle')
+      .sort({ 'reports.length': -1, createdAt: -1 });
+
     const safePosts = flaggedPosts.map(post => ({ type: 'post', ...applyAnonymity(post) }));
     const safeReviews = flaggedReviews.map(review => ({ type: 'review', ...applyAnonymity(review) }));
     const safeExperiences = flaggedExperiences.map(exp => ({ type: 'interview_experience', ...applyAnonymity(exp) }));
+    const typedElectives = flaggedElectives.map(e => ({ type: 'elective_suggestion', ...e.toObject() }));
+    const typedRoadmaps = flaggedRoadmaps.map(r => ({ type: 'career_roadmap', ...r.toObject() }));
 
-    const combined = [...safePosts, ...safeReviews, ...safeExperiences].sort((a, b) => b.reports.length - a.reports.length || new Date(b.createdAt) - new Date(a.createdAt));
+    const combined = [...safePosts, ...safeReviews, ...safeExperiences, ...typedElectives, ...typedRoadmaps].sort((a, b) => b.reports.length - a.reports.length || new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json(combined);
   } catch (err) {
@@ -78,6 +102,8 @@ router.post('/:itemId/resolve', requirePlatformAdmin, async (req, res, next) => 
     let Model = Post;
     if (type === 'review') Model = Review;
     if (type === 'interview_experience') Model = InterviewExperience;
+    if (type === 'elective_suggestion') Model = ElectiveSuggestion;
+    if (type === 'career_roadmap') Model = CareerRoadmap;
     const item = await Model.findById(req.params.itemId);
     if (!item) {
       return res.status(404).json({ error: { message: 'Item not found' } });

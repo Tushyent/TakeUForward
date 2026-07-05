@@ -93,6 +93,19 @@ const ModerationQueue = () => {
                       Rounds: {post.rounds?.length}
                     </>
                   )}
+                  {post.type === 'elective_suggestion' && (
+                    <>
+                      <strong>{post.courseCode} - {post.courseName}</strong> ({post.semester})
+                      <br />Platform: {post.platform} | Recommendation: {post.recommendation}
+                      <br />{post.comment}
+                    </>
+                  )}
+                  {post.type === 'career_roadmap' && (
+                    <>
+                      <strong>{post.title}</strong>
+                      <br />Path: {post.careerPath} | Steps: {post.steps?.length}
+                    </>
+                  )}
                 </div>
                 
                 <div style={{ display: 'flex', gap: '1rem' }}>

@@ -37,6 +37,8 @@ Status values: Not Started / In Progress / Done / Blocked
 | Full Profile Pages | 2 | Done | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-05 |
 | Mock Interview / Resume Review Pairing | 2 | Done | | server/models/MockInterviewRequest.js, server/routes/mockInterviewRoutes.js, client/src/pages/MockInterviews.jsx | 2026-07-05 |
 | Interview Experience Repository | 2 | Done | | server/models/InterviewExperience.js, server/routes/interviewExperienceRoutes.js, client/src/pages/InterviewExperiences.jsx | 2026-07-05 |
+| NPTEL / Elective Suggestion Aggregator | 2 | Done | | server/models/ElectiveSuggestion.js, server/routes/electiveRoutes.js, client/src/pages/Electives.jsx | 2026-07-05 |
+| Career Roadmap Templates | 2 | Done | | server/models/CareerRoadmap.js, server/routes/careerRoadmapRoutes.js, client/src/pages/CareerRoadmaps.jsx | 2026-07-05 |
 | Teammate Finder | 2 | Done | | server/models/TeamRequest.js, server/routes/teamRequestRoutes.js, client/src/pages/TeamFinder.jsx | 2026-07-05 |
 | Club Analytics | 2 | Done | | server/routes/clubRoutes.js, client/src/pages/ClubPage.jsx | 2026-07-05 |
 | Course & Professor Reviews | 2 | Done | | server/models/Review.js, server/routes/reviewRoutes.js, client/src/pages/Reviews.jsx | 2026-07-06 |

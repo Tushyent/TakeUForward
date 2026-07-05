@@ -26,6 +26,8 @@ import bookmarkRoutes from './routes/bookmarkRoutes.js';
 import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
 import interviewExperienceRoutes from './routes/interviewExperienceRoutes.js';
 import teamRequestRoutes from './routes/teamRequestRoutes.js';
+import electiveRoutes from './routes/electiveRoutes.js';
+import careerRoadmapRoutes from './routes/careerRoadmapRoutes.js';
 
 dotenv.config();
 
@@ -101,6 +103,8 @@ app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/mock-interviews', mockInterviewRoutes);
 app.use('/api/interview-experiences', interviewExperienceRoutes);
 app.use('/api/team-requests', teamRequestRoutes);
+app.use('/api/elective-suggestions', electiveRoutes);
+app.use('/api/career-roadmaps', careerRoadmapRoutes);
 
 // Error Handling
 app.get('/', (req, res) => {
