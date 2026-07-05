@@ -35,3 +35,4 @@ Status values: Not Started / In Progress / Done / Blocked
 | Verified Alumni Directory | 2 | Done | | server/routes/alumniRoutes.js, client/src/pages/AlumniDirectory.jsx | 2026-07-05 |
 | Referral Request Board | 2 | Done | | server/models/ReferralRequest.js, server/routes/referralRoutes.js, client/src/pages/ReferralBoard.jsx | 2026-07-05 |
 | Full Profile Pages | 2 | Done | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-05 |
+| Course & Professor Reviews | 2 | Done | | server/models/Review.js, server/routes/reviewRoutes.js, client/src/pages/Reviews.jsx | 2026-07-06 |

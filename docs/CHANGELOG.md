@@ -8,6 +8,8 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased] - 2026-07-05
 
 ### Added
+- **[Phase 2] Course & Professor Reviews**: Implemented the full reviews system at `/reviews`. Added filtering by course, professor, and semester. Included a dynamic aggregate summary (average rating and total reviews) that computes over the filtered results.
+- **[Phase 2] Reviews Moderation**: Integrated the `Review` model into the platform's central moderation queue. Users can report abusive reviews, and platform admins can resolve them alongside reported posts.
 - **[Phase 2] Full Profile Pages**: Added `/profile/:username` for public profiles with configurable visibility settings. Logged-in users can update their profile information and privacy settings at `/settings/profile`.
 - **[Phase 2] Data Model Extensions**: Added `username`, `graduationYear`, `currentCompany`, `previousCompany`, `higherEducation`, `about`, `skills`, `interests`, and `socialLinks` to the `User` model.
 - **[Phase 2] Standardized Departments**: Transformed `dept` field into an exact strict enum and constrained `year` to integers `2000-2029`.
@@ -26,6 +28,11 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **[Deployment Hardening] Dynamic CORS**: Updated backend CORS configuration to dynamically match an array of local origins, the exact production origin, and a regular expression (`^https:\/\/takeuforward.*\.vercel\.app$`) to automatically whitelist all Vercel preview deployment URLs.
 - **[Deployment Hardening] Defensiveness**: Systematically stripped trailing slashes in `server/routes/authRoutes.js`, `server/config/mailer.js`, and `client/src/api/axiosClient.js` wherever env var URLs are read.
 - **[Docs] Deployment Checklist**: Created a permanent, reusable `docs/DEPLOYMENT_CHECKLIST.md` for pre- and post-deploy checks.
+
+### Fixed
+- **[Phase 1/2 Audit Fix] Data Integrity**: Added required MongoDB indexes to `ReferralRequest` (`status`, `targetCompany`, `requesterId`, `matchedAlumniId`) and `Review` (`courseCode`, `professorName`, `semester`, `authorId`) models to ensure query performance scales.
+- **[Phase 1/2 Audit Fix] Rate Limiting**: Applied `postCreationLimiter` to `POST /api/referrals` and `POST /api/referrals/:id/match` to close a spam vector.
+- **[Phase 1/2 Audit Fix] UI Consistency**: Fixed non-existent CSS variables (`--card-bg`, `--input-bg`) in `Reviews.jsx` to match the global shared UI tokens.
 
 ### Changed
 - **Status**: Officially finalized Phase 1 MVP completion and performed Vercel/Render deployment UI/UX polish audit.

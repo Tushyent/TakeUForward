@@ -14,5 +14,9 @@ const referralRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+referralRequestSchema.index({ requesterId: 1 });
+referralRequestSchema.index({ matchedAlumniId: 1 });
+referralRequestSchema.index({ status: 1, targetCompany: 1 });
+
 const ReferralRequest = mongoose.model('ReferralRequest', referralRequestSchema);
 export default ReferralRequest;

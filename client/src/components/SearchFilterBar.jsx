@@ -1,6 +1,6 @@
 import React from 'react';
 
-function SearchFilterBar({ filters, setFilters, showType = true, showDept = true, showYear = true, showCourse = true }) {
+function SearchFilterBar({ filters, setFilters, showType = true, showDept = true, showYear = true, showCourse = true, showProfessor = false, showSemester = false }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
@@ -54,6 +54,27 @@ function SearchFilterBar({ filters, setFilters, showType = true, showDept = true
           onChange={handleChange}
           style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
         />
+      )}
+
+      {showProfessor && (
+        <input 
+          type="text" 
+          name="professorName" 
+          placeholder="Professor name..." 
+          value={filters.professorName || ''} 
+          onChange={handleChange}
+          style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+        />
+      )}
+
+      {showSemester && (
+        <select name="semester" value={filters.semester || ''} onChange={handleChange} style={{ padding: '5px' }}>
+          <option value="">All Semesters</option>
+          <option value="Fall 2026">Fall 2026</option>
+          <option value="Spring 2026">Spring 2026</option>
+          <option value="Fall 2025">Fall 2025</option>
+          <option value="Spring 2025">Spring 2025</option>
+        </select>
       )}
     </div>
   );

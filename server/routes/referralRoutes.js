@@ -1,5 +1,6 @@
 import express from 'express';
 import ReferralRequest from '../models/ReferralRequest.js';
+import { postCreationLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -47,7 +48,7 @@ router.get('/my-requests', async (req, res) => {
 
 // POST /api/referrals
 // Create a new referral request (students only)
-router.post('/', async (req, res) => {
+router.post('/', postCreationLimiter, async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
   if (req.user.role !== 'student') {
     return res.status(403).json({ error: 'Only students can create referral requests' });
@@ -82,7 +83,7 @@ router.post('/', async (req, res) => {
 
 // POST /api/referrals/:id/match
 // Match an alumni to a request (verified alumni only)
-router.post('/:id/match', async (req, res) => {
+router.post('/:id/match', postCreationLimiter, async (req, res) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
   if (!req.user.isVerifiedAlumni || req.user.role !== 'alumni') {
     return res.status(403).json({ error: 'Only verified alumni can match with referral requests' });

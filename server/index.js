@@ -21,6 +21,7 @@ import announcementRoutes from './routes/announcementRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import alumniRoutes from './routes/alumniRoutes.js';
 import referralRoutes from './routes/referralRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 dotenv.config();
 
@@ -91,6 +92,7 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/alumni', alumniRoutes);
 app.use('/api/referrals', referralRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Error Handling
 app.use(notFound);

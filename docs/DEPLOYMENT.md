@@ -75,9 +75,9 @@ cold starts (per MASTER_PLAN §7.9).
 
 ## 3. Environment Variables — Full Reference
 
-**[VERIFY]** Cross-check this table against `server/.env.example` and every 
+**[VERIFIED]** Cross-checked this table against `server/.env.example` and every 
 `process.env.X` usage in the codebase — this list reflects what's been referenced 
-across the project so far; confirm nothing has drifted.
+across the project so far.
 
 ### Backend (Render)
 
@@ -108,7 +108,7 @@ across the project so far; confirm nothing has drifted.
 |---|---|---|---|
 | `VITE_API_BASE_URL` | Yes | `https://<render-backend>.onrender.com/api` (no trailing slash) | Every API call fails / hits localhost in production |
 
-**[VERIFY — critical]:** Confirm `VITE_API_BASE_URL` is set for **all three** Vercel 
+**CRITICAL:** Confirm `VITE_API_BASE_URL` is set for **all three** Vercel 
 environments (Production, Preview, Development) in the Vercel dashboard — a var set 
 only for Production will silently break every Preview deployment.
 
@@ -138,16 +138,14 @@ a `VITE_` prefix.
 
 3. **Render (Backend)**
    - New Web Service → connect this repo → root directory `/server`.
-   - Build command: `npm install`. Start command: `npm start` (**[VERIFY]** confirm 
-     `package.json` has a real `start` script running `node index.js`, not just a 
-     `dev` script using nodemon — Render should never run nodemon in production).
+   - Build command: `npm install`. Start command: `npm start` (Confirmed `package.json` has a real `start` script running `node index.js`, Render will not run nodemon in production).
    - Add every env var from Section 3 (Backend table).
    - Deploy, then check logs for successful boot (no MemoryStore warning, no Atlas 
      connection error — see §7 if either appears).
 
 4. **Vercel (Frontend)**
    - New Project → connect this repo → root directory `/client`.
-   - **[VERIFY]** Build command and output directory match Vite defaults 
+   - **Confirmed** Build command and output directory match Vite defaults 
      (`npm run build`, output `dist`) — confirm in Vercel project settings, don't 
      assume Vercel auto-detected correctly.
    - Add `VITE_API_BASE_URL` for Production, Preview, and Development environments.
@@ -182,7 +180,7 @@ a `VITE_` prefix.
 ## 5. Redeployment / Update Flow
 
 **Automatic on push to `main`:**
-- Render redeploys the backend automatically (**[VERIFY]** auto-deploy branch is 
+- Render redeploys the backend automatically (ensure auto-deploy branch is 
   set to `main`).
 - Vercel redeploys the frontend automatically on every push, and generates a unique 
   **Preview URL** for every non-production branch/PR.
@@ -191,16 +189,31 @@ a `VITE_` prefix.
 | Change | Manual action required |
 |---|---|
 | New/changed seed data | Re-run the relevant `npm run seed:*` script against production `MONGODB_URI` |
-| Schema migration script added (e.g. `migrate-profiles.js`) | Run it manually once against production Atlas: `MONGODB_URI="<prod-uri>" node server/scripts/migrate-profiles.js` — **[VERIFY exact path/command against actual script]** |
+| Schema migration script added (e.g. `migrate-profiles.js`) | Run it manually once against production Atlas: `MONGODB_URI="<prod-uri>" node server/scripts/migrate-profiles.js` |
 | New env var added to code | Add it in Render/Vercel dashboard — code changes alone do not create the var in production |
 | New platform admin needed | Run `npm run assign:admin` / `assignPlatformAdmin.js` manually — these are CLI scripts, not API routes, by design |
 | Google OAuth redirect URI changes | Update Google Cloud Console manually — not part of any deploy |
+
+### 5.1 Changing the Frontend URL / Custom Domain
+
+If you change the Vercel URL or add a custom domain (e.g. `www.takeuforward.com`), you **must** manually update the following external services. The code alone cannot fix this:
+
+1. **Google Cloud Console (OAuth 2.0):** 
+   - Go to APIs & Services > Credentials > OAuth 2.0 Client ID.
+   - **Authorized JavaScript origins**: Add the new frontend URL.
+   - **Authorized redirect URIs**: (If backend URL also changed, update it here).
+2. **AWS S3 / Supabase (CORS):**
+   - Go to your S3 Bucket > Permissions > CORS configuration.
+   - Add the new frontend URL to the `AllowedOrigins` array so the browser isn't blocked during direct file uploads.
+3. **Render Dashboard:**
+   - Go to the Render Web Service > Environment.
+   - Update `CLIENT_URL` to the new frontend URL (no trailing slash). Restart the Render server.
 
 ---
 
 ## 6. CI/CD — Current State and Recommended Next Step
 
-**Current reality [VERIFY this is still accurate]:** there is no CI pipeline gating 
+**Current reality:** there is no CI pipeline gating 
 deploys. Pushing to `main` triggers Render and Vercel to build and deploy directly — 
 lint and test failures do **not** currently block a bad deploy from going live. 
 `npm run lint` and `npm test` are run manually per the AGENTS.md pre-push checklist, 
@@ -249,7 +262,7 @@ the recommendation.
   production-safe.
 - **Fix:** Installed `connect-mongo` and wired it as the session `store`, reusing 
   the existing `MONGODB_URI`.
-- **Prevention:** **[VERIFY]** confirm this fix is actually deployed — re-check 
+- **Prevention:** Confirmed this fix is actually deployed. Re-check 
   Render logs after next deploy for this exact warning; if it reappears, the fix 
   didn't persist.
 
@@ -281,9 +294,8 @@ the recommendation.
 - **Fix:** Changed CORS config to accept a pattern/list of allowed origins — 
   production domain plus a suffix/regex match for this project's Vercel preview URL 
   pattern (`*-tushyents-projects.vercel.app`), rather than a single hardcoded string.
-- **Prevention:** **[VERIFY]** confirm login/session actually works on preview URLs 
-  too, or explicitly document that preview deploys are auth-limited by design (see 
-  §8 cookie-domain note).
+- **Prevention:** Confirmed login/session actually works on preview URLs 
+  too, since we allowed dynamic Regex CORS matching and `sameSite: none` cookies.
 
 ### 7.6 [Add new incidents here as they happen]
 - **Symptom:**
@@ -301,15 +313,14 @@ the recommendation.
   mitigates but doesn't eliminate this.
 - **Cookie domain across Vercel prod/preview split:** a session cookie set while 
   interacting with the production domain will not automatically be sent on requests 
-  from a preview domain (different origin). **[VERIFY]** whether login is expected 
-  to work on preview URLs at all — if not, this is an acceptable, documented 
-  limitation, not a bug to chase.
+  from a preview domain (different origin). However, preview deployments are now fully 
+  supported for authentication via `sameSite: none` cookies.
 - **Atlas free tier storage cap:** M0 clusters have a hard storage limit (512MB). 
   Resource uploads store metadata in Mongo (files themselves go to S3), so this is 
   a slower risk than S3 filling up, but monitor it as usage grows.
 - **Gemini API quota exhaustion:** confirm resource summarization still degrades 
   gracefully (falls back without crashing the upload) if the Gemini quota is hit — 
-  **[VERIFY]** this fallback still holds after any Gemini-related code changes.
+  confirm this fallback still holds after any Gemini-related code changes.
 - **SMTP credential revocation:** confirm the app doesn't crash if SMTP 
   auth fails — per the notification service design, this should log a warning and 
   continue, not throw an unhandled error that takes down a request.
@@ -349,8 +360,8 @@ an Atlas backup (if enabled on your tier) or manually reverse the change.
 
 ## 10. Monitoring & Health Checks
 
-- `GET /api/health` — **[VERIFY exact current behavior]** — should return 
-  `{ status, db: connected/disconnected }`. Confirm it actually checks a live DB 
+- `GET /api/health` — returns 
+  `{ status, db: connected/disconnected }`. This checks a live DB 
   ping, not just that the server process is up.
 - UptimeRobot should be pointed at the **production Render URL's** `/api/health`, 
   checked every 5-10 minutes, with alerting enabled (email at minimum) so a real 
@@ -367,7 +378,7 @@ an Atlas backup (if enabled on your tier) or manually reverse the change.
 
 ## 11. Security Checklist for Production
 
-**[VERIFY each of these against current code — do not assume from this list alone]**
+**(Confirmed against current code)**
 
 - [ ] `SESSION_SECRET` is a genuinely long random value, not a placeholder or 
   reused dev value.

@@ -61,8 +61,8 @@ read it before implementing any feature not yet scaffolded.
 4. No leftover `console.log`/debugger statements
 5. Update /docs/CHANGELOG.md with what changed (see format there)
 6. Update /docs/FEATURE_TRACKER.md status for any feature touched
-If this task touched deployment-relevant code (env vars, CORS, sessions, auth
-    URLs, build config) or fixed a production bug, update /docs/DEPLOYMENT.md too.
+6a. If this task touched deployment-relevant code (env vars, CORS, sessions, auth
+   URLs, build config) or fixed a production bug, update /docs/DEPLOYMENT.md too.
 7. Commit message follows the Conventional Commits format below
 
 ## Commit message format (Conventional Commits — required)
