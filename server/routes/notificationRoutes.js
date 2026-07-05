@@ -1,5 +1,6 @@
 import express from 'express';
 import Notification from '../models/Notification.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 
 const router = express.Router();
 
@@ -12,9 +13,9 @@ router.get('/', async (req, res, next) => {
   }
 
   try {
-    const { page = 1, limit = 20 } = req.query;
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-
+    const { page: pageQuery, limit: limitQuery } = req.query;
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    
     const notifications = await Notification.find({ userId: req.user._id })
       .sort({ createdAt: -1 })
       .skip(skip)

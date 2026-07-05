@@ -1,28 +1,34 @@
 import express from 'express';
 import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
 // GET /api/elective-suggestions
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const { courseCode, platform, semester, page = 1, limit = 10 } = req.query;
-    
+    const { courseCode, platform, semester, page: pageQuery, limit: limitQuery } = req.query;
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+
     const query = { isHidden: { $ne: true } };
     
-    if (courseCode) query.courseCode = { $regex: new RegExp(courseCode, 'i') };
+    if (courseCode) {
+      const safeCourseCode = courseCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.courseCode = { $regex: new RegExp(safeCourseCode, 'i') };
+    }
     if (platform) query.platform = platform;
-    if (semester) query.semester = { $regex: new RegExp(semester, 'i') };
+    if (semester) {
+      const safeSemester = semester.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.semester = { $regex: new RegExp(safeSemester, 'i') };
+    }
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    
     const suggestions = await ElectiveSuggestion.aggregate([
       { $match: query },
       { $addFields: { upvotesCount: { $size: { $ifNull: ["$upvotes", []] } } } },
       { $sort: { upvotesCount: -1, createdAt: -1 } },
       { $skip: skip },
-      { $limit: parseInt(limit, 10) }
+      { $limit: limit }
     ]);
 
     await ElectiveSuggestion.populate(suggestions, { 
@@ -33,12 +39,12 @@ router.get('/', async (req, res) => {
     res.status(200).json(suggestions);
   } catch (err) {
     console.error('Error fetching elective suggestions:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/elective-suggestions
-router.post('/', postCreationLimiter, async (req, res) => {
+router.post('/', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -69,12 +75,12 @@ router.post('/', postCreationLimiter, async (req, res) => {
     res.status(201).json(responseData);
   } catch (err) {
     console.error('Error creating elective suggestion:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/elective-suggestions/:id/upvote
-router.post('/:id/upvote', async (req, res) => {
+router.post('/:id/upvote', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -82,24 +88,22 @@ router.post('/:id/upvote', async (req, res) => {
     if (!suggestion) return res.status(404).json({ error: { message: 'Suggestion not found' } });
 
     const userIdStr = req.user._id.toString();
-    const upvoteIndex = suggestion.upvotes.findIndex(id => id.toString() === userIdStr);
+    const hasUpvoted = suggestion.upvotes.some(id => id.toString() === userIdStr);
 
-    if (upvoteIndex === -1) {
-      suggestion.upvotes.push(req.user._id);
-    } else {
-      suggestion.upvotes.splice(upvoteIndex, 1);
-    }
+    const update = hasUpvoted
+      ? { $pull: { upvotes: req.user._id } }
+      : { $addToSet: { upvotes: req.user._id } };
 
-    await suggestion.save();
-    res.status(200).json({ upvotesCount: suggestion.upvotes.length });
+    const updatedSuggestion = await ElectiveSuggestion.findByIdAndUpdate(req.params.id, update, { new: true });
+    res.status(200).json({ upvotesCount: updatedSuggestion.upvotes.length });
   } catch (err) {
     console.error('Error toggling upvote:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/elective-suggestions/:id/report
-router.post('/:id/report', async (req, res) => {
+router.post('/:id/report', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -129,7 +133,7 @@ router.post('/:id/report', async (req, res) => {
     res.status(200).json({ message: 'Suggestion reported successfully', isHidden: suggestion.isHidden });
   } catch (err) {
     console.error('Error reporting suggestion:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 

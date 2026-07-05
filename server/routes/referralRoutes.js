@@ -6,7 +6,7 @@ const router = express.Router();
 
 // GET /api/referrals
 // List open referral requests (filterable by company)
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -14,7 +14,8 @@ router.get('/', async (req, res) => {
     const query = { status };
 
     if (company) {
-      query.targetCompany = { $regex: new RegExp(company, 'i') };
+      const safeCompany = company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.targetCompany = { $regex: new RegExp(safeCompany, 'i') };
     }
 
     const requests = await ReferralRequest.find(query)
@@ -25,13 +26,13 @@ router.get('/', async (req, res) => {
     res.status(200).json(requests);
   } catch (err) {
     console.error('Error fetching referral requests:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // GET /api/referrals/my-requests
 // List requests made by the current user
-router.get('/my-requests', async (req, res) => {
+router.get('/my-requests', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -42,13 +43,13 @@ router.get('/my-requests', async (req, res) => {
     res.status(200).json(requests);
   } catch (err) {
     console.error('Error fetching my referral requests:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // POST /api/referrals
 // Create a new referral request (students only)
-router.post('/', postCreationLimiter, async (req, res) => {
+router.post('/', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
   if (req.user.role !== 'student') {
     return res.status(403).json({ error: 'Only students can create referral requests' });
@@ -61,7 +62,7 @@ router.post('/', postCreationLimiter, async (req, res) => {
     // Check if user already has an open request for this company
     const existing = await ReferralRequest.findOne({ 
       requesterId: req.user._id, 
-      targetCompany: { $regex: new RegExp(`^${targetCompany}$`, 'i') },
+      targetCompany: { $regex: new RegExp(`^${targetCompany.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
       status: 'open'
     });
 
@@ -77,13 +78,13 @@ router.post('/', postCreationLimiter, async (req, res) => {
     res.status(201).json(request);
   } catch (err) {
     console.error('Error creating referral request:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // POST /api/referrals/:id/match
 // Match an alumni to a request (verified alumni only)
-router.post('/:id/match', postCreationLimiter, async (req, res) => {
+router.post('/:id/match', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
   if (!req.user.isVerifiedAlumni || req.user.role !== 'alumni') {
     return res.status(403).json({ error: 'Only verified alumni can match with referral requests' });
@@ -109,13 +110,13 @@ router.post('/:id/match', postCreationLimiter, async (req, res) => {
     res.status(200).json(request);
   } catch (err) {
     console.error('Error matching referral request:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // PATCH /api/referrals/:id/close
 // Close a request (requester only)
-router.patch('/:id/close', async (req, res) => {
+router.patch('/:id/close', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -131,7 +132,7 @@ router.patch('/:id/close', async (req, res) => {
     res.status(200).json(request);
   } catch (err) {
     console.error('Error closing referral request:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 

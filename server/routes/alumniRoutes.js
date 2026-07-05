@@ -1,42 +1,40 @@
 import express from 'express';
 import User from '../models/User.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 
 const router = express.Router();
 
 // GET /api/alumni
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
-    const { company, dept, page = 1, limit = 20 } = req.query;
-    
+    const { company, dept, page: pageQuery, limit: limitQuery } = req.query;
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+
     const query = { role: 'alumni', isVerifiedAlumni: true };
     if (company) {
-      query.currentCompany = { $regex: new RegExp(company, 'i') };
+      const safeCompany = company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.currentCompany = { $regex: new RegExp(safeCompany, 'i') };
     }
-    if (dept) {
-      query.dept = dept;
-    }
-
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    if (dept) query.dept = dept;
 
     const alumni = await User.find(query)
       .select('name handle dept year currentCompany bio reputation isVerifiedAlumni username')
       .sort({ reputation: -1, createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit));
+      .limit(limit);
 
     const total = await User.countDocuments(query);
 
     res.status(200).json({
       alumni,
-      page: parseInt(page),
       totalPages: Math.ceil(total / parseInt(limit)),
       total
     });
   } catch (err) {
     console.error('Error fetching alumni directory:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 

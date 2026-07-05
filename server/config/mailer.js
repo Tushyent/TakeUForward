@@ -51,7 +51,6 @@ export const sendNotificationEmail = async (user, type, refId, isAnonymousSender
       text,
       html,
     });
-    console.log(`Notification email sent to ${user.email} (type: ${type})`);
   } catch (err) {
     console.error('Error sending email:', err);
   }

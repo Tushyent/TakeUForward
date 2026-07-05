@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import passport from 'passport';
 import { connectDB } from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import { apiLimiter } from './middleware/rateLimiter.js';
 import './config/passport.js'; // initialize passport
 
 import authRoutes from './routes/authRoutes.js';
@@ -31,6 +32,7 @@ import careerRoadmapRoutes from './routes/careerRoadmapRoutes.js';
 import jobRoutes from './routes/jobRoutes.js';
 import pushRoutes from './routes/pushRoutes.js';
 import lostFoundRoutes from './routes/lostFoundRoutes.js';
+import marketplaceRoutes from './routes/marketplaceRoutes.js';
 
 dotenv.config();
 
@@ -88,6 +90,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
+app.use('/api', apiLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/communities', communityRoutes);
@@ -111,6 +114,7 @@ app.use('/api/career-roadmaps', careerRoadmapRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
+app.use('/api/marketplace', marketplaceRoutes);
 
 // Error Handling
 app.get('/', (req, res) => {

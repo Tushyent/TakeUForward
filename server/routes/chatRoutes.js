@@ -14,7 +14,7 @@ export const chatCreationLimiter = rateLimit({
 });
 
 // GET /api/chats - List all chats for logged in user
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -25,12 +25,12 @@ router.get('/', async (req, res) => {
     res.status(200).json(chats);
   } catch (err) {
     console.error('Error fetching chats:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // GET /api/chats/:userId - Get or create a 1:1 chat
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -73,17 +73,17 @@ router.get('/:userId', async (req, res) => {
     res.status(200).json(chat);
   } catch (err) {
     console.error('Error fetching chat:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // POST /api/chats/:userId/message - Send a message
-router.post('/:userId/message', chatCreationLimiter, async (req, res) => {
+router.post('/:userId/message', chatCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
     const { text } = req.body;
-    if (!text) return res.status(400).json({ error: 'Message text is required' });
+    if (!text || !text.trim()) return res.status(400).json({ error: 'Message text is required' });
 
     const targetUserId = req.params.userId;
     if (targetUserId === req.user._id.toString()) {
@@ -123,7 +123,7 @@ router.post('/:userId/message', chatCreationLimiter, async (req, res) => {
     res.status(201).json(chat);
   } catch (err) {
     console.error('Error sending message:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 

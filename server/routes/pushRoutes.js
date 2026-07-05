@@ -4,7 +4,7 @@ import User from '../models/User.js';
 const router = express.Router();
 
 // POST /api/push/subscribe
-router.post('/subscribe', async (req, res) => {
+router.post('/subscribe', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   const subscription = req.body;
@@ -25,12 +25,12 @@ router.post('/subscribe', async (req, res) => {
     res.status(200).json({ message: 'Push subscription saved' });
   } catch (err) {
     console.error('Error saving push subscription:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // POST /api/push/unsubscribe
-router.post('/unsubscribe', async (req, res) => {
+router.post('/unsubscribe', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   const { endpoint } = req.body;
@@ -47,7 +47,7 @@ router.post('/unsubscribe', async (req, res) => {
     res.status(200).json({ message: 'Push subscription removed' });
   } catch (err) {
     console.error('Error removing push subscription:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 

@@ -8,7 +8,7 @@ const router = express.Router();
 // @route   GET /api/bookmarks
 // @desc    Get user's bookmarks
 // @access  Private
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -41,14 +41,14 @@ router.get('/', async (req, res) => {
     res.status(200).json(safeBookmarks);
   } catch (err) {
     console.error('Error fetching bookmarks:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // @route   POST /api/bookmarks
 // @desc    Toggle a bookmark (add if not exists, remove if exists)
 // @access  Private
-router.post('/', bookmarkLimiter, async (req, res) => {
+router.post('/', bookmarkLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   const { itemType, itemId } = req.body;
@@ -60,22 +60,29 @@ router.post('/', bookmarkLimiter, async (req, res) => {
   }
 
   try {
-    const existing = await Bookmark.findOne({ userId: req.user._id, itemId });
+    const deleted = await Bookmark.findOneAndDelete({ userId: req.user._id, itemId });
     
-    if (existing) {
-      await existing.deleteOne();
+    if (deleted) {
       return res.status(200).json({ message: 'Bookmark removed', bookmarked: false });
     } else {
-      await Bookmark.create({
-        userId: req.user._id,
-        itemType,
-        itemId
-      });
-      return res.status(201).json({ message: 'Bookmark added', bookmarked: true });
+      try {
+        await Bookmark.create({
+          userId: req.user._id,
+          itemType,
+          itemId
+        });
+        return res.status(201).json({ message: 'Bookmark added', bookmarked: true });
+      } catch (createErr) {
+        if (createErr.code === 11000) {
+          // Race condition fallback
+          return res.status(200).json({ message: 'Bookmark added', bookmarked: true });
+        }
+        throw createErr;
+      }
     }
   } catch (err) {
     console.error('Error toggling bookmark:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 

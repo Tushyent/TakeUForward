@@ -37,7 +37,7 @@ router.get('/me', (req, res) => {
   }
 });
 
-router.patch('/profile', async (req, res) => {
+router.patch('/profile', async (req, res, next) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
@@ -72,7 +72,7 @@ router.patch('/profile', async (req, res) => {
     res.status(200).json({ message: 'Profile updated', user: req.user, profileComplete: true });
   } catch (err) {
     console.error('Error updating profile:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
@@ -87,7 +87,7 @@ router.get('/logout', (req, res, next) => {
   });
 });
 
-router.post('/alumni/invite', async (req, res) => {
+router.post('/alumni/invite', async (req, res, next) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Must be logged in to invite alumni' });
   }
@@ -118,11 +118,11 @@ router.post('/alumni/invite', async (req, res) => {
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Email already invited or token collision' });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
-router.get('/alumni/invite/:token', async (req, res) => {
+router.get('/alumni/invite/:token', async (req, res, next) => {
   try {
     const { token } = req.params;
     const invite = await ApprovedAlumniEmail.findOne({ inviteToken: token });
@@ -141,7 +141,7 @@ router.get('/alumni/invite/:token', async (req, res) => {
     res.status(200).json({ message: 'Invite accepted, you can now log in with Google' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 

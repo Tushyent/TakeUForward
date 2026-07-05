@@ -5,7 +5,6 @@ import Community from '../models/Community.js';
 import { sendDigestEmail } from '../config/mailer.js';
 
 export const generateAndSendWeeklyDigests = async () => {
-  console.log('Starting Weekly Digest Generation...');
   try {
     const generalCommunity = await Community.findOne({ type: 'general' });
     const globalCommunityIds = generalCommunity ? [generalCommunity._id] : [];
@@ -128,7 +127,6 @@ export const generateAndSendWeeklyDigests = async () => {
       }
     }
 
-    console.log(`Weekly Digest Run Complete. Sent: ${sentCount}, Skipped: ${skippedCount}, Errors: ${errorCount}`);
     return { sentCount, skippedCount, errorCount };
 
   } catch (error) {

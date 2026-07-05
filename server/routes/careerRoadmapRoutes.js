@@ -1,25 +1,25 @@
 import express from 'express';
 import CareerRoadmap from '../models/CareerRoadmap.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
 // GET /api/career-roadmaps
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const { careerPath, page = 1, limit = 10 } = req.query;
-    
+    const { careerPath, page: pageQuery, limit: limitQuery } = req.query;
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+
     const query = { isHidden: { $ne: true } };
     if (careerPath) query.careerPath = careerPath;
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    
     const roadmaps = await CareerRoadmap.aggregate([
       { $match: query },
       { $addFields: { upvotesCount: { $size: { $ifNull: ["$upvotes", []] } } } },
       { $sort: { upvotesCount: -1, createdAt: -1 } },
       { $skip: skip },
-      { $limit: parseInt(limit, 10) }
+      { $limit: limit }
     ]);
 
     await CareerRoadmap.populate(roadmaps, { 
@@ -30,12 +30,12 @@ router.get('/', async (req, res) => {
     res.status(200).json(roadmaps);
   } catch (err) {
     console.error('Error fetching career roadmaps:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/career-roadmaps
-router.post('/', postCreationLimiter, async (req, res) => {
+router.post('/', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   // Same rule as Mock Interview mentor eligibility
@@ -73,12 +73,12 @@ router.post('/', postCreationLimiter, async (req, res) => {
     res.status(201).json(responseData);
   } catch (err) {
     console.error('Error creating career roadmap:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/career-roadmaps/:id/upvote
-router.post('/:id/upvote', async (req, res) => {
+router.post('/:id/upvote', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -86,24 +86,22 @@ router.post('/:id/upvote', async (req, res) => {
     if (!roadmap) return res.status(404).json({ error: { message: 'Career roadmap not found' } });
 
     const userIdStr = req.user._id.toString();
-    const upvoteIndex = roadmap.upvotes.findIndex(id => id.toString() === userIdStr);
+    const hasUpvoted = roadmap.upvotes.some(id => id.toString() === userIdStr);
 
-    if (upvoteIndex === -1) {
-      roadmap.upvotes.push(req.user._id);
-    } else {
-      roadmap.upvotes.splice(upvoteIndex, 1);
-    }
+    const update = hasUpvoted
+      ? { $pull: { upvotes: req.user._id } }
+      : { $addToSet: { upvotes: req.user._id } };
 
-    await roadmap.save();
-    res.status(200).json({ upvotesCount: roadmap.upvotes.length });
+    const updatedRoadmap = await CareerRoadmap.findByIdAndUpdate(req.params.id, update, { new: true });
+    res.status(200).json({ upvotesCount: updatedRoadmap.upvotes.length });
   } catch (err) {
     console.error('Error toggling upvote:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/career-roadmaps/:id/report
-router.post('/:id/report', async (req, res) => {
+router.post('/:id/report', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -133,7 +131,7 @@ router.post('/:id/report', async (req, res) => {
     res.status(200).json({ message: 'Roadmap reported successfully', isHidden: roadmap.isHidden });
   } catch (err) {
     console.error('Error reporting roadmap:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 

@@ -18,7 +18,6 @@ export const summarizeResource = async (title, courseCode, tags, fileUrl) => {
 
     if (isPdf) {
       try {
-        console.log(`Downloading PDF for extraction: ${fileUrl}`);
         const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
         const pdfData = await pdfParse(response.data);
         

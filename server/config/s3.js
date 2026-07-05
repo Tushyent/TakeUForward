@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import dotenv from 'dotenv';
 
@@ -31,4 +31,27 @@ export const generatePresignedUrl = async (fileName, fileType) => {
   const fileUrl = `https://${bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
 
   return { uploadUrl, fileUrl, key };
+};
+
+export const validateObjectSize = async (key, maxSizeInBytes) => {
+  const bucketName = process.env.AWS_BUCKET_NAME;
+  if (!bucketName) throw new Error('AWS_BUCKET_NAME is missing');
+
+  try {
+    const command = new HeadObjectCommand({ Bucket: bucketName, Key: key });
+    const response = await s3Client.send(command);
+    const size = response.ContentLength;
+
+    if (size > maxSizeInBytes) {
+      // Delete the oversized object
+      await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
+      return { valid: false, size };
+    }
+    return { valid: true, size };
+  } catch (err) {
+    if (err.name === 'NotFound') {
+      return { valid: false, error: 'Object not found in S3' };
+    }
+    throw err;
+  }
 };

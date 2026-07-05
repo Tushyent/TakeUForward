@@ -5,12 +5,12 @@ const router = express.Router();
 
 // POST /api/jobs/weekly-digest
 // Secured webhook for external cron services (e.g. cron-job.org)
-router.post('/weekly-digest', async (req, res) => {
+router.post('/weekly-digest', async (req, res, next) => {
   const cronSecret = process.env.CRON_SECRET;
   
   if (!cronSecret) {
     console.error('CRON_SECRET is not configured in environment variables');
-    return res.status(500).json({ error: 'Server configuration error' });
+    return next(err);
   }
 
   // Check shared secret in header

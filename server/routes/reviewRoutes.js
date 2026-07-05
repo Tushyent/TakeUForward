@@ -1,5 +1,6 @@
 import express from 'express';
 import Review from '../models/Review.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 
@@ -29,17 +30,25 @@ router.post('/', requireAuth, postCreationLimiter, async (req, res, next) => {
       return res.status(400).json({ error: { message: 'Rating must be a number between 1 and 5' } });
     }
 
-    const review = new Review({
-      courseCode,
-      professorName,
-      semester,
-      rating: numericRating,
-      comment,
-      isAnonymous: Boolean(isAnonymous),
-      authorId: req.user._id
-    });
+    const review = await Review.findOneAndUpdate(
+      { 
+        authorId: req.user._id, 
+        courseCode, 
+        professorName 
+      },
+      {
+        semester,
+        rating: numericRating,
+        comment,
+        isAnonymous: Boolean(isAnonymous),
+      },
+      { 
+        new: true, 
+        upsert: true,
+        setDefaultsOnInsert: true 
+      }
+    );
 
-    await review.save();
     
     // Populate author before stripping
     await review.populate('authorId', 'name handle role');
@@ -55,14 +64,22 @@ router.post('/', requireAuth, postCreationLimiter, async (req, res, next) => {
 // @access  Public
 router.get('/', async (req, res, next) => {
   try {
-    const { courseCode, professorName, semester, page = 1, limit = 20 } = req.query;
+    const { courseCode, professorName, semester, page: pageQuery, limit: limitQuery } = req.query;
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
     let filter = { isHidden: false };
-    if (courseCode) filter.courseCode = new RegExp(courseCode, 'i');
-    if (professorName) filter.professorName = new RegExp(professorName, 'i');
-    if (semester) filter.semester = new RegExp(semester, 'i');
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+    if (courseCode) {
+      const safeCourseCode = courseCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.courseCode = new RegExp(safeCourseCode, 'i');
+    }
+    if (professorName) {
+      const safeProf = professorName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.professorName = new RegExp(safeProf, 'i');
+    }
+    if (semester) {
+      const safeSemester = semester.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.semester = new RegExp(safeSemester, 'i');
+    }
 
     // Run queries concurrently
     const [reviews, stats] = await Promise.all([
@@ -70,7 +87,7 @@ router.get('/', async (req, res, next) => {
         .populate('authorId', 'name handle role')
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(parseInt(limit, 10)),
+        .limit(limit),
       Review.aggregate([
         { $match: { ...filter, isHidden: false } },
         { 

@@ -61,6 +61,7 @@ reviewSchema.index({ courseCode: 1 });
 reviewSchema.index({ professorName: 1 });
 reviewSchema.index({ semester: 1 });
 reviewSchema.index({ authorId: 1 });
+reviewSchema.index({ authorId: 1, courseCode: 1, professorName: 1 }, { unique: true });
 
 const Review = mongoose.models.Review || mongoose.model('Review', reviewSchema);
 

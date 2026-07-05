@@ -1,15 +1,17 @@
 import express from 'express';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
+import Community from '../models/Community.js';
 import '../models/Club.js'; // Required for mongoose populate
 import { createNotification } from '../services/notificationService.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { applyAnonymity } from '../utils/anonymity.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 
 const router = express.Router();
 
 // POST /api/posts
-router.post('/', postCreationLimiter, async (req, res) => {
+router.post('/', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
@@ -17,8 +19,21 @@ router.post('/', postCreationLimiter, async (req, res) => {
   try {
     const { communityId, isAnonymous, content, tags } = req.body;
     
-    if (!communityId || !content) {
+    if (!communityId || !content || !content.trim()) {
       return res.status(400).json({ error: 'communityId and content are required' });
+    }
+
+    const communityExists = await Community.findById(communityId);
+    if (!communityExists) {
+      return res.status(400).json({ error: 'Invalid communityId' });
+    }
+
+    // Basic tags validation
+    let validTags = {};
+    if (tags && typeof tags === 'object') {
+      if (tags.dept) validTags.dept = String(tags.dept).trim();
+      if (tags.year) validTags.year = Number(tags.year) || undefined;
+      if (tags.courseCode) validTags.courseCode = String(tags.courseCode).trim().toUpperCase();
     }
 
     const post = await Post.create({
@@ -26,7 +41,7 @@ router.post('/', postCreationLimiter, async (req, res) => {
       communityId,
       isAnonymous: Boolean(isAnonymous),
       content,
-      tags: tags || {}
+      tags: validTags
     });
 
     // Parse @mentions
@@ -58,15 +73,17 @@ router.post('/', postCreationLimiter, async (req, res) => {
     res.status(201).json(applyAnonymity(post));
   } catch (err) {
     console.error('Error creating post:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // GET /api/posts
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const { communityId, type, dept, year, courseCode, q, page = 1, limit = 10 } = req.query;
+    const { communityId, type, dept, year, courseCode, q, page: pageQuery, limit: limitQuery } = req.query;
     
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+
     const query = { isHidden: { $ne: true } };
     
     if (communityId) query.communityId = communityId;
@@ -74,9 +91,11 @@ router.get('/', async (req, res) => {
     if (dept) query['tags.dept'] = dept;
     if (year) query['tags.year'] = year;
     if (courseCode) query['tags.courseCode'] = courseCode;
-    if (q) query.content = { $regex: new RegExp(q, 'i') };
+    if (q) {
+      const safeQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.content = { $regex: new RegExp(safeQ, 'i') };
+    }
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
     const { sort } = req.query;
 
     let posts;
@@ -102,7 +121,7 @@ router.get('/', async (req, res) => {
         },
         { $sort: { hotScore: -1, createdAt: -1 } },
         { $skip: skip },
-        { $limit: parseInt(limit, 10) }
+        { $limit: limit }
       ];
       
       const aggregateResult = await Post.aggregate(pipeline);
@@ -115,7 +134,7 @@ router.get('/', async (req, res) => {
       posts = await Post.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(parseInt(limit, 10))
+        .limit(limit)
         .populate('authorId', 'name dept role handle isVerifiedAlumni username')
         .populate('comments.authorId', 'name dept role handle isVerifiedAlumni username')
         .populate('clubId', 'name'); // Populate club details for announcements
@@ -126,12 +145,12 @@ router.get('/', async (req, res) => {
     res.status(200).json(safePosts);
   } catch (err) {
     console.error('Error fetching posts:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // GET /api/posts/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate('authorId', 'name dept role handle isVerifiedAlumni username')
@@ -148,17 +167,17 @@ router.get('/:id', async (req, res) => {
     if (err.name === 'CastError') {
       return res.status(404).json({ error: 'Post not found' });
     }
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // POST /api/posts/:id/comment
-router.post('/:id/comment', postCreationLimiter, async (req, res) => {
+router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
     const { text, isAnonymous } = req.body;
-    if (!text) return res.status(400).json({ error: 'Comment text is required' });
+    if (!text || !text.trim()) return res.status(400).json({ error: 'Comment text is required' });
 
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ error: 'Post not found' });
@@ -223,12 +242,12 @@ router.post('/:id/comment', postCreationLimiter, async (req, res) => {
     res.status(201).json(applyAnonymity(post));
   } catch (err) {
     console.error('Error adding comment:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // POST /api/posts/:id/upvote
-router.post('/:id/upvote', async (req, res) => {
+router.post('/:id/upvote', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -236,24 +255,22 @@ router.post('/:id/upvote', async (req, res) => {
     if (!post) return res.status(404).json({ error: 'Post not found' });
 
     const userIdStr = req.user._id.toString();
-    const upvoteIndex = post.upvotes.findIndex(id => id.toString() === userIdStr);
+    const hasUpvoted = post.upvotes.some(id => id.toString() === userIdStr);
 
-    if (upvoteIndex === -1) {
-      post.upvotes.push(req.user._id);
-    } else {
-      post.upvotes.splice(upvoteIndex, 1);
-    }
+    const update = hasUpvoted
+      ? { $pull: { upvotes: req.user._id } }
+      : { $addToSet: { upvotes: req.user._id } };
 
-    await post.save();
-    res.status(200).json({ upvoteCount: post.upvotes.length });
+    const updatedPost = await Post.findByIdAndUpdate(req.params.id, update, { new: true });
+    res.status(200).json({ upvoteCount: updatedPost.upvotes.length });
   } catch (err) {
     console.error('Error toggling upvote:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
 // POST /api/posts/:id/report
-router.post('/:id/report', async (req, res) => {
+router.post('/:id/report', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
@@ -283,7 +300,52 @@ router.post('/:id/report', async (req, res) => {
     res.status(200).json({ message: 'Post reported successfully', isHidden: post.isHidden });
   } catch (err) {
     console.error('Error reporting post:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
+  }
+});
+
+// DELETE /api/posts/:id
+router.delete('/:id', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+
+    if (post.authorId.toString() !== req.user._id.toString() && req.user.role !== 'platform_admin') {
+      return res.status(403).json({ error: 'Unauthorized to delete this post' });
+    }
+
+    await Post.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Post deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting post:', err);
+    next(err);
+  }
+});
+
+// DELETE /api/posts/:id/comments/:commentId
+router.delete('/:id/comments/:commentId', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).json({ error: 'Comment not found' });
+
+    if (comment.authorId.toString() !== req.user._id.toString() && req.user.role !== 'platform_admin') {
+      return res.status(403).json({ error: 'Unauthorized to delete this comment' });
+    }
+
+    post.comments.pull({ _id: req.params.commentId });
+    await post.save();
+    
+    res.status(200).json({ message: 'Comment deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting comment:', err);
+    next(err);
   }
 });
 

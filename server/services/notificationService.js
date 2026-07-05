@@ -48,7 +48,7 @@ export const createNotification = async ({ userId, type, refId, isAnonymousSende
               validSubscriptions.push(sub);
             } catch (err) {
               if (err.statusCode === 404 || err.statusCode === 410) {
-                console.log(`Subscription expired for user ${user._id}, removing.`);
+                // Subscription expired, do nothing so it's removed
               } else {
                 console.error('Error sending push notification:', err);
                 validSubscriptions.push(sub); // Keep if it was a temporary error

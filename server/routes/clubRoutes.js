@@ -64,7 +64,7 @@ router.post('/:id/posts', postCreationLimiter, async (req, res, next) => {
     // Find the 'General' community for announcements
     const generalCommunity = await Community.findOne({ name: 'General' });
     if (!generalCommunity) {
-      return res.status(500).json({ error: { message: 'General community not found. Please seed communities.' } });
+      return next(new Error('General community not found'));
     }
 
     const post = await Post.create({

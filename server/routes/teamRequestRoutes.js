@@ -1,36 +1,62 @@
 import express from 'express';
 import TeamRequest from '../models/TeamRequest.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, applyTeamLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
-// GET /api/team-requests
-router.get('/', async (req, res) => {
-  try {
-    const { eventType, skill, page = 1, limit = 10 } = req.query;
-    
-    const query = {};
-    if (eventType) query.eventType = eventType;
-    if (skill) query.skillsNeeded = { $regex: new RegExp(skill, 'i') };
+const maskContactInfo = (request, currentUserId) => {
+  const reqObj = request.toObject ? request.toObject() : request;
+  const currentUserIdStr = currentUserId ? currentUserId.toString() : 'guest';
+  const isAuthor = reqObj.authorId && reqObj.authorId._id && reqObj.authorId._id.toString() === currentUserIdStr;
+  
+  if (!isAuthor) {
+    if (reqObj.authorId) {
+      delete reqObj.authorId.handle;
+      delete reqObj.authorId.username;
+    }
+    if (reqObj.applicants) {
+      reqObj.applicants.forEach(app => {
+        if (app.userId && app.userId._id.toString() !== currentUserIdStr) {
+          delete app.userId.handle;
+          delete app.userId.username;
+        }
+      });
+    }
+  }
+  return reqObj;
+};
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+// GET /api/team-requests
+router.get('/', async (req, res, next) => {
+  try {
+    const { eventType, skill, page: pageQuery, limit: limitQuery } = req.query;
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
+    const query = { status: 'open', isHidden: { $ne: true } };
+    if (eventType) query.eventType = eventType;
+    if (skill) {
+      const safeSkill = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.skillsNeeded = { $regex: new RegExp(safeSkill, 'i') };
+    }
+
     const requests = await TeamRequest.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit, 10))
+      .limit(limit)
       .populate('authorId', 'name dept role handle username isVerifiedAlumni')
       .populate('applicants.userId', 'name dept role handle username isVerifiedAlumni');
 
-    res.status(200).json(requests);
+    const maskedRequests = requests.map(r => maskContactInfo(r, req.user ? req.user._id : null));
+    res.status(200).json(maskedRequests);
   } catch (err) {
     console.error('Error fetching team requests:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/team-requests
-router.post('/', postCreationLimiter, async (req, res) => {
+router.post('/', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -52,15 +78,15 @@ router.post('/', postCreationLimiter, async (req, res) => {
     const populatedRequest = await TeamRequest.findById(teamRequest._id)
       .populate('authorId', 'name dept role handle username isVerifiedAlumni');
 
-    res.status(201).json(populatedRequest);
+    res.status(201).json(maskContactInfo(populatedRequest, req.user._id));
   } catch (err) {
     console.error('Error creating team request:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/team-requests/:id/apply
-router.post('/:id/apply', applyTeamLimiter, async (req, res) => {
+router.post('/:id/apply', applyTeamLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -93,15 +119,15 @@ router.post('/:id/apply', applyTeamLimiter, async (req, res) => {
       .populate('authorId', 'name dept role handle username isVerifiedAlumni')
       .populate('applicants.userId', 'name dept role handle username isVerifiedAlumni');
 
-    res.status(200).json(updatedRequest);
+    res.status(200).json(maskContactInfo(updatedRequest, req.user._id));
   } catch (err) {
     console.error('Error applying to team request:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 
 // POST /api/team-requests/:id/close
-router.post('/:id/close', async (req, res) => {
+router.post('/:id/close', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -119,10 +145,10 @@ router.post('/:id/close', async (req, res) => {
       .populate('authorId', 'name dept role handle username isVerifiedAlumni')
       .populate('applicants.userId', 'name dept role handle username isVerifiedAlumni');
 
-    res.status(200).json(updatedRequest);
+    res.status(200).json(maskContactInfo(updatedRequest, req.user._id));
   } catch (err) {
     console.error('Error closing team request:', err);
-    res.status(500).json({ error: { message: 'Internal server error' } });
+    next(err);
   }
 });
 

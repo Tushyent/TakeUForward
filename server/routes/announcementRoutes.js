@@ -1,31 +1,31 @@
 import express from 'express';
 import Post from '../models/Post.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
 
 const router = express.Router();
 
 // GET /api/announcements
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
-    const { category, page = 1, limit = 10 } = req.query;
+    const { category, page: pageQuery, limit: limitQuery } = req.query;
+    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
     const query = { type: 'announcement', isHidden: { $ne: true } };
     if (category) {
       query.category = category;
     }
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-
     const announcements = await Post.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(parseInt(limit, 10))
+      .limit(limit)
       .populate('authorId', 'name dept role handle')
       .populate('clubId', 'name');
 
     res.status(200).json(announcements);
   } catch (err) {
     console.error('Error fetching announcements:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    next(err);
   }
 });
 
