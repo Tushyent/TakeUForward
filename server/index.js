@@ -23,6 +23,9 @@ import alumniRoutes from './routes/alumniRoutes.js';
 import referralRoutes from './routes/referralRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import bookmarkRoutes from './routes/bookmarkRoutes.js';
+import mockInterviewRoutes from './routes/mockInterviewRoutes.js';
+import interviewExperienceRoutes from './routes/interviewExperienceRoutes.js';
+import teamRequestRoutes from './routes/teamRequestRoutes.js';
 
 dotenv.config();
 
@@ -95,6 +98,9 @@ app.use('/api/alumni', alumniRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
+app.use('/api/mock-interviews', mockInterviewRoutes);
+app.use('/api/interview-experiences', interviewExperienceRoutes);
+app.use('/api/team-requests', teamRequestRoutes);
 
 // Error Handling
 app.get('/', (req, res) => {

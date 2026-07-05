@@ -35,12 +35,12 @@ const ModerationQueue = () => {
     fetchQueue();
   }, [navigate]);
 
-  const handleResolve = async (postId, action) => {
+  const handleResolve = async (postId, action, type) => {
     setIsSubmitting(true);
     try {
-      await axiosClient.post(`/moderation/${postId}/resolve`, { action });
+      await axiosClient.post(`/moderation/${postId}/resolve`, { action, type });
       setPosts(posts.filter((p) => p._id !== postId));
-      toast.success(`Post ${action === 'remove' ? 'removed' : 'dismissed'} successfully`);
+      toast.success(`Item ${action === 'remove' ? 'removed' : 'dismissed'} successfully`);
     } catch {
       toast.error('Failed to resolve post');
     } finally {
@@ -72,23 +72,40 @@ const ModerationQueue = () => {
                   <Badge variant="secondary">
                     Author: {post.isAnonymous ? 'Anonymous' : post.authorId?.name}
                   </Badge>
+                  <Badge variant="primary" style={{ textTransform: 'capitalize' }}>
+                    Type: {post.type?.replace('_', ' ')}
+                  </Badge>
                 </div>
                 
-                <p style={{ fontSize: '1.1em', marginBottom: '20px', color: 'var(--text-h)', background: 'var(--social-bg)', padding: '15px', borderRadius: '6px' }}>
-                  {post.content}
-                </p>
+                <div style={{ fontSize: '1.1em', marginBottom: '20px', color: 'var(--text-h)', background: 'var(--social-bg)', padding: '15px', borderRadius: '6px' }}>
+                  {post.type === 'post' && post.content}
+                  {post.type === 'review' && (
+                    <>
+                      <strong>{post.courseCode} - {post.professorName} ({post.semester})</strong>
+                      <br />Rating: {post.rating}/5<br />
+                      {post.comment}
+                    </>
+                  )}
+                  {post.type === 'interview_experience' && (
+                    <>
+                      <strong>{post.company} - {post.role} ({post.batchYear})</strong>
+                      <br />Outcome: {post.overallOutcome}<br />
+                      Rounds: {post.rounds?.length}
+                    </>
+                  )}
+                </div>
                 
                 <div style={{ display: 'flex', gap: '1rem' }}>
                   <Button 
                     variant="success"
-                    onClick={() => handleResolve(post._id, 'dismiss')}
+                    onClick={() => handleResolve(post._id, 'dismiss', post.type)}
                     disabled={isSubmitting}
                   >
                     Dismiss (Unhide)
                   </Button>
                   <Button 
                     variant="danger"
-                    onClick={() => handleResolve(post._id, 'remove')}
+                    onClick={() => handleResolve(post._id, 'remove', post.type)}
                     disabled={isSubmitting}
                   >
                     Remove (Delete)

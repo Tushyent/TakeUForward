@@ -1,11 +1,10 @@
 ---
 title: "TakeUForward — Master Project Plan & Technical Blueprint"
 subtitle: "Campus Peer-Mentorship & Community Platform"
-author: "Working Document — Team of 2 · SSN College of Engineering"
+author: "Working Document · SSN College of Engineering"
 date: "July 2026"
 ---
 
-\newpage
 
 # 1. Executive Summary
 
@@ -139,6 +138,9 @@ At most Indian engineering colleges, including SSN, information relevant to a st
 | 23 | **NPTEL / Elective Suggestion Aggregator** | Crowdsourced senior recommendations on which electives/NPTEL courses are worthwhile |
 | 24 | **Career Roadmap Templates** | Structured guides per career path (SDE, PM, core, higher studies) crowdsourced from alumni |
 | 25 | **Weekly Digest Email** | Auto-compiled summary of top posts, new resources, and upcoming events |
+| 34 | **Interview Experience Repository** | Structured, searchable interview experiences (company, role, batch/year, per-round breakdown, difficulty, outcome) — distinct from generic free-text Discussion posts and from the Academic Resource Repository. Supports anonymity per the same server-side stripping rule as posts. |
+| 35 | **Teammate Finder (Hackathons/Events)** | Peer-to-peer team formation for hackathons/projects/competitions — post what skills you need, browse open requests, apply. Distinct from the Referral Board (junior-to-junior for building things together). No anonymity — team formation requires identity. |
+| 36 | **Club Analytics** | Basic engagement analytics (total posts, total upvotes, total comments, top-performing post) visible to a club's own admin on their Club Page, computed from existing Post engagement fields already in the data model. Explicitly does not add page-view tracking. |
 
 ## 6.3 Phase 3 — Long-term / lower-priority utility features
 
@@ -146,12 +148,11 @@ At most Indian engineering colleges, including SSN, information relevant to a st
 |---|---|---|
 | 26 | **WhatsApp Notifications** | Deferred — requires Meta/Twilio WhatsApp Business API approval and template pre-approval, an external process outside the team's control (see §12) |
 | 27 | **Lost & Found Board** | Post/search lost items with location tagging |
-| 28 | **Secondhand Marketplace** | Buy/sell/exchange books, cycles, calculators (contact-exchange only, no in-app payments) |
-| 29 | **Roommate / Hostel-Room Finder** | Compatibility-based matching for incoming juniors |
-| 30 | **Shared Deadline/Assignment Tracker** | Class-wide aggregated view of upcoming deadlines |
-| 31 | **Confession / Rant Board** | Fully anonymous, high-engagement — requires the strongest moderation safeguards of any feature |
-| 32 | **Mess Menu / Bus Timing Updates** | Small daily-utility updates — explicitly deprioritized, high-retention if added later |
-| 33 | **Multi-College Expansion** | College/tenant field added to the data model, enabling expansion beyond SSN |
+| 28 | **Secondhand Marketplace** | Buy/sell/exchange books, cycles, calculators (sellers may list an item as free or priced at their choice; if priced, payment is handled via Razorpay integration (future)) |
+| 29 | **Shared Deadline/Assignment Tracker** | Class-wide aggregated view of upcoming deadlines |
+| 30 | **Confession / Rant Board** | Fully anonymous, high-engagement — requires the strongest moderation safeguards of any feature |
+| 31 | **Mess Menu / Bus Timing Updates** | Small daily-utility updates — explicitly deprioritized, high-retention if added later |
+| 32 | **Multi-College Expansion** | College/tenant field added to the data model, enabling expansion beyond SSN |
 
 ---
 
@@ -366,6 +367,25 @@ Render's free tier spins a service down after roughly 15 minutes without traffic
   status: ["open" | "matched" | "closed"],
   matchedAlumniId, createdAt
 }
+
+// interviewExperiences (Phase 2)
+{
+  _id, authorId, isAnonymous, company, role, batchYear,
+  rounds: [{ roundName, description, difficulty }],
+  overallOutcome: ["selected" | "rejected" | "withdrawn"],
+  tags: [String], upvotes: [userId], reports: [{ userId, reason, createdAt }],
+  createdAt
+}
+
+// teamRequests (Phase 2)
+{
+  _id, authorId, eventName,
+  eventType: ["hackathon" | "project" | "competition" | "other"],
+  skillsNeeded: [String], teamSizeNeeded: Number, description: String,
+  status: ["open" | "closed"],
+  applicants: [{ userId, message, appliedAt }],
+  createdAt
+}
 ```
 
 ---
@@ -494,6 +514,15 @@ POST   /api/notifications/:id/read
 GET/POST /api/reviews?courseCode=
 GET/POST /api/referralRequests
 POST     /api/referralRequests/:id/match
+
+-- Phase 2 (new) --
+GET/POST /api/interview-experiences?company=&role=&year=
+POST     /api/interview-experiences/:id/upvote
+POST     /api/interview-experiences/:id/report
+GET/POST /api/team-requests?eventType=&skill=
+POST     /api/team-requests/:id/apply
+POST     /api/team-requests/:id/close
+GET      /api/clubs/:id/analytics
 ```
 
 ---
@@ -591,10 +620,12 @@ Since this is an ongoing project, phrase in active/building tense rather than cl
 | NPTEL / Elective Suggestion Aggregator | 2 |
 | Career Roadmap Templates | 2 |
 | Weekly Digest Email | 2 |
+| Interview Experience Repository | 2 |
+| Teammate Finder (Hackathons/Events) | 2 |
+| Club Analytics | 2 |
 | WhatsApp Notifications | 3 |
 | Lost & Found Board | 3 |
-| Secondhand Marketplace | 3 |
-| Roommate / Hostel-Room Finder | 3 |
+| Secondhand Marketplace (Razorpay future) | 3 |
 | Shared Deadline/Assignment Tracker | 3 |
 | Confession / Rant Board | 3 |
 | Mess Menu / Bus Timing Updates | 3 |

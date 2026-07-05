@@ -1,6 +1,7 @@
 import express from 'express';
 import Post from '../models/Post.js';
 import Review from '../models/Review.js';
+import InterviewExperience from '../models/InterviewExperience.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 
 const router = express.Router();
@@ -41,10 +42,21 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
       .populate('reports.userId', 'name handle')
       .sort({ 'reports.length': -1, createdAt: -1 });
 
+    const flaggedExperiences = await InterviewExperience.find({
+      $or: [
+        { isHidden: true },
+        { 'reports.0': { $exists: true } }
+      ]
+    })
+      .populate('authorId', 'name handle role')
+      .populate('reports.userId', 'name handle')
+      .sort({ 'reports.length': -1, createdAt: -1 });
+
     const safePosts = flaggedPosts.map(post => ({ type: 'post', ...applyAnonymity(post) }));
     const safeReviews = flaggedReviews.map(review => ({ type: 'review', ...applyAnonymity(review) }));
+    const safeExperiences = flaggedExperiences.map(exp => ({ type: 'interview_experience', ...applyAnonymity(exp) }));
 
-    const combined = [...safePosts, ...safeReviews].sort((a, b) => b.reports.length - a.reports.length || new Date(b.createdAt) - new Date(a.createdAt));
+    const combined = [...safePosts, ...safeReviews, ...safeExperiences].sort((a, b) => b.reports.length - a.reports.length || new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json(combined);
   } catch (err) {
@@ -63,7 +75,9 @@ router.post('/:itemId/resolve', requirePlatformAdmin, async (req, res, next) => 
       return res.status(400).json({ error: { message: 'Invalid action. Must be dismiss or remove.' } });
     }
 
-    const Model = type === 'review' ? Review : Post;
+    let Model = Post;
+    if (type === 'review') Model = Review;
+    if (type === 'interview_experience') Model = InterviewExperience;
     const item = await Model.findById(req.params.itemId);
     if (!item) {
       return res.status(404).json({ error: { message: 'Item not found' } });

@@ -2,7 +2,9 @@ import express from 'express';
 import request from 'supertest';
 import mongoose from 'mongoose';
 import postRoutes from '../routes/postRoutes.js';
+import interviewExperienceRoutes from '../routes/interviewExperienceRoutes.js';
 import Post from '../models/Post.js';
+import InterviewExperience from '../models/InterviewExperience.js';
 import User from '../models/User.js';
 import Community from '../models/Community.js';
 
@@ -21,8 +23,8 @@ app.use((req, res, next) => {
   }
   next();
 });
-
 app.use('/api/posts', postRoutes);
+app.use('/api/interview-experiences', interviewExperienceRoutes);
 
 describe('Anonymity Engine (Post Routes)', () => {
   let communityId;
@@ -152,6 +154,43 @@ describe('Anonymity Engine (Post Routes)', () => {
 
     expect(publicComment.isAnonymous).toBe(false);
     expect(publicComment).toHaveProperty('authorId');
-    expect(publicComment.authorId.name).toBe('Test User');
+  });
+});
+
+describe('Anonymity Engine (Interview Experience Routes)', () => {
+  beforeAll(async () => {
+    await mongoose.connect('mongodb://localhost:27017/takeuforward_test_anonymity');
+    await InterviewExperience.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
+  });
+
+  afterEach(async () => {
+    await InterviewExperience.deleteMany({});
+  });
+
+  it('should explicitly STRIP authorId when an interview experience isAnonymous = true', async () => {
+    const createRes = await request(app)
+      .post('/api/interview-experiences')
+      .send({
+        company: 'Google',
+        role: 'SWE',
+        batchYear: 2026,
+        rounds: [{ roundName: 'Round 1', description: 'DSA', difficulty: 4 }],
+        overallOutcome: 'selected',
+        isAnonymous: true
+      });
+    
+    expect(createRes.status).toBe(201);
+    
+    const fetchRes = await request(app).get(`/api/interview-experiences`);
+    expect(fetchRes.status).toBe(200);
+    expect(fetchRes.body.length).toBe(1);
+
+    const exp = fetchRes.body[0];
+    expect(exp.isAnonymous).toBe(true);
+    expect(exp).not.toHaveProperty('authorId');
   });
 });

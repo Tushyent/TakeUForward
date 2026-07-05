@@ -13,8 +13,11 @@ function ClubPage() {
   const { id } = useParams();
   const [club, setClub] = useState(null);
   const [announcements, setAnnouncements] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const [activeTab, setActiveTab] = useState('announcements');
   
   const [user, setUser] = useState(null);
   const [newTitle, setNewTitle] = useState('');
@@ -31,6 +34,18 @@ function ClubPage() {
         const clubRes = await axiosClient.get(`/clubs/${id}`);
         setClub(clubRes.data.club);
         setAnnouncements(clubRes.data.announcements);
+
+        const fetchedUser = userRes.data.user;
+        const isClubAdmin = clubRes.data.club.adminIds.includes(fetchedUser?._id) || fetchedUser?.clubId === clubRes.data.club._id;
+        
+        if (isClubAdmin) {
+          try {
+            const analyticsRes = await axiosClient.get(`/clubs/${id}/analytics`);
+            setAnalytics(analyticsRes.data);
+          } catch (err) {
+            console.error('Failed to fetch analytics', err);
+          }
+        }
       } catch (err) {
         setError(err.response?.data?.error?.message || err.message);
       } finally {
@@ -92,6 +107,25 @@ function ClubPage() {
         </Card>
 
         {isAdmin && (
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <Button 
+              variant={activeTab === 'announcements' ? 'primary' : 'secondary'} 
+              onClick={() => setActiveTab('announcements')}
+            >
+              Announcements
+            </Button>
+            <Button 
+              variant={activeTab === 'analytics' ? 'primary' : 'secondary'} 
+              onClick={() => setActiveTab('analytics')}
+            >
+              Analytics
+            </Button>
+          </div>
+        )}
+
+        {(!isAdmin || activeTab === 'announcements') && (
+          <>
+            {isAdmin && (
           <Card style={{ borderColor: 'var(--primary)' }}>
             <h3 style={{ marginTop: 0 }}>Post an Announcement</h3>
             <form onSubmit={handlePostAnnouncement} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -146,6 +180,43 @@ function ClubPage() {
             ))
           )}
         </div>
+          </>
+        )}
+
+        {isAdmin && activeTab === 'analytics' && analytics && (
+          <Card style={{ borderColor: 'var(--info)' }}>
+            <h2 style={{ marginTop: 0 }}>Club Analytics</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
+              <div style={{ background: 'var(--social-bg)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{analytics.totalPosts}</div>
+                <div style={{ color: 'var(--text)' }}>Total Posts</div>
+              </div>
+              <div style={{ background: 'var(--social-bg)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)' }}>{analytics.totalUpvotes}</div>
+                <div style={{ color: 'var(--text)' }}>Total Upvotes</div>
+              </div>
+              <div style={{ background: 'var(--social-bg)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--info)' }}>{analytics.totalComments}</div>
+                <div style={{ color: 'var(--text)' }}>Total Comments</div>
+              </div>
+            </div>
+
+            {analytics.topPost ? (
+              <div style={{ background: 'var(--bg)', padding: '15px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <h3 style={{ marginTop: 0 }}>Top Performing Post</h3>
+                <div style={{ fontSize: '1.1em', color: 'var(--text-h)', marginBottom: '10px' }}>
+                  {analytics.topPost.content}
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Badge variant="success">{analytics.topPost.upvotesCount} Upvotes</Badge>
+                  <Badge variant="secondary">{analytics.topPost.type}</Badge>
+                </div>
+              </div>
+            ) : (
+              <p>No posts available to calculate top performing post.</p>
+            )}
+          </Card>
+        )}
       </div>
     </div>
   );

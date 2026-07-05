@@ -38,6 +38,9 @@ const Navbar = () => {
         <Link to="/announcements" style={{ color: 'white', textDecoration: 'none' }}>Announcements</Link>
         <Link to="/alumni" style={{ color: 'white', textDecoration: 'none' }}>Alumni</Link>
         <Link to="/referrals" style={{ color: 'white', textDecoration: 'none' }}>Referrals</Link>
+        <Link to="/mock-interviews" style={{ color: 'white', textDecoration: 'none' }}>Mock Intv</Link>
+        <Link to="/interview-experiences" style={{ color: 'white', textDecoration: 'none' }}>Intv Exp</Link>
+        <Link to="/team-finder" style={{ color: 'white', textDecoration: 'none' }}>Teams</Link>
         <Link to="/reviews" style={{ color: 'white', textDecoration: 'none' }}>Reviews</Link>
         <Link to="/bookmarks" style={{ color: 'white', textDecoration: 'none' }}>Saved</Link>
         <Link to="/chats" style={{ color: 'white', textDecoration: 'none' }}>Inbox</Link>

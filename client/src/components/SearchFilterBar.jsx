@@ -1,6 +1,6 @@
 import React from 'react';
 
-function SearchFilterBar({ filters, setFilters, showType = true, showDept = true, showYear = true, showCourse = true, showProfessor = false, showSemester = false }) {
+function SearchFilterBar({ filters, setFilters, showType = true, showDept = true, showYear = true, showCourse = true, showProfessor = false, showSemester = false, showCompany = false, showRole = false, showEventType = false, showSkill = false }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
@@ -82,6 +82,49 @@ function SearchFilterBar({ filters, setFilters, showType = true, showDept = true
           <option value="Fall 2025">Fall 2025</option>
           <option value="Spring 2025">Spring 2025</option>
         </select>
+      )}
+
+      {showCompany && (
+        <input 
+          type="text" 
+          name="company" 
+          placeholder="Company (e.g. Google)" 
+          value={filters.company || ''} 
+          onChange={handleChange}
+          style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+        />
+      )}
+
+      {showRole && (
+        <input 
+          type="text" 
+          name="role" 
+          placeholder="Role (e.g. SDE)" 
+          value={filters.role || ''} 
+          onChange={handleChange}
+          style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+        />
+      )}
+
+      {showEventType && (
+        <select name="eventType" value={filters.eventType || ''} onChange={handleChange} style={{ padding: '5px' }}>
+          <option value="">All Event Types</option>
+          <option value="hackathon">Hackathon</option>
+          <option value="project">Project</option>
+          <option value="competition">Competition</option>
+          <option value="other">Other</option>
+        </select>
+      )}
+
+      {showSkill && (
+        <input 
+          type="text" 
+          name="skill" 
+          placeholder="Skill (e.g. React)" 
+          value={filters.skill || ''} 
+          onChange={handleChange}
+          style={{ padding: '5px', borderRadius: '4px', border: '1px solid #ccc' }}
+        />
       )}
     </div>
   );

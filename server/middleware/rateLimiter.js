@@ -15,3 +15,11 @@ export const bookmarkLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+export const applyTeamLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 20, // Limit each IP to 20 applications per 10 minutes
+  message: { error: { message: 'Too many team applications, please wait 10 minutes' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

@@ -81,4 +81,58 @@ router.post('/:id/posts', postCreationLimiter, async (req, res, next) => {
   }
 });
 
+// @route   GET /api/clubs/:id/analytics
+// @desc    Get club analytics (read-only aggregation)
+// @access  Private (Club Admin only)
+router.get('/:id/analytics', async (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: { message: 'Not authenticated' } });
+  }
+
+  try {
+    const clubId = req.params.id;
+
+    const club = await Club.findById(clubId);
+    if (!club) {
+      return res.status(404).json({ error: { message: 'Club not found' } });
+    }
+
+    // Check if logged-in user is an admin for this club
+    if (!club.adminIds.some(adminId => adminId.toString() === req.user._id.toString())) {
+      return res.status(403).json({ error: { message: 'Not authorized to view analytics for this club' } });
+    }
+
+    // Read-only aggregation: 0 DB writes
+    const stats = await Post.aggregate([
+      { $match: { clubId: club._id } },
+      {
+        $group: {
+          _id: null,
+          totalPosts: { $sum: 1 },
+          totalUpvotes: { $sum: { $size: { $ifNull: ["$upvotes", []] } } },
+          totalComments: { $sum: { $size: { $ifNull: ["$comments", []] } } }
+        }
+      }
+    ]);
+
+    const topPost = await Post.aggregate([
+      { $match: { clubId: club._id } },
+      { $addFields: { upvotesCount: { $size: { $ifNull: ["$upvotes", []] } } } },
+      { $sort: { upvotesCount: -1 } },
+      { $limit: 1 }
+    ]);
+
+    const result = {
+      totalPosts: stats.length > 0 ? stats[0].totalPosts : 0,
+      totalUpvotes: stats.length > 0 ? stats[0].totalUpvotes : 0,
+      totalComments: stats.length > 0 ? stats[0].totalComments : 0,
+      topPost: topPost.length > 0 ? topPost[0] : null
+    };
+
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

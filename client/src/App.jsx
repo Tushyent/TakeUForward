@@ -19,6 +19,9 @@ import PublicProfile from './pages/PublicProfile';
 import ProfileSettings from './pages/ProfileSettings';
 import Reviews from './pages/Reviews';
 import Bookmarks from './pages/Bookmarks';
+import MockInterviews from './pages/MockInterviews';
+import InterviewExperiences from './pages/InterviewExperiences';
+import TeamFinder from './pages/TeamFinder';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -39,6 +42,9 @@ function App() {
           <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
           <Route path="/alumni" element={<ProtectedRoute><AlumniDirectory /></ProtectedRoute>} />
           <Route path="/referrals" element={<ProtectedRoute><ReferralBoard /></ProtectedRoute>} />
+          <Route path="/mock-interviews" element={<ProtectedRoute><MockInterviews /></ProtectedRoute>} />
+          <Route path="/interview-experiences" element={<ProtectedRoute><InterviewExperiences /></ProtectedRoute>} />
+          <Route path="/team-finder" element={<ProtectedRoute><TeamFinder /></ProtectedRoute>} />
           <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmarks /></ProtectedRoute>} />
           <Route path="/moderation" element={<ProtectedRoute><ModerationQueue /></ProtectedRoute>} />

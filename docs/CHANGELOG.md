@@ -7,10 +7,17 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased] - 2026-07-05
 
+### Docs
+- **Phase 2 & 3 Roadmap Refinement**: Updated `docs/MASTER_PLAN.md`. Removed the Roommate Finder feature entirely from Phase 3. Added future Razorpay integration note to Secondhand Marketplace. Added full specs, data models, and API surface for three new Phase 2 features: Interview Experience Repository (#34), Teammate Finder (#35), and Club Analytics (#36). Renumbered the Appendix sequentially.
+
 ### Added
+- **[Phase 2] Mock Interview & Resume Review Pairing**: Implemented Feature #17. Created a dedicated board (`/mock-interviews`) where juniors can request 1:1 prep for specific companies, and verified alumni working at those companies can match with them. Integrates seamlessly with the existing real-time chat system for pairing.
 - **[Phase 2] Personal Tracker (Bookmarks)**: Implemented Feature #22. Added a unified `/bookmarks` page for users to track their saved posts and resources. Includes polymorphic `Bookmark` model and toggle buttons on post and resource cards. Strict anonymity enforcement ensures anonymous post authors remain hidden in the bookmarks feed.
 - **[Phase 2] Trending (Hot) Sort**: Implemented Feature #19. Added a `?sort=hot` query parameter to `/api/posts` using a MongoDB aggregation pipeline that gracefully decays engagement (`(upvotes + comments) / max(1, hours_since_creation)`) to rank trending posts.
 - **[Phase 2] Course & Professor Reviews**: Implemented the full reviews system at `/reviews`. Added filtering by course, professor, and semester. Included a dynamic aggregate summary (average rating and total reviews) that computes over the filtered results.
+- **Teammate Finder:** Scaffolded new `TeamRequest` model, built API routes (create, list, apply, close), and created a frontend board to browse and post team requests for hackathons, projects, and competitions. Integrated `applyTeamLimiter` to prevent application spam.
+- **Club Analytics:** Added a read-only MongoDB aggregation route `GET /api/clubs/:id/analytics` restricted to club admins, returning total posts, upvotes, comments, and the top performing post. Exposed this via a new 'Analytics' tab on `ClubPage.jsx` for authorized users.
+- **Interview Experience Repository:** Added new `InterviewExperience` model and routes with detailed rounds. Integrated into moderation queue and frontend. Built an explicit anonymity test to verify `authorId` is strictly dropped when `isAnonymous: true`.
 - **[Phase 2] Reviews Moderation**: Integrated the `Review` model into the platform's central moderation queue. Users can report abusive reviews, and platform admins can resolve them alongside reported posts.
 - **[Phase 2] Full Profile Pages**: Added `/profile/:username` for public profiles with configurable visibility settings. Logged-in users can update their profile information and privacy settings at `/settings/profile`.
 - **[Phase 2] Data Model Extensions**: Added `username`, `graduationYear`, `currentCompany`, `previousCompany`, `higherEducation`, `about`, `skills`, `interests`, and `socialLinks` to the `User` model.
