@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
+import toast from 'react-hot-toast';
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -46,19 +47,26 @@ function Home() {
 
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLink, setInviteLink] = useState('');
-  const [inviteError, setInviteError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleGenerateInvite = async () => {
-    setInviteError('');
+    if (!inviteEmail) {
+      toast.error('Please enter an email');
+      return;
+    }
     setInviteLink('');
+    setIsSubmitting(true);
     try {
       const response = await axiosClient.post('/auth/alumni/invite', {
         email: inviteEmail,
         currentCompany: 'Test Company'
       });
       setInviteLink(response.data.inviteLink);
+      toast.success('Invite generated successfully!');
     } catch (err) {
-      setInviteError(err.response?.data?.error || 'Failed to generate invite');
+      toast.error(err.response?.data?.error || 'Failed to generate invite');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -89,14 +97,15 @@ function Home() {
           onChange={(e) => setInviteEmail(e.target.value)}
           style={{ padding: '5px', marginRight: '10px' }}
         />
-        <button onClick={handleGenerateInvite} style={{ padding: '5px 10px', cursor: 'pointer' }}>Generate Link</button>
+        <button onClick={handleGenerateInvite} disabled={isSubmitting} style={{ padding: '5px 10px', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+          {isSubmitting ? 'Generating...' : 'Generate Link'}
+        </button>
         
         {inviteLink && (
           <div style={{ marginTop: '10px', padding: '10px', background: '#eef', wordBreak: 'break-all' }}>
             <strong>Invite Link:</strong> <a href={inviteLink} target="_blank" rel="noreferrer">{inviteLink}</a>
           </div>
         )}
-        {inviteError && <p style={{ color: 'red' }}>{inviteError}</p>}
       </div>
 
       <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>

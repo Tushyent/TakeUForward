@@ -63,11 +63,17 @@ router.post('/', async (req, res) => {
 // GET /api/resources
 router.get('/', async (req, res) => {
   try {
-    const { courseCode, page = 1, limit = 10 } = req.query;
+    const { courseCode, q, page = 1, limit = 10 } = req.query;
     
     const query = {};
     if (courseCode) {
       query.courseCode = { $regex: new RegExp(courseCode, 'i') };
+    }
+    if (q) {
+      query.$or = [
+        { title: { $regex: new RegExp(q, 'i') } },
+        { tags: { $regex: new RegExp(q, 'i') } }
+      ];
     }
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
+import toast from 'react-hot-toast';
 
 function ClubPage() {
   const { id } = useParams();
@@ -14,7 +15,8 @@ function ClubPage() {
   const [user, setUser] = useState(null);
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
-  const [postError, setPostError] = useState('');
+  const [newCategory, setNewCategory] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,16 +40,17 @@ function ClubPage() {
 
   const handlePostAnnouncement = async (e) => {
     e.preventDefault();
-    setPostError('');
     if (!newContent.trim()) {
-      setPostError('Content is required');
+      toast.error('Content is required');
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const response = await axiosClient.post(`/clubs/${id}/posts`, {
         title: newTitle,
-        content: newContent
+        content: newContent,
+        category: newCategory || undefined
       });
       // Prepend the new announcement
       const populatedPost = {
@@ -57,8 +60,11 @@ function ClubPage() {
       setAnnouncements([populatedPost, ...announcements]);
       setNewTitle('');
       setNewContent('');
+      toast.success('Announcement posted successfully!');
     } catch (err) {
-      setPostError(err.response?.data?.error?.message || 'Failed to post announcement');
+      toast.error(err.response?.data?.error?.message || 'Failed to post announcement');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -110,6 +116,19 @@ function ClubPage() {
               />
             </div>
             <div style={{ marginBottom: '10px' }}>
+              <select
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+                style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+              >
+                <option value="">No Category</option>
+                <option value="event">Event</option>
+                <option value="placement">Placement</option>
+                <option value="hackathon">Hackathon</option>
+                <option value="workshop">Workshop</option>
+              </select>
+            </div>
+            <div style={{ marginBottom: '10px' }}>
               <textarea
                 placeholder="Write your announcement details here..."
                 value={newContent}
@@ -118,9 +137,8 @@ function ClubPage() {
                 style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
               />
             </div>
-            {postError && <p style={{ color: 'red', marginTop: 0 }}>{postError}</p>}
-            <button type="submit" style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: '#007BFF', color: 'white', border: 'none', borderRadius: '4px' }}>
-              Post Announcement
+            <button type="submit" disabled={isSubmitting} style={{ padding: '8px 16px', cursor: 'pointer', backgroundColor: '#007BFF', color: 'white', border: 'none', borderRadius: '4px', opacity: isSubmitting ? 0.7 : 1 }}>
+              {isSubmitting ? 'Posting...' : 'Post Announcement'}
             </button>
           </form>
         </div>
@@ -137,6 +155,11 @@ function ClubPage() {
                 <span>Posted by {post.authorId?.name}</span>
                 <span>{new Date(post.createdAt).toLocaleDateString()}</span>
               </div>
+              {post.category && (
+                <span style={{ display: 'inline-block', padding: '2px 6px', background: '#e0e0e0', borderRadius: '4px', fontSize: '0.8rem', marginBottom: '10px', color: '#333' }}>
+                  {post.category.toUpperCase()}
+                </span>
+              )}
               <div style={{ whiteSpace: 'pre-wrap' }}>
                 {post.content}
               </div>

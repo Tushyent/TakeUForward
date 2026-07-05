@@ -57,7 +57,7 @@ router.post('/:id/posts', postCreationLimiter, async (req, res, next) => {
     }
 
     // Check if logged-in user is an admin for this club
-    if (!club.adminIds.includes(req.user._id)) {
+    if (!club.adminIds.some(adminId => adminId.toString() === req.user._id.toString())) {
       return res.status(403).json({ error: { message: 'Not authorized to post as this club' } });
     }
 

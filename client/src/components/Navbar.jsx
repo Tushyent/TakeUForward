@@ -32,6 +32,11 @@ const Navbar = () => {
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <Link to="/home" style={{ color: 'white', textDecoration: 'none' }}>Home</Link>
+        <Link to="/clubs" style={{ color: 'white', textDecoration: 'none' }}>Clubs</Link>
+        <Link to="/resources" style={{ color: 'white', textDecoration: 'none' }}>Resources</Link>
+        <Link to="/announcements" style={{ color: 'white', textDecoration: 'none' }}>Announcements</Link>
+        <Link to="/chats" style={{ color: 'white', textDecoration: 'none' }}>Inbox</Link>
         <NotificationsDropdown />
         <button 
           onClick={handleLogout}

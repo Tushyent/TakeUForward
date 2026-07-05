@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axiosClient from '../api/axiosClient';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import toast from 'react-hot-toast';
 
 const ModerationQueue = () => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,11 +29,15 @@ const ModerationQueue = () => {
   }, [navigate]);
 
   const handleResolve = async (postId, action) => {
+    setIsSubmitting(true);
     try {
       await axiosClient.post(`/moderation/${postId}/resolve`, { action });
       setPosts(posts.filter((p) => p._id !== postId));
+      toast.success(`Post ${action === 'remove' ? 'removed' : 'dismissed'} successfully`);
     } catch {
-      alert('Failed to resolve post');
+      toast.error('Failed to resolve post');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -55,15 +61,17 @@ const ModerationQueue = () => {
               <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
                 <button 
                   onClick={() => handleResolve(post._id, 'dismiss')}
-                  style={{ background: 'green', color: 'white', padding: '0.5rem 1rem', border: 'none', cursor: 'pointer' }}
+                  disabled={isSubmitting}
+                  style={{ background: '#28a745', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}
                 >
-                  Dismiss (Unhide & clear reports)
+                  Dismiss (Unhide)
                 </button>
                 <button 
                   onClick={() => handleResolve(post._id, 'remove')}
-                  style={{ background: 'red', color: 'white', padding: '0.5rem 1rem', border: 'none', cursor: 'pointer' }}
+                  disabled={isSubmitting}
+                  style={{ background: '#dc3545', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}
                 >
-                  Remove (Delete permanently)
+                  Remove (Delete)
                 </button>
               </div>
             </div>

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import SearchFilterBar from '../components/SearchFilterBar';
+import toast from 'react-hot-toast';
 
 function Resources() {
   const [resources, setResources] = useState([]);
@@ -12,20 +14,22 @@ function Resources() {
   const [tags, setTags] = useState('');
   const [file, setFile] = useState(null);
   
-  const [filterCourseCode, setFilterCourseCode] = useState('');
-  
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [filters, setFilters] = useState({});
 
   const fetchResources = React.useCallback(async () => {
+    setLoading(true);
     try {
-      const url = filterCourseCode ? `/resources?courseCode=${filterCourseCode}` : '/resources';
-      const response = await axiosClient.get(url);
+      const queryParams = new URLSearchParams(filters).toString();
+      const response = await axiosClient.get(`/resources?${queryParams}`);
       setResources(response.data);
     } catch (err) {
       console.error('Error fetching resources', err);
+    } finally {
+      setLoading(false);
     }
-  }, [filterCourseCode]);
+  }, [filters]);
 
   useEffect(() => {
     fetchResources();
@@ -34,12 +38,11 @@ function Resources() {
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!title || !courseCode || !semester || !file) {
-      setError('Please fill in all required fields and select a file.');
+      toast.error('Please fill in all required fields and select a file.');
       return;
     }
 
-    setLoading(true);
-    setError('');
+    setIsUploading(true);
 
     try {
       // 1. Get presigned URL
@@ -74,12 +77,13 @@ function Resources() {
       setFile(null);
       e.target.reset();
 
+      toast.success('Resource uploaded successfully!');
       fetchResources();
     } catch (err) {
       console.error('Upload error', err);
-      setError('Failed to upload resource');
+      toast.error('Failed to upload resource');
     } finally {
-      setLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -102,29 +106,24 @@ function Resources() {
         
         <input type="file" onChange={e => setFile(e.target.files[0])} required />
 
-        {error && <div style={{ color: 'red' }}>{error}</div>}
-        <button type="submit" disabled={loading}>
-          {loading ? 'Uploading...' : 'Upload'}
+        <button type="submit" disabled={isUploading} style={{ opacity: isUploading ? 0.7 : 1 }}>
+          {isUploading ? 'Uploading...' : 'Upload'}
         </button>
       </form>
 
       <hr />
-
-      <div style={{ marginBottom: '1rem' }}>
-        <input 
-          type="text" 
-          placeholder="Filter by Course Code..." 
-          value={filterCourseCode}
-          onChange={e => setFilterCourseCode(e.target.value)}
-          style={{ padding: '5px' }}
-        />
-      </div>
+      
+      <SearchFilterBar filters={filters} setFilters={setFilters} showType={false} showDept={false} showYear={false} />
 
       <h2>Available Resources</h2>
-      {resources.length === 0 ? <p>No resources found.</p> : (
+      {loading ? (
+        <p>Loading resources...</p>
+      ) : resources.length === 0 ? (
+        <p>No resources found.</p>
+      ) : (
         <ul style={{ listStyleType: 'none', padding: 0 }}>
           {resources.map((res) => (
-            <li key={res._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+            <li key={res._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px', borderRadius: '8px', background: 'white', color: '#000' }}>
               <p><strong>{res.title}</strong> ({res.courseCode}, Sem {res.semester})</p>
               
               {res.aiSummary && (

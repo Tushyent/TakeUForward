@@ -1,5 +1,6 @@
 import express from 'express';
 import Post from '../models/Post.js';
+import { applyAnonymity } from '../utils/anonymity.js';
 
 const router = express.Router();
 
@@ -29,7 +30,9 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
       .populate('reports.userId', 'name handle')
       .sort({ 'reports.length': -1, createdAt: -1 });
 
-    res.json(flaggedPosts);
+    const safePosts = flaggedPosts.map(post => applyAnonymity(post));
+
+    res.json(safePosts);
   } catch (err) {
     next(err);
   }

@@ -13,8 +13,10 @@ import communityRoutes from './routes/communityRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import resourceRoutes from './routes/resourceRoutes.js';
 import clubRoutes from './routes/clubRoutes.js';
-import notificationRoutes from './routes/notificationRoutes.js';
 import moderationRoutes from './routes/moderationRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import chatRoutes from './routes/chatRoutes.js';
+import announcementRoutes from './routes/announcementRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 
 dotenv.config();
@@ -52,6 +54,8 @@ app.use('/api/resources', resourceRoutes);
 app.use('/api/clubs', clubRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/moderation', moderationRoutes);
+app.use('/api/chats', chatRoutes);
+app.use('/api/announcements', announcementRoutes);
 app.use('/api/users', userRoutes);
 
 // Error Handling

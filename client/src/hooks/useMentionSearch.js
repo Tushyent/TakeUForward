@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 
 const useMentionSearch = (text, cursorPosition) => {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [activeQuery, setActiveQuery] = useState('');
   const [mentionStartIndex, setMentionStartIndex] = useState(-1);
 
   useEffect(() => {
@@ -22,11 +21,10 @@ const useMentionSearch = (text, cursorPosition) => {
 
     if (match) {
       const query = match[1];
-      setActiveQuery(query);
       // Determine the exact index where the @ symbol is located
       setMentionStartIndex(cursorPosition - query.length - 1);
       
-      if (query.length > 0) {
+      if (query.length >= 0) {
         // Only fetch if there is at least one character after @
         const delayDebounceFn = setTimeout(async () => {
           try {

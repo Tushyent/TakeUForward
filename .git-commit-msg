@@ -1,0 +1,9 @@
+fix(core): phase 1 audit fixes including anonymity leak and ui states
+
+- Security: Fixed anonymity leak in `/api/moderation/queue` by applying the anonymity stripper to flagged posts.
+- Auth: Fixed club admin check in `clubRoutes.js` (used `.some()` for ObjectId comparison).
+- Auth: Restricted `/api/auth/alumni/invite` to admins and alumni only.
+- UI: Fixed broken loading state in `CommunityPosts.jsx` by rendering Navbar.
+- UI: Fixed empty state flash in `Resources.jsx` by properly managing initial loading state.
+- UI: Fixed wrong name display in `Chats.jsx` by finding the other user securely via `myUserId`.
+- Docs: Added full Phase 1 audit log to `docs/AUDIT_2026-07.md`.

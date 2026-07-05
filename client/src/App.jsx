@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import AlumniInvite from './pages/AlumniInvite';
@@ -9,23 +10,32 @@ import Resources from './pages/Resources';
 import ClubsList from './pages/ClubsList';
 import ClubPage from './pages/ClubPage';
 import ModerationQueue from './pages/ModerationQueue';
+import Chats from './pages/Chats';
+import ChatThread from './pages/ChatThread';
+import Announcements from './pages/Announcements';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
-        <Route path="/complete-profile" element={<CompleteProfile />} />
-        <Route path="/community/:id" element={<CommunityPosts />} />
-        <Route path="/resources" element={<Resources />} />
-        <Route path="/clubs" element={<ClubsList />} />
-        <Route path="/clubs/:id" element={<ClubPage />} />
-        <Route path="/moderation" element={<ModerationQueue />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/" element={<Navigate to="/home" replace />} />
-      </Routes>
-    </Router>
+    <>
+      <Toaster position="top-right" />
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
+          <Route path="/complete-profile" element={<CompleteProfile />} />
+          <Route path="/community/:id" element={<CommunityPosts />} />
+          <Route path="/resources" element={<Resources />} />
+          <Route path="/clubs" element={<ClubsList />} />
+          <Route path="/clubs/:id" element={<ClubPage />} />
+          <Route path="/announcements" element={<Announcements />} />
+          <Route path="/moderation" element={<ModerationQueue />} />
+          <Route path="/chats" element={<Chats />} />
+          <Route path="/chat/:userId" element={<ChatThread />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/" element={<Navigate to="/home" replace />} />
+        </Routes>
+      </Router>
+    </>
   );
 }
 

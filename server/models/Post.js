@@ -7,6 +7,7 @@ const postSchema = new mongoose.Schema(
     clubId: { type: mongoose.Schema.Types.ObjectId, ref: 'Club', default: null },
     isAnonymous: { type: Boolean, default: false },
     type: { type: String, enum: ['question', 'announcement', 'resource', 'event'], default: 'question' },
+    category: { type: String, enum: ['event', 'placement', 'hackathon', 'workshop'] },
     tags: {
       dept: { type: String },
       year: { type: Number },

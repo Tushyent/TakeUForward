@@ -1,31 +1,12 @@
 import express from 'express';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
-import Club from '../models/Club.js';
+import '../models/Club.js'; // Required for mongoose populate
 import { createNotification } from '../services/notificationService.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { applyAnonymity } from '../utils/anonymity.js';
 
 const router = express.Router();
-
-/**
- * Strips authorId from post if isAnonymous is true.
- * Must be used on a Mongoose document or lean object.
- */
-const applyAnonymity = (post) => {
-  const postObj = post.toObject ? post.toObject() : { ...post };
-  if (postObj.isAnonymous) {
-    delete postObj.authorId;
-  }
-  if (postObj.comments && Array.isArray(postObj.comments)) {
-    postObj.comments = postObj.comments.map(comment => {
-      if (comment.isAnonymous) {
-        delete comment.authorId;
-      }
-      return comment;
-    });
-  }
-  return postObj;
-};
 
 // POST /api/posts
 router.post('/', postCreationLimiter, async (req, res) => {
@@ -84,15 +65,20 @@ router.post('/', postCreationLimiter, async (req, res) => {
 // GET /api/posts
 router.get('/', async (req, res) => {
   try {
-    const { communityId, page = 1, limit = 10 } = req.query;
+    const { communityId, type, dept, year, courseCode, q, page = 1, limit = 10 } = req.query;
     
-    if (!communityId) {
-      return res.status(400).json({ error: 'communityId is required' });
-    }
+    const query = { isHidden: { $ne: true } };
+    
+    if (communityId) query.communityId = communityId;
+    if (type) query.type = type;
+    if (dept) query['tags.dept'] = dept;
+    if (year) query['tags.year'] = year;
+    if (courseCode) query['tags.courseCode'] = courseCode;
+    if (q) query.content = { $regex: new RegExp(q, 'i') };
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
 
-    const posts = await Post.find({ communityId, isHidden: { $ne: true } })
+    const posts = await Post.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit, 10))

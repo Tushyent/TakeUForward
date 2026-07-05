@@ -5,9 +5,29 @@ Every commit that adds/changes a feature should have a matching entry here.
 Have orderwise log either based on filewise, or changes did in the codebase.
 Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
-## [Unreleased]
+## [Unreleased] - 2026-07-05
 
 ### Added
+- **Global Auth Handling**: Added Axios interceptor to catch `401 Unauthorized` errors and automatically redirect to `/login` if the session expires.
+- **Global User Feedback**: Installed `react-hot-toast` and replaced all generic `alert()` and silent feedback mechanisms with standardized toasts.
+- **Loading States**: Implemented `isSubmitting`/`isUploading` disabled states for all destructive actions to prevent double-submissions.
+- **Chat Notifications**: Integrated 1:1 message notifications in-app, enabling the recipient to instantly see message notifications in their notifications dropdown and navigate directly to the chat thread when clicked.
+
+### Changed
+- **Status**: Officially finalized Phase 1 MVP completion.
+
+### Fixed
+- **UI/UX Consistency**: Standardized button styling in `CommunityPosts.jsx` and `ModerationQueue.jsx`.
+- **Docs**: Consolidated `AUDIT_2026-07.md` and `AUDIT_2026-07-FINAL.md` into one definitive final audit document.
+
+## [Phase 1 MVP - Previous]
+
+### Added
+- **Phase 1 MVP Audit & Fixes**: Completed a full end-to-end audit of all 14 MVP features, resolving 6 issues (including an anonymity leak, broken auth checks, and missing UI loading states).
+- **1:1 Direct Messaging**: Polling-based secure messaging between two users (identified mode only). Rate limited.
+- **Search & Filter**: Global post and resource search using text queries, department, year, course, and type filters.
+- **Announcements Feed**: A dedicated global feed for all club and administrative announcements, filterable by category (event, placement, hackathon, workshop).
+- **Phase 1 MVP Complete**: All 14 features of Phase 1 have now been implemented.
 - Added `Navbar` component to house the brand, Notifications Bell, and Logout button globally
 - Added `NotificationsDropdown` component for real-time in-app notification checking and marking as read
 - Added `MentionTextarea` and `useMentionSearch` hook for frontend `@mention` autocomplete

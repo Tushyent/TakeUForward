@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import MentionTextarea from '../components/MentionTextarea';
 import Navbar from '../components/Navbar';
+import SearchFilterBar from '../components/SearchFilterBar';
+import toast from 'react-hot-toast';
 
 function CommunityPosts() {
   const { id } = useParams();
@@ -11,15 +13,18 @@ function CommunityPosts() {
   const [newPostContent, setNewPostContent] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [error, setError] = useState('');
+  const [filters, setFilters] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchPosts = React.useCallback(async () => {
     try {
-      const response = await axiosClient.get(`/posts?communityId=${id}`);
+      const queryParams = new URLSearchParams({ communityId: id, ...filters }).toString();
+      const response = await axiosClient.get(`/posts?${queryParams}`);
       setPosts(response.data);
     } catch (err) {
       console.error('Error fetching posts', err);
     }
-  }, [id]);
+  }, [id, filters]);
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -40,6 +45,7 @@ function CommunityPosts() {
     e.preventDefault();
     if (!newPostContent.trim()) return;
 
+    setIsSubmitting(true);
     try {
       await axiosClient.post('/posts', {
         communityId: id,
@@ -48,10 +54,13 @@ function CommunityPosts() {
       });
       setNewPostContent('');
       setIsAnonymous(false);
+      toast.success('Post created successfully!');
       fetchPosts(); // Refresh list
     } catch (err) {
-      setError('Failed to create post');
+      toast.error(err.response?.data?.error || 'Failed to create post');
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -64,7 +73,7 @@ function CommunityPosts() {
       fetchPosts();
     } catch (err) {
       console.error(err);
-      alert('Failed to upvote');
+      toast.error('Failed to upvote');
     }
   };
 
@@ -74,10 +83,10 @@ function CommunityPosts() {
     try {
       await axiosClient.post(`/posts/${postId}/report`, { reason });
       fetchPosts();
-      alert('Post reported successfully');
+      toast.success('Post reported successfully');
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || 'Failed to report post');
+      toast.error(err.response?.data?.error || 'Failed to report post');
     }
   };
 
@@ -85,6 +94,7 @@ function CommunityPosts() {
     const text = commentInputs[postId];
     if (!text || !text.trim()) return;
 
+    setIsSubmitting(true);
     try {
       await axiosClient.post(`/posts/${postId}/comment`, {
         text,
@@ -92,15 +102,18 @@ function CommunityPosts() {
       });
       setCommentInputs(prev => ({ ...prev, [postId]: '' }));
       setCommentAnonymity(prev => ({ ...prev, [postId]: false }));
+      toast.success('Comment posted!');
       fetchPosts();
     } catch (err) {
       console.error(err);
-      alert('Failed to post comment');
+      toast.error('Failed to post comment');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  if (error) return <div>{error}</div>;
-  if (!community) return <div>Loading...</div>;
+  if (error) return <div><Navbar /><div style={{ padding: '2rem', color: 'red' }}>{error}</div></div>;
+  if (!community) return <div><Navbar /><div style={{ padding: '2rem' }}>Loading community...</div></div>;
 
   return (
     <div>
@@ -110,6 +123,8 @@ function CommunityPosts() {
       <h1>{community.name}</h1>
       <p>{community.description}</p>
       
+      <SearchFilterBar filters={filters} setFilters={setFilters} />
+
       <hr />
 
       <form onSubmit={handleCreatePost} style={{ marginBottom: '2rem' }}>
@@ -130,7 +145,9 @@ function CommunityPosts() {
             Post Anonymously
           </label>
         </div>
-        <button type="submit" style={{ marginTop: '10px' }}>Post</button>
+        <button type="submit" disabled={isSubmitting} style={{ marginTop: '10px' }}>
+          {isSubmitting ? 'Posting...' : 'Post'}
+        </button>
       </form>
 
       <hr />
@@ -145,7 +162,13 @@ function CommunityPosts() {
                 {post.type === 'announcement' && post.clubId ? (
                   <span style={{ color: '#007BFF', fontWeight: 'bold' }}>📢 Announcement by {post.clubId.name} | </span>
                 ) : (
-                  <span>By: {post.isAnonymous ? 'Anonymous' : `${post.authorId?.name || 'Unknown'} (@${post.authorId?.handle || 'unknown'})`} | </span>
+                  <span>
+                    By: {post.isAnonymous ? 'Anonymous' : `${post.authorId?.name || 'Unknown'} (@${post.authorId?.handle || 'unknown'})`}
+                    {!post.isAnonymous && post.authorId && (
+                      <Link to={`/chat/${post.authorId._id}`} style={{ marginLeft: '8px', textDecoration: 'none', background: '#28a745', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>Message</Link>
+                    )}
+                    {' | '}
+                  </span>
                 )}
                 Posted: {new Date(post.createdAt).toLocaleString()}
               </small>
@@ -170,7 +193,11 @@ function CommunityPosts() {
                         {c.text}
                         <br />
                         <small>
-                          - {c.isAnonymous ? 'Anonymous' : `${c.authorId?.name || 'Unknown'} (@${c.authorId?.handle || 'unknown'})`}, {new Date(c.createdAt).toLocaleString()}
+                          - {c.isAnonymous ? 'Anonymous' : `${c.authorId?.name || 'Unknown'} (@${c.authorId?.handle || 'unknown'})`}
+                          {!c.isAnonymous && c.authorId && (
+                            <Link to={`/chat/${c.authorId._id}`} style={{ marginLeft: '6px', textDecoration: 'none', background: '#28a745', color: 'white', padding: '2px 5px', borderRadius: '4px', fontSize: '0.7rem' }}>Message</Link>
+                          )}
+                          , {new Date(c.createdAt).toLocaleString()}
                         </small>
                       </li>
                     ))}
@@ -191,7 +218,9 @@ function CommunityPosts() {
                     />
                     Comment Anonymously
                   </label>
-                  <button onClick={() => handleComment(post._id)} style={{ alignSelf: 'flex-start' }}>Submit</button>
+                  <button onClick={() => handleComment(post._id)} disabled={isSubmitting} style={{ alignSelf: 'flex-start' }}>
+                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                  </button>
                 </div>
               </div>
             </li>

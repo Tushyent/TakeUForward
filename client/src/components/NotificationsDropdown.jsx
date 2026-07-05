@@ -35,9 +35,13 @@ const NotificationsDropdown = () => {
       }
     }
     
-    // Redirect logic - currently redirecting to home since we don't have a single-post view
+    // Redirect logic - redirect to chat thread if it's a DM, otherwise redirect to home
     setIsOpen(false);
-    navigate('/home');
+    if (notif.type === 'message') {
+      navigate(`/chat/${notif.refId}`);
+    } else {
+      navigate('/home');
+    }
   };
 
   const getMessage = (type) => {
@@ -45,6 +49,7 @@ const NotificationsDropdown = () => {
       case 'mention': return 'Someone mentioned you in a post or comment.';
       case 'reply': return 'Someone replied to your post.';
       case 'comment': return 'Someone commented on a post.';
+      case 'message': return 'Someone sent you a direct message.';
       default: return 'You have a new notification.';
     }
   };

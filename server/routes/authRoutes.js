@@ -74,6 +74,9 @@ router.post('/alumni/invite', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Must be logged in to invite alumni' });
   }
+  if (req.user.role !== 'admin' && req.user.role !== 'alumni') {
+    return res.status(403).json({ error: 'Only admins or verified alumni can generate invites' });
+  }
 
   try {
     const { email, currentCompany } = req.body;
