@@ -109,3 +109,51 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* Global Shared UI Classes */
+:root {
+  --primary: #aa3bff;
+  --primary-hover: #922ae3;
+  --danger: #dc3545;
+  --danger-hover: #c82333;
+  --success: #28a745;
+  --success-hover: #218838;
+  --border-light: #e0e0e0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #c084fc;
+    --primary-hover: #d8b4fe;
+    --danger: #ef4444;
+    --danger-hover: #f87171;
+    --success: #10b981;
+    --success-hover: #34d399;
+    --border-light: #2e303a;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 3px solid rgba(170, 59, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text);
+  background: var(--code-bg);
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+  margin: 1rem 0;
+}
+

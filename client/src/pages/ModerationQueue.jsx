@@ -3,11 +3,16 @@ import axiosClient from '../api/axiosClient';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
+import Spinner from '../components/ui/Spinner';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Badge from '../components/ui/Badge';
 
 const ModerationQueue = () => {
   const [posts, setPosts] = useState([]);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,6 +28,8 @@ const ModerationQueue = () => {
         } else {
           setError('Failed to fetch moderation queue');
         }
+      } finally {
+        setLoading(false);
       }
     };
     fetchQueue();
@@ -41,41 +48,55 @@ const ModerationQueue = () => {
     }
   };
 
-  if (error) return <div style={{ color: 'red', padding: '2rem' }}>{error}</div>;
+  if (loading) return <div><Navbar /><Spinner text="Loading moderation queue..." /></div>;
+  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
 
   return (
     <div>
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-        <Link to="/home">← Back to Home</Link>
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+          ← Back to Home
+        </Link>
         <h1>Moderation Queue</h1>
+        
         {posts.length === 0 ? (
-          <p>No reported posts!</p>
+          <div className="empty-state">No reported posts! The queue is clean.</div>
         ) : (
-          posts.map(post => (
-            <div key={post._id} style={{ border: '1px solid #ccc', padding: '1rem', marginBottom: '1rem', borderRadius: '4px' }}>
-              <p><strong>Reports:</strong> {post.reports?.length || 0}</p>
-              <p><strong>Hidden:</strong> {post.isHidden ? 'Yes' : 'No'}</p>
-              <p><strong>Author:</strong> {post.isAnonymous ? 'Anonymous' : post.authorId?.name}</p>
-              <p><strong>Content:</strong> {post.content}</p>
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                <button 
-                  onClick={() => handleResolve(post._id, 'dismiss')}
-                  disabled={isSubmitting}
-                  style={{ background: '#28a745', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}
-                >
-                  Dismiss (Unhide)
-                </button>
-                <button 
-                  onClick={() => handleResolve(post._id, 'remove')}
-                  disabled={isSubmitting}
-                  style={{ background: '#dc3545', color: 'white', padding: '8px 16px', border: 'none', borderRadius: '4px', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}
-                >
-                  Remove (Delete)
-                </button>
-              </div>
-            </div>
-          ))
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {posts.map(post => (
+              <Card key={post._id} style={{ borderColor: 'var(--danger)' }}>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px', flexWrap: 'wrap' }}>
+                  <Badge variant="danger">Reports: {post.reports?.length || 0}</Badge>
+                  {post.isHidden && <Badge variant="secondary">Hidden</Badge>}
+                  <Badge variant="secondary">
+                    Author: {post.isAnonymous ? 'Anonymous' : post.authorId?.name}
+                  </Badge>
+                </div>
+                
+                <p style={{ fontSize: '1.1em', marginBottom: '20px', color: 'var(--text-h)', background: 'var(--social-bg)', padding: '15px', borderRadius: '6px' }}>
+                  {post.content}
+                </p>
+                
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <Button 
+                    variant="success"
+                    onClick={() => handleResolve(post._id, 'dismiss')}
+                    disabled={isSubmitting}
+                  >
+                    Dismiss (Unhide)
+                  </Button>
+                  <Button 
+                    variant="danger"
+                    onClick={() => handleResolve(post._id, 'remove')}
+                    disabled={isSubmitting}
+                  >
+                    Remove (Delete)
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     </div>

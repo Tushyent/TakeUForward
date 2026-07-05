@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
+import Spinner from '../components/ui/Spinner';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
 
 function ClubsList() {
   const [clubs, setClubs] = useState([]);
@@ -22,33 +25,31 @@ function ClubsList() {
     fetchClubs();
   }, []);
 
-  if (loading) {
-    return <div style={{ padding: '2rem' }}>Loading clubs...</div>;
-  }
+  if (loading) return <div><Navbar /><Spinner text="Loading clubs..." /></div>;
 
   return (
     <div>
       <Navbar />
       <div style={{ padding: '2rem' }}>
-        <h1>Campus Clubs</h1>
-        <Link to="/" style={{ textDecoration: 'none', color: '#007BFF', marginBottom: '20px', display: 'inline-block' }}>
-          &larr; Back to Home
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+          ← Back to Home
         </Link>
+        <h1>Campus Clubs</h1>
 
-        {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+        {error && <div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div>}
 
-        <div style={{ display: 'grid', gap: '1rem', marginTop: '1rem' }}>
-          {clubs.length === 0 ? (
-            <p>No clubs found.</p>
+        <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+          {clubs.length === 0 && !error ? (
+            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>No clubs found.</div>
           ) : (
             clubs.map(club => (
-              <div key={club._id} style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px' }}>
-                <h2>{club.name}</h2>
-                <p>{club.description}</p>
-                <Link to={`/clubs/${club._id}`} style={{ textDecoration: 'none', color: '#007BFF', fontWeight: 'bold' }}>
-                  View Club Page &rarr;
+              <Card key={club._id} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                <h2 style={{ marginTop: 0 }}>{club.name}</h2>
+                <p style={{ flexGrow: 1, marginBottom: '20px' }}>{club.description}</p>
+                <Link to={`/clubs/${club._id}`} style={{ textDecoration: 'none' }}>
+                  <Button variant="primary" style={{ width: '100%' }}>View Club Page &rarr;</Button>
                 </Link>
-              </div>
+              </Card>
             ))
           )}
         </div>

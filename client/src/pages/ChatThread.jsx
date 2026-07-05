@@ -3,6 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
+import Spinner from '../components/ui/Spinner';
+import Button from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
 
 function ChatThread() {
   const { userId } = useParams();
@@ -14,7 +17,6 @@ function ChatThread() {
   
   const messagesEndRef = useRef(null);
 
-  // Fetch current user ID for alignment
   useEffect(() => {
     axiosClient.get('/auth/me').then(res => setMyUserId(res.data.user._id)).catch(console.error);
   }, []);
@@ -30,7 +32,6 @@ function ChatThread() {
 
   useEffect(() => {
     fetchChat();
-    // Polling every 3 seconds for MVP
     const interval = setInterval(fetchChat, 3000);
     return () => clearInterval(interval);
   }, [fetchChat]);
@@ -47,7 +48,7 @@ function ChatThread() {
     try {
       await axiosClient.post(`/chats/${userId}/message`, { text });
       setText('');
-      fetchChat(); // immediately fetch to update UI
+      fetchChat(); 
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to send message');
     } finally {
@@ -55,8 +56,8 @@ function ChatThread() {
     }
   };
 
-  if (error) return <div><Navbar /><div style={{ padding: '2rem', color: 'red' }}>{error}</div></div>;
-  if (!chat) return <div><Navbar /><div style={{ padding: '2rem' }}>Loading chat...</div></div>;
+  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (!chat) return <div><Navbar /><Spinner text="Loading chat..." /></div>;
 
   const otherUser = chat.participants.find(p => p._id !== myUserId);
 
@@ -64,25 +65,28 @@ function ChatThread() {
     <div>
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', height: '80vh' }}>
-        <Link to="/chats" style={{ marginBottom: '1rem', textDecoration: 'none', color: '#007BFF' }}>&larr; Back to Inbox</Link>
+        <Link to="/chats" style={{ marginBottom: '1rem', textDecoration: 'none', color: 'var(--text)', display: 'inline-block' }}>
+          &larr; Back to Inbox
+        </Link>
         
         <h2 style={{ margin: '0 0 1rem 0' }}>Chat with {otherUser?.name}</h2>
 
-        <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #ccc', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg)' }}>
           {chat.messages.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#888' }}>No messages yet. Say hi!</p>
+            <p style={{ textAlign: 'center', color: 'var(--text)', marginTop: '2rem' }}>No messages yet. Say hi!</p>
           ) : (
             chat.messages.map((msg, idx) => {
               const isMine = msg.senderId._id === myUserId;
               return (
-                <div key={idx} style={{ alignSelf: isMine ? 'flex-end' : 'flex-start', maxWidth: '70%' }}>
+                <div key={idx} style={{ alignSelf: isMine ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
                   <div style={{ 
-                    background: isMine ? '#007BFF' : '#e5e5ea', 
-                    color: isMine ? 'white' : 'black', 
+                    background: isMine ? 'var(--primary)' : 'var(--social-bg)', 
+                    color: isMine ? 'white' : 'var(--text-h)', 
                     padding: '10px 15px', 
                     borderRadius: '15px',
                     borderBottomRightRadius: isMine ? '2px' : '15px',
-                    borderBottomLeftRadius: !isMine ? '2px' : '15px'
+                    borderBottomLeftRadius: !isMine ? '2px' : '15px',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                   }}>
                     {msg.text}
                   </div>
@@ -94,16 +98,16 @@ function ChatThread() {
         </div>
 
         <form onSubmit={handleSend} style={{ display: 'flex', marginTop: '1rem', gap: '10px' }}>
-          <input 
+          <Input 
             type="text" 
             value={text} 
             onChange={(e) => setText(e.target.value)} 
             placeholder="Type a message..." 
-            style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+            style={{ flex: 1 }}
           />
-          <button type="submit" disabled={isSubmitting} style={{ padding: '10px 20px', background: '#007BFF', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
+          <Button type="submit" disabled={isSubmitting} style={{ whiteSpace: 'nowrap' }}>
             {isSubmitting ? 'Sending...' : 'Send'}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

@@ -13,13 +13,16 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **Loading States**: Implemented `isSubmitting`/`isUploading` disabled states for all destructive actions to prevent double-submissions.
 - **Chat Notifications**: Integrated 1:1 message notifications in-app, enabling the recipient to instantly see message notifications in their notifications dropdown and navigate directly to the chat thread when clicked.
 - **Deployment Readiness**: Upgraded `express-session` to use persistent MongoDB storage (`connect-mongo`), added production-grade cookie settings (`sameSite`), fixed environment variable names (`AWS_BUCKET_NAME`), and restored local `dev` concurrently script.
+- **Shared UI Components**: Created vanilla CSS-based shared React components (`Button`, `Card`, `Badge`, `Spinner`, `Input`) in `client/src/components/ui/` to unify styling across the application.
 
 ### Changed
-- **Status**: Officially finalized Phase 1 MVP completion and performed Vercel/Render deployment audit.
+- **Status**: Officially finalized Phase 1 MVP completion and performed Vercel/Render deployment UI/UX polish audit.
+- **Visual Consistency**: Refactored `Home`, `CommunityPosts`, `ModerationQueue`, `Resources`, `ClubPage`, `ClubsList`, `Announcements`, `Chats`, `ChatThread`, `Login`, and `CompleteProfile` to use the new shared UI components instead of ad-hoc inline styles.
+- **UX**: Replaced all raw text `<div>Loading...</div>` placeholders with standard centered `<Spinner />` components for better UX during Render cold-starts.
 
 ### Fixed
-- **UI/UX Consistency**: Standardized button styling in `CommunityPosts.jsx` and `ModerationQueue.jsx`.
-- **Docs**: Consolidated `AUDIT_2026-07.md` and `AUDIT_2026-07-FINAL.md` into one definitive final audit document.
+- **UI/UX Consistency**: Standardized button styling, card padding, inputs, and typography globally.
+- **Docs**: Created `docs/UI_UX_DEPLOYMENT_AUDIT.md` mapping out all deployment and visual consistency bugs and fixed them in Phase 2.
 
 ## [Phase 1 MVP - Previous]
 

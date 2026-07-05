@@ -3,6 +3,11 @@ import { useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
+import Spinner from '../components/ui/Spinner';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import Badge from '../components/ui/Badge';
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -71,7 +76,12 @@ function Home() {
   };
 
   if (loading) {
-    return <div style={{ padding: '2rem' }}>Loading user data...</div>;
+    return (
+      <div>
+        <Navbar />
+        <Spinner text="Loading user data..." />
+      </div>
+    );
   }
 
   return (
@@ -80,75 +90,83 @@ function Home() {
       <div style={{ padding: '2rem' }}>
         <h1>TakeUForward - Home Feed</h1>
       
-      <div style={{ padding: '1rem', border: '1px solid #ccc', borderRadius: '8px', marginBottom: '20px' }}>
-        <h2>Welcome, {user?.name}</h2>
-        <p>Email: {user?.email}</p>
-        <p>Role: {user?.role}</p>
-        {user?.currentCompany && <p>Company: {user?.currentCompany}</p>}
-        {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-      </div>
+        <Card>
+          <h2>Welcome, {user?.name}</h2>
+          <p>Email: {user?.email}</p>
+          <p>Role: <Badge variant="primary">{user?.role}</Badge></p>
+          {user?.currentCompany && <p>Company: {user?.currentCompany}</p>}
+          {error && <p style={{ color: 'var(--danger)', marginTop: '10px' }}>Error: {error}</p>}
+        </Card>
 
-      <div style={{ padding: '1rem', border: '1px dashed #666', borderRadius: '8px' }}>
-        <h3>[Test] Generate Alumni Invite</h3>
-        <input 
-          type="email" 
-          placeholder="Alumnus email" 
-          value={inviteEmail} 
-          onChange={(e) => setInviteEmail(e.target.value)}
-          style={{ padding: '5px', marginRight: '10px' }}
-        />
-        <button onClick={handleGenerateInvite} disabled={isSubmitting} style={{ padding: '5px 10px', cursor: 'pointer', opacity: isSubmitting ? 0.7 : 1 }}>
-          {isSubmitting ? 'Generating...' : 'Generate Link'}
-        </button>
-        
-        {inviteLink && (
-          <div style={{ marginTop: '10px', padding: '10px', background: '#eef', wordBreak: 'break-all' }}>
-            <strong>Invite Link:</strong> <a href={inviteLink} target="_blank" rel="noreferrer">{inviteLink}</a>
-          </div>
+        {user?.role === 'platform_admin' && (
+          <Card>
+            <h3>[Test] Generate Alumni Invite</h3>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              <Input 
+                type="email" 
+                placeholder="Alumnus email" 
+                value={inviteEmail} 
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+              <Button onClick={handleGenerateInvite} disabled={isSubmitting} style={{ whiteSpace: 'nowrap' }}>
+                {isSubmitting ? 'Generating...' : 'Generate Link'}
+              </Button>
+            </div>
+            
+            {inviteLink && (
+              <div style={{ marginTop: '15px', padding: '10px', background: 'var(--code-bg)', wordBreak: 'break-all', borderRadius: '4px' }}>
+                <strong>Invite Link:</strong> <a href={inviteLink} target="_blank" rel="noreferrer">{inviteLink}</a>
+              </div>
+            )}
+          </Card>
         )}
-      </div>
 
-      <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>
-        <h3>Academic Resources</h3>
-        <p>Access notes, previous year question papers, and study materials.</p>
-        <Link to="/resources" style={{ textDecoration: 'none', color: '#007BFF', fontWeight: 'bold' }}>
-          Browse Resources &rarr;
-        </Link>
-      </div>
-
-      <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>
-        <h3>Campus Clubs</h3>
-        <p>View official clubs and their announcements.</p>
-        <Link to="/clubs" style={{ textDecoration: 'none', color: '#007BFF', fontWeight: 'bold' }}>
-          Browse Clubs &rarr;
-        </Link>
-      </div>
-
-      {user?.isPlatformAdmin && (
-        <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid red', borderRadius: '8px', background: '#ffe6e6' }}>
-          <h3 style={{ color: 'red' }}>Moderation Queue</h3>
-          <p>Review flagged and reported posts.</p>
-          <Link to="/moderation" style={{ textDecoration: 'none', color: 'red', fontWeight: 'bold' }}>
-            Open Moderation Dashboard &rarr;
+        <Card>
+          <h3>Academic Resources</h3>
+          <p style={{ marginBottom: '10px' }}>Access notes, previous year question papers, and study materials.</p>
+          <Link to="/resources" style={{ textDecoration: 'none' }}>
+            <Button variant="secondary">Browse Resources &rarr;</Button>
           </Link>
-        </div>
-      )}
+        </Card>
 
-      <div style={{ padding: '1rem', marginTop: '20px', border: '1px solid #333', borderRadius: '8px' }}>
-        <h3>Communities List</h3>
-        {communities.length === 0 ? <p>No communities found.</p> : (
-          <ul>
-            {communities.map((comm) => (
-              <li key={comm._id} style={{ marginBottom: '10px' }}>
-                <Link to={`/community/${comm._id}`} style={{ textDecoration: 'none', color: '#007BFF' }}>
-                  <strong>{comm.name}</strong>
-                </Link> 
-                {' '}({comm.type}) - {comm.memberCount} members
-              </li>
-            ))}
-          </ul>
+        <Card>
+          <h3>Campus Clubs</h3>
+          <p style={{ marginBottom: '10px' }}>View official clubs and their announcements.</p>
+          <Link to="/clubs" style={{ textDecoration: 'none' }}>
+            <Button variant="secondary">Browse Clubs &rarr;</Button>
+          </Link>
+        </Card>
+
+        {user?.isPlatformAdmin && (
+          <Card style={{ borderColor: 'var(--danger)', background: 'rgba(220, 53, 69, 0.05)' }}>
+            <h3 style={{ color: 'var(--danger)' }}>Moderation Queue</h3>
+            <p style={{ marginBottom: '10px' }}>Review flagged and reported posts.</p>
+            <Link to="/moderation" style={{ textDecoration: 'none' }}>
+              <Button variant="danger">Open Moderation Dashboard &rarr;</Button>
+            </Link>
+          </Card>
         )}
-      </div>
+
+        <Card>
+          <h3>Communities List</h3>
+          {communities.length === 0 ? (
+            <div className="empty-state">No communities found.</div>
+          ) : (
+            <ul style={{ paddingLeft: '20px', margin: '10px 0 0 0' }}>
+              {communities.map((comm) => (
+                <li key={comm._id} style={{ marginBottom: '10px' }}>
+                  <Link to={`/community/${comm._id}`} style={{ textDecoration: 'none', color: 'var(--primary)', fontWeight: 500 }}>
+                    {comm.name}
+                  </Link> 
+                  {' '}<Badge variant="secondary" style={{ marginLeft: '8px' }}>{comm.type}</Badge>
+                  <span style={{ fontSize: '0.9em', color: 'var(--text)', marginLeft: '8px' }}>
+                    {comm.memberCount} members
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
       </div>
     </div>
   );

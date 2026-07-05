@@ -5,6 +5,11 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import SearchFilterBar from '../components/SearchFilterBar';
 import toast from 'react-hot-toast';
+import Spinner from '../components/ui/Spinner';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Badge from '../components/ui/Badge';
+import { Input } from '../components/ui/Input';
 
 function Resources() {
   const [resources, setResources] = useState([]);
@@ -91,61 +96,68 @@ function Resources() {
     <div>
       <Navbar />
       <div style={{ padding: '2rem' }}>
-        <Link to="/home">← Back to Home</Link>
-      <h1>Academic Resources</h1>
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+          ← Back to Home
+        </Link>
+        <h1>Academic Resources</h1>
 
-      <hr />
+        <Card style={{ maxWidth: '600px' }}>
+          <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <h3 style={{ marginTop: 0 }}>Upload a Resource</h3>
+            
+            <Input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required />
+            <Input type="text" placeholder="Course Code (e.g. CS101)" value={courseCode} onChange={e => setCourseCode(e.target.value)} required />
+            <Input type="number" placeholder="Semester (e.g. 1-8)" value={semester} onChange={e => setSemester(e.target.value)} required min="1" max="8" />
+            <Input type="text" placeholder="Tags (comma separated)" value={tags} onChange={e => setTags(e.target.value)} />
+            
+            <input type="file" onChange={e => setFile(e.target.files[0])} required style={{ color: 'var(--text)', margin: '10px 0' }} />
 
-      <form onSubmit={handleUpload} style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '400px' }}>
-        <h3>Upload a Resource</h3>
+            <Button type="submit" disabled={isUploading}>
+              {isUploading ? 'Uploading...' : 'Upload Resource'}
+            </Button>
+          </form>
+        </Card>
         
-        <input type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} required />
-        <input type="text" placeholder="Course Code (e.g. CS101)" value={courseCode} onChange={e => setCourseCode(e.target.value)} required />
-        <input type="number" placeholder="Semester (e.g. 1-8)" value={semester} onChange={e => setSemester(e.target.value)} required min="1" max="8" />
-        <input type="text" placeholder="Tags (comma separated)" value={tags} onChange={e => setTags(e.target.value)} />
-        
-        <input type="file" onChange={e => setFile(e.target.files[0])} required />
+        <SearchFilterBar filters={filters} setFilters={setFilters} showType={false} showDept={false} showYear={false} />
 
-        <button type="submit" disabled={isUploading} style={{ opacity: isUploading ? 0.7 : 1 }}>
-          {isUploading ? 'Uploading...' : 'Upload'}
-        </button>
-      </form>
-
-      <hr />
-      
-      <SearchFilterBar filters={filters} setFilters={setFilters} showType={false} showDept={false} showYear={false} />
-
-      <h2>Available Resources</h2>
-      {loading ? (
-        <p>Loading resources...</p>
-      ) : resources.length === 0 ? (
-        <p>No resources found.</p>
-      ) : (
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {resources.map((res) => (
-            <li key={res._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px', borderRadius: '8px', background: 'white', color: '#000' }}>
-              <p><strong>{res.title}</strong> ({res.courseCode}, Sem {res.semester})</p>
-              
-              {res.aiSummary && (
-                <div style={{ backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '5px', marginBottom: '10px', fontSize: '0.9em' }}>
-                  <strong>✨ AI Summary:</strong> {res.aiSummary}
+        <h2 style={{ marginTop: '3rem' }}>Available Resources</h2>
+        {loading ? (
+          <Spinner text="Loading resources..." />
+        ) : resources.length === 0 ? (
+          <div className="empty-state">No resources found matching your criteria.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {resources.map((res) => (
+              <Card key={res._id} style={{ marginBottom: 0 }}>
+                <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-h)' }}>
+                  <strong>{res.title}</strong>
+                </p>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '15px', flexWrap: 'wrap' }}>
+                  <Badge variant="primary">{res.courseCode}</Badge>
+                  <Badge variant="secondary">Semester {res.semester}</Badge>
+                  {res.tags?.map((tag, idx) => (
+                    <Badge key={idx} variant="info">{tag}</Badge>
+                  ))}
                 </div>
-              )}
+                
+                {res.aiSummary && (
+                  <div style={{ backgroundColor: 'var(--social-bg)', padding: '15px', borderRadius: '6px', marginBottom: '15px', fontSize: '0.95em', color: 'var(--text-h)', borderLeft: '3px solid var(--primary)' }}>
+                    <strong>✨ AI Summary:</strong> {res.aiSummary}
+                  </div>
+                )}
 
-              <small>
-                Uploaded by: {res.uploaderId?.name || 'Unknown'} 
-                {' | '} 
-                Tags: {res.tags?.join(', ') || 'None'}
-              </small>
-              <br />
-              <a href={res.fileUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: '10px' }}>
-                Download / View File
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+                <p style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px' }}>
+                  Uploaded by: {res.uploaderId?.name || 'Unknown'}
+                </p>
+                
+                <a href={res.fileUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary">Download / View File</Button>
+                </a>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

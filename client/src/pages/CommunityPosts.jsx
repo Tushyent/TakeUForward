@@ -5,6 +5,11 @@ import MentionTextarea from '../components/MentionTextarea';
 import Navbar from '../components/Navbar';
 import SearchFilterBar from '../components/SearchFilterBar';
 import toast from 'react-hot-toast';
+import Spinner from '../components/ui/Spinner';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Badge from '../components/ui/Badge';
+import { Input } from '../components/ui/Input';
 
 function CommunityPosts() {
   const { id } = useParams();
@@ -15,6 +20,7 @@ function CommunityPosts() {
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const fetchPosts = React.useCallback(async () => {
     try {
@@ -34,6 +40,8 @@ function CommunityPosts() {
       } catch (err) {
         console.error('Error fetching community', err);
         setError('Community not found');
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -112,121 +120,130 @@ function CommunityPosts() {
     }
   };
 
-  if (error) return <div><Navbar /><div style={{ padding: '2rem', color: 'red' }}>{error}</div></div>;
-  if (!community) return <div><Navbar /><div style={{ padding: '2rem' }}>Loading community...</div></div>;
+  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (loading) return <div><Navbar /><Spinner text="Loading community..." /></div>;
 
   return (
     <div>
       <Navbar />
       <div style={{ padding: '2rem' }}>
-        <Link to="/home">← Back to Home</Link>
-      <h1>{community.name}</h1>
-      <p>{community.description}</p>
-      
-      <SearchFilterBar filters={filters} setFilters={setFilters} />
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+          ← Back to Home
+        </Link>
+        <h1>{community.name}</h1>
+        <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>{community.description}</p>
+        
+        <SearchFilterBar filters={filters} setFilters={setFilters} />
 
-      <hr />
-
-      <form onSubmit={handleCreatePost} style={{ marginBottom: '2rem' }}>
-        <h3>Create a Post</h3>
-        <MentionTextarea 
-          value={newPostContent}
-          onChange={(val) => setNewPostContent(val)}
-          placeholder="What's on your mind?"
-          style={{ width: '100%', height: '80px', marginBottom: '10px' }}
-        />
-        <div>
-          <label>
-            <input 
-              type="checkbox" 
-              checked={isAnonymous}
-              onChange={(e) => setIsAnonymous(e.target.checked)}
+        <Card style={{ marginTop: '2rem' }}>
+          <form onSubmit={handleCreatePost}>
+            <h3 style={{ marginTop: 0 }}>Create a Post</h3>
+            <MentionTextarea 
+              value={newPostContent}
+              onChange={(val) => setNewPostContent(val)}
+              placeholder="What's on your mind?"
+              style={{ width: '100%', minHeight: '80px', marginBottom: '15px' }}
             />
-            Post Anonymously
-          </label>
-        </div>
-        <button type="submit" disabled={isSubmitting} style={{ marginTop: '10px' }}>
-          {isSubmitting ? 'Posting...' : 'Post'}
-        </button>
-      </form>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input 
+                  type="checkbox" 
+                  checked={isAnonymous}
+                  onChange={(e) => setIsAnonymous(e.target.checked)}
+                />
+                Post Anonymously
+              </label>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Posting...' : 'Post'}
+              </Button>
+            </div>
+          </form>
+        </Card>
 
-      <hr />
-
-      <h2>Posts</h2>
-      {posts.length === 0 ? <p>No posts yet.</p> : (
-        <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {posts.map((post) => (
-            <li key={post._id} style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
-              <p><strong>{post.content}</strong></p>
-              <small>
-                {post.type === 'announcement' && post.clubId ? (
-                  <span style={{ color: '#007BFF', fontWeight: 'bold' }}>📢 Announcement by {post.clubId.name} | </span>
-                ) : (
-                  <span>
-                    By: {post.isAnonymous ? 'Anonymous' : `${post.authorId?.name || 'Unknown'} (@${post.authorId?.handle || 'unknown'})`}
-                    {!post.isAnonymous && post.authorId && (
-                      <Link to={`/chat/${post.authorId._id}`} style={{ marginLeft: '8px', textDecoration: 'none', background: '#28a745', color: 'white', padding: '2px 6px', borderRadius: '4px', fontSize: '0.75rem' }}>Message</Link>
-                    )}
-                    {' | '}
-                  </span>
-                )}
-                Posted: {new Date(post.createdAt).toLocaleString()}
-              </small>
-
-              <div style={{ marginTop: '10px' }}>
-                <button onClick={() => handleUpvote(post._id)}>
-                  Upvote ({post.upvotes?.length || 0})
-                </button>
-                <button onClick={() => handleReport(post._id)} style={{ marginLeft: '10px' }}>
-                  Report
-                </button>
-              </div>
-
-              <hr style={{ margin: '10px 0' }} />
-              
-              <div style={{ paddingLeft: '1rem', borderLeft: '2px solid #eee' }}>
-                <h4>Comments</h4>
-                {post.comments && post.comments.length > 0 ? (
-                  <ul style={{ paddingLeft: '1rem', marginBottom: '10px' }}>
-                    {post.comments.map(c => (
-                      <li key={c._id} style={{ marginBottom: '5px' }}>
-                        {c.text}
-                        <br />
-                        <small>
-                          - {c.isAnonymous ? 'Anonymous' : `${c.authorId?.name || 'Unknown'} (@${c.authorId?.handle || 'unknown'})`}
-                          {!c.isAnonymous && c.authorId && (
-                            <Link to={`/chat/${c.authorId._id}`} style={{ marginLeft: '6px', textDecoration: 'none', background: '#28a745', color: 'white', padding: '2px 5px', borderRadius: '4px', fontSize: '0.7rem' }}>Message</Link>
-                          )}
-                          , {new Date(c.createdAt).toLocaleString()}
-                        </small>
-                      </li>
-                    ))}
-                  </ul>
-                ) : <p style={{ fontSize: '0.9em' }}>No comments yet.</p>}
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginTop: '10px' }}>
-                  <MentionTextarea
-                    placeholder="Write a comment..."
-                    value={commentInputs[post._id] || ''}
-                    onChange={(val) => setCommentInputs(prev => ({ ...prev, [post._id]: val }))}
-                  />
-                  <label style={{ fontSize: '0.9em' }}>
-                    <input
-                      type="checkbox"
-                      checked={commentAnonymity[post._id] || false}
-                      onChange={e => setCommentAnonymity(prev => ({ ...prev, [post._id]: e.target.checked }))}
-                    />
-                    Comment Anonymously
-                  </label>
-                  <button onClick={() => handleComment(post._id)} disabled={isSubmitting} style={{ alignSelf: 'flex-start' }}>
-                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                  </button>
+        <h2 style={{ marginTop: '3rem' }}>Posts</h2>
+        {posts.length === 0 ? <div className="empty-state">No posts yet. Be the first to post!</div> : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {posts.map((post) => (
+              <Card key={post._id} style={{ marginBottom: 0 }}>
+                <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-h)' }}>
+                  {post.content}
+                </p>
+                <div style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                  {post.type === 'announcement' && post.clubId ? (
+                    <Badge variant="info">📢 Announcement by {post.clubId.name}</Badge>
+                  ) : (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      By: {post.isAnonymous ? 'Anonymous' : `${post.authorId?.name || 'Unknown'} (@${post.authorId?.handle || 'unknown'})`}
+                      {!post.isAnonymous && post.authorId && (
+                        <Link to={`/chat/${post.authorId._id}`} style={{ textDecoration: 'none' }}>
+                          <Badge variant="success">Message</Badge>
+                        </Link>
+                      )}
+                    </span>
+                  )}
+                  <span>• {new Date(post.createdAt).toLocaleString()}</span>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+                  <Button variant="secondary" onClick={() => handleUpvote(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
+                    ▲ Upvote ({post.upvotes?.length || 0})
+                  </Button>
+                  <Button variant="secondary" onClick={() => handleReport(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
+                    ⚑ Report
+                  </Button>
+                </div>
+
+                <div style={{ paddingLeft: '1rem', borderLeft: '2px solid var(--border)', marginTop: '1rem' }}>
+                  <h4 style={{ margin: '0 0 10px 0' }}>Comments</h4>
+                  {post.comments && post.comments.length > 0 ? (
+                    <ul style={{ listStyleType: 'none', padding: 0, margin: '0 0 15px 0' }}>
+                      {post.comments.map(c => (
+                        <li key={c._id} style={{ marginBottom: '10px', padding: '10px', background: 'var(--social-bg)', borderRadius: '6px' }}>
+                          <p style={{ marginBottom: '5px', color: 'var(--text-h)' }}>{c.text}</p>
+                          <div style={{ fontSize: '0.8em', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {c.isAnonymous ? 'Anonymous' : `${c.authorId?.name || 'Unknown'} (@${c.authorId?.handle || 'unknown'})`}
+                            {!c.isAnonymous && c.authorId && (
+                              <Link to={`/chat/${c.authorId._id}`} style={{ textDecoration: 'none' }}>
+                                <Badge variant="success">Message</Badge>
+                              </Link>
+                            )}
+                            <span>• {new Date(c.createdAt).toLocaleString()}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p style={{ fontSize: '0.9em', fontStyle: 'italic', marginBottom: '15px' }}>No comments yet.</p>
+                  )}
+                  
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <Input 
+                      type="text" 
+                      placeholder="Add a comment..."
+                      value={commentInputs[post._id] || ''}
+                      onChange={(e) => setCommentInputs(prev => ({ ...prev, [post._id]: e.target.value }))}
+                      style={{ flex: 1, minWidth: '200px' }}
+                    />
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '14px', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={!!commentAnonymity[post._id]}
+                        onChange={(e) => setCommentAnonymity(prev => ({ ...prev, [post._id]: e.target.checked }))}
+                      />
+                      Anon
+                    </label>
+                    <Button 
+                      onClick={() => handleComment(post._id)}
+                      disabled={isSubmitting || !commentInputs[post._id]?.trim()}
+                    >
+                      Reply
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
