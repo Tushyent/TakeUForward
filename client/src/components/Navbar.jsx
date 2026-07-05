@@ -39,6 +39,7 @@ const Navbar = () => {
         <Link to="/alumni" style={{ color: 'white', textDecoration: 'none' }}>Alumni</Link>
         <Link to="/referrals" style={{ color: 'white', textDecoration: 'none' }}>Referrals</Link>
         <Link to="/reviews" style={{ color: 'white', textDecoration: 'none' }}>Reviews</Link>
+        <Link to="/bookmarks" style={{ color: 'white', textDecoration: 'none' }}>Saved</Link>
         <Link to="/chats" style={{ color: 'white', textDecoration: 'none' }}>Inbox</Link>
         <NotificationsDropdown />
         <button 

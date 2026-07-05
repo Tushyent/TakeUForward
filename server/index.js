@@ -22,6 +22,7 @@ import userRoutes from './routes/userRoutes.js';
 import alumniRoutes from './routes/alumniRoutes.js';
 import referralRoutes from './routes/referralRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import bookmarkRoutes from './routes/bookmarkRoutes.js';
 
 dotenv.config();
 
@@ -93,8 +94,12 @@ app.use('/api/users', userRoutes);
 app.use('/api/alumni', alumniRoutes);
 app.use('/api/referrals', referralRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/bookmarks', bookmarkRoutes);
 
 // Error Handling
+app.get('/', (req, res) => {
+  res.send('TakeUForward API is running smoothly.');
+});
 app.use(notFound);
 app.use(errorHandler);
 

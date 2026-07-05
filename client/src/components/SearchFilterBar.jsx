@@ -26,6 +26,13 @@ function SearchFilterBar({ filters, setFilters, showType = true, showDept = true
         </select>
       )}
 
+      {filters.sort !== undefined && (
+        <select name="sort" value={filters.sort || 'newest'} onChange={handleChange} style={{ padding: '5px' }}>
+          <option value="newest">Newest</option>
+          <option value="hot">Hot (Trending)</option>
+        </select>
+      )}
+
       {showDept && (
         <select name="dept" value={filters.dept || ''} onChange={handleChange} style={{ padding: '5px' }}>
           <option value="">All Depts</option>

@@ -77,14 +77,49 @@ router.get('/', async (req, res) => {
     if (q) query.content = { $regex: new RegExp(q, 'i') };
 
     const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+    const { sort } = req.query;
 
-    const posts = await Post.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(parseInt(limit, 10))
-      .populate('authorId', 'name dept role handle isVerifiedAlumni username')
-      .populate('comments.authorId', 'name dept role handle isVerifiedAlumni username')
-      .populate('clubId', 'name'); // Populate club details for announcements
+    let posts;
+    if (sort === 'hot') {
+      const pipeline = [
+        { $match: query },
+        {
+          $addFields: {
+            upvoteCount: { $size: { $ifNull: ["$upvotes", []] } },
+            commentCount: { $size: { $ifNull: ["$comments", []] } },
+            ageHours: {
+              $max: [
+                1,
+                { $divide: [ { $subtract: [ new Date(), "$createdAt" ] }, 3600000 ] }
+              ]
+            }
+          }
+        },
+        {
+          $addFields: {
+            hotScore: { $divide: [ { $add: ["$upvoteCount", "$commentCount"] }, "$ageHours" ] }
+          }
+        },
+        { $sort: { hotScore: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: parseInt(limit, 10) }
+      ];
+      
+      const aggregateResult = await Post.aggregate(pipeline);
+      posts = await Post.populate(aggregateResult, [
+        { path: 'authorId', select: 'name dept role handle isVerifiedAlumni username' },
+        { path: 'comments.authorId', select: 'name dept role handle isVerifiedAlumni username' },
+        { path: 'clubId', select: 'name' }
+      ]);
+    } else {
+      posts = await Post.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit, 10))
+        .populate('authorId', 'name dept role handle isVerifiedAlumni username')
+        .populate('comments.authorId', 'name dept role handle isVerifiedAlumni username')
+        .populate('clubId', 'name'); // Populate club details for announcements
+    }
 
     const safePosts = posts.map(applyAnonymity);
 

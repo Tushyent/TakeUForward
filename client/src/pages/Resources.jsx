@@ -22,6 +22,7 @@ function Resources() {
   const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [filters, setFilters] = useState({});
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   const fetchResources = React.useCallback(async () => {
     setLoading(true);
@@ -36,9 +37,19 @@ function Resources() {
     }
   }, [filters]);
 
+  const fetchBookmarks = React.useCallback(async () => {
+    try {
+      const response = await axiosClient.get('/bookmarks?type=resource');
+      setBookmarkedIds(new Set(response.data.map(b => typeof b.itemId === 'object' ? b.itemId._id : b.itemId)));
+    } catch (err) {
+      console.error('Error fetching bookmarks', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchResources();
-  }, [fetchResources]);
+    fetchBookmarks();
+  }, [fetchResources, fetchBookmarks]);
 
   const handleUpload = async (e) => {
     e.preventDefault();
@@ -89,6 +100,21 @@ function Resources() {
       toast.error('Failed to upload resource');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleBookmark = async (resourceId) => {
+    try {
+      await axiosClient.post('/bookmarks', { itemType: 'resource', itemId: resourceId });
+      setBookmarkedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(resourceId)) next.delete(resourceId);
+        else next.add(resourceId);
+        return next;
+      });
+      toast.success('Bookmark updated');
+    } catch (err) {
+      toast.error('Failed to update bookmark');
     }
   };
 
@@ -150,9 +176,14 @@ function Resources() {
                   Uploaded by: {res.uploaderId?.name || 'Unknown'}
                 </p>
                 
-                <a href={res.fileUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-                  <Button variant="secondary">Download / View File</Button>
-                </a>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <a href={res.fileUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+                    <Button variant="secondary">Download / View File</Button>
+                  </a>
+                  <Button variant="secondary" onClick={() => handleBookmark(res._id)} style={{ color: bookmarkedIds.has(res._id) ? 'var(--primary)' : 'inherit' }}>
+                    {bookmarkedIds.has(res._id) ? '★ Saved' : '☆ Save'}
+                  </Button>
+                </div>
               </Card>
             ))}
           </div>

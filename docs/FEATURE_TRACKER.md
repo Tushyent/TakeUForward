@@ -36,3 +36,5 @@ Status values: Not Started / In Progress / Done / Blocked
 | Referral Request Board | 2 | Done | | server/models/ReferralRequest.js, server/routes/referralRoutes.js, client/src/pages/ReferralBoard.jsx | 2026-07-05 |
 | Full Profile Pages | 2 | Done | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-05 |
 | Course & Professor Reviews | 2 | Done | | server/models/Review.js, server/routes/reviewRoutes.js, client/src/pages/Reviews.jsx | 2026-07-06 |
+| Trending (Hot) Sort | 2 | Done | | server/routes/postRoutes.js, client/src/components/SearchFilterBar.jsx | 2026-07-06 |
+| Personal Tracker (Bookmarks) | 2 | Done | | server/models/Bookmark.js, server/routes/bookmarkRoutes.js, client/src/pages/Bookmarks.jsx | 2026-07-06 |

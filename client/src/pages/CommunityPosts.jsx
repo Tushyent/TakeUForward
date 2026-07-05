@@ -19,9 +19,10 @@ function CommunityPosts() {
   const [newPostContent, setNewPostContent] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [error, setError] = useState('');
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({ sort: 'newest' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   const fetchPosts = React.useCallback(async () => {
     try {
@@ -32,6 +33,15 @@ function CommunityPosts() {
       console.error('Error fetching posts', err);
     }
   }, [id, filters]);
+
+  const fetchBookmarks = React.useCallback(async () => {
+    try {
+      const response = await axiosClient.get('/bookmarks?type=post');
+      setBookmarkedIds(new Set(response.data.map(b => typeof b.itemId === 'object' ? b.itemId._id : b.itemId)));
+    } catch (err) {
+      console.error('Error fetching bookmarks', err);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -48,7 +58,8 @@ function CommunityPosts() {
     
     fetchCommunity();
     fetchPosts();
-  }, [id, fetchPosts]);
+    fetchBookmarks();
+  }, [id, fetchPosts, fetchBookmarks]);
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
@@ -118,6 +129,21 @@ function CommunityPosts() {
       toast.error('Failed to post comment');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleBookmark = async (postId) => {
+    try {
+      await axiosClient.post('/bookmarks', { itemType: 'post', itemId: postId });
+      setBookmarkedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(postId)) next.delete(postId);
+        else next.add(postId);
+        return next;
+      });
+      toast.success('Bookmark updated');
+    } catch (err) {
+      toast.error('Failed to update bookmark');
     }
   };
 
@@ -195,6 +221,9 @@ function CommunityPosts() {
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                   <Button variant="secondary" onClick={() => handleUpvote(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
                     ▲ Upvote ({post.upvotes?.length || 0})
+                  </Button>
+                  <Button variant="secondary" onClick={() => handleBookmark(post._id)} style={{ padding: '6px 12px', fontSize: '13px', color: bookmarkedIds.has(post._id) ? 'var(--primary)' : 'inherit' }}>
+                    {bookmarkedIds.has(post._id) ? '★ Saved' : '☆ Save'}
                   </Button>
                   <Button variant="secondary" onClick={() => handleReport(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
                     ⚑ Report

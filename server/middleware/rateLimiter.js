@@ -7,3 +7,11 @@ export const postCreationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+export const bookmarkLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 60, // Generous limit for bookmark toggles
+  message: { error: { message: 'Too many bookmark actions, please wait 10 minutes' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

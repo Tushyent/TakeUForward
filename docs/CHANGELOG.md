@@ -8,6 +8,8 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased] - 2026-07-05
 
 ### Added
+- **[Phase 2] Personal Tracker (Bookmarks)**: Implemented Feature #22. Added a unified `/bookmarks` page for users to track their saved posts and resources. Includes polymorphic `Bookmark` model and toggle buttons on post and resource cards. Strict anonymity enforcement ensures anonymous post authors remain hidden in the bookmarks feed.
+- **[Phase 2] Trending (Hot) Sort**: Implemented Feature #19. Added a `?sort=hot` query parameter to `/api/posts` using a MongoDB aggregation pipeline that gracefully decays engagement (`(upvotes + comments) / max(1, hours_since_creation)`) to rank trending posts.
 - **[Phase 2] Course & Professor Reviews**: Implemented the full reviews system at `/reviews`. Added filtering by course, professor, and semester. Included a dynamic aggregate summary (average rating and total reviews) that computes over the filtered results.
 - **[Phase 2] Reviews Moderation**: Integrated the `Review` model into the platform's central moderation queue. Users can report abusive reviews, and platform admins can resolve them alongside reported posts.
 - **[Phase 2] Full Profile Pages**: Added `/profile/:username` for public profiles with configurable visibility settings. Logged-in users can update their profile information and privacy settings at `/settings/profile`.
