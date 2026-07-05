@@ -12,9 +12,10 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **Global User Feedback**: Installed `react-hot-toast` and replaced all generic `alert()` and silent feedback mechanisms with standardized toasts.
 - **Loading States**: Implemented `isSubmitting`/`isUploading` disabled states for all destructive actions to prevent double-submissions.
 - **Chat Notifications**: Integrated 1:1 message notifications in-app, enabling the recipient to instantly see message notifications in their notifications dropdown and navigate directly to the chat thread when clicked.
+- **Deployment Readiness**: Upgraded `express-session` to use persistent MongoDB storage (`connect-mongo`), added production-grade cookie settings (`sameSite`), fixed environment variable names (`AWS_BUCKET_NAME`), and restored local `dev` concurrently script.
 
 ### Changed
-- **Status**: Officially finalized Phase 1 MVP completion.
+- **Status**: Officially finalized Phase 1 MVP completion and performed Vercel/Render deployment audit.
 
 ### Fixed
 - **UI/UX Consistency**: Standardized button styling in `CommunityPosts.jsx` and `ModerationQueue.jsx`.

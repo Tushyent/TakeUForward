@@ -1,5 +1,6 @@
 import express from 'express';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import passport from 'passport';
@@ -35,9 +36,14 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'dev_secret',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev',
+    collectionName: 'sessions'
+  }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 1 day
     secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     httpOnly: true,
   }
 }));
