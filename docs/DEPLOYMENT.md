@@ -100,13 +100,18 @@ across the project so far.
 | `SMTP_USER` | Yes | sender email | Same as above |
 | `SMTP_PASS` | Yes | app password / API key | Same as above |
 | `EMAIL_FROM` | Yes | display sender address | Emails may be rejected by provider if malformed |
+| `CRON_SECRET` | Yes (for Weekly Digest) | long random string | Weekly Digest endpoint `/api/jobs/weekly-digest` will reject external triggers |
+| `VAPID_PUBLIC_KEY` | Yes (for Web Push) | Web Push public key | Generated via `npx web-push generate-vapid-keys` |
+| `VAPID_PRIVATE_KEY`| Yes (for Web Push) | Web Push private key | Generated via `npx web-push generate-vapid-keys` |
+| `VAPID_SUBJECT` | Yes (for Web Push) | `mailto:admin@domain.com` | Required by the web-push protocol |
 | `PORT` | Usually auto-set by Render | `5000`/auto | Render auto-injects this — do not hardcode a port in code |
 
 ### Frontend (Vercel)
 
-| Variable | Required | Example format | Breaks if missing/wrong |
-|---|---|---|---|
+| Variable | Required | Example | Notes |
+|----------|----------|---------|-------|
 | `VITE_API_BASE_URL` | Yes | `https://<render-backend>.onrender.com/api` (no trailing slash) | Every API call fails / hits localhost in production |
+| `VITE_VAPID_PUBLIC_KEY`| Yes (for Web Push)| Same as Backend `VAPID_PUBLIC_KEY` | Used by the frontend to subscribe to Web Push |
 
 **CRITICAL:** Confirm `VITE_API_BASE_URL` is set for **all three** Vercel 
 environments (Production, Preview, Development) in the Vercel dashboard — a var set 
@@ -174,6 +179,10 @@ a `VITE_` prefix.
    - Run `npm run seed:communities` and `npm run seed:clubs` **against the 
      production `MONGODB_URI`**, not local Mongo — seeding locally does not seed 
      Atlas. This was a real incident (see §7).
+
+10. **Weekly Digest Scheduling**
+    - Set up a job on cron-job.org or GitHub Actions to send a `POST` request to `https://<render-backend>.onrender.com/api/jobs/weekly-digest` every Monday at 9:00 AM.
+    - Include header: `x-cron-secret: <your-cron-secret>`. This wakes up Render and guarantees execution.
 
 ---
 

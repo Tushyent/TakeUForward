@@ -10,6 +10,8 @@ import toast from 'react-hot-toast';
 function ProfileSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [webPushOptIn, setWebPushOptIn] = useState(false);
+  const [pushSupported, setPushSupported] = useState(false);
   const [profile, setProfile] = useState({
     about: '',
     skills: '',
@@ -22,10 +24,20 @@ function ProfileSettings() {
       showSkills: true,
       showBio: true,
       showEducation: true
-    }
+    },
+    weeklyDigestOptIn: true
   });
 
   useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      setPushSupported(true);
+      navigator.serviceWorker.ready.then(reg => {
+        reg.pushManager.getSubscription().then(sub => {
+          if (sub) setWebPushOptIn(true);
+        });
+      });
+    }
+
     const fetchMe = async () => {
       try {
         const res = await axiosClient.get('/auth/me');
@@ -38,7 +50,8 @@ function ProfileSettings() {
           profileVisibility: u.profileVisibility || {
             showEmail: true, showSocialLinks: true, showInterests: true,
             showSkills: true, showBio: true, showEducation: true
-          }
+          },
+          weeklyDigestOptIn: u.weeklyDigestOptIn !== false
         });
       } catch (_) {
         toast.error('Failed to load profile');
@@ -70,6 +83,63 @@ function ProfileSettings() {
     }));
   };
 
+  const handlePushToggle = async () => {
+    if (!pushSupported) return toast.error('Push notifications are not supported in this browser.');
+    
+    if (webPushOptIn) {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) {
+          await axiosClient.post('/push/unsubscribe', { endpoint: sub.endpoint });
+          await sub.unsubscribe();
+        }
+        setWebPushOptIn(false);
+        toast.success('Unsubscribed from push notifications');
+      } catch (err) {
+        toast.error('Failed to unsubscribe');
+      }
+    } else {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          return toast.error('Permission denied for push notifications');
+        }
+        
+        const reg = await navigator.serviceWorker.register('/sw.js');
+        await navigator.serviceWorker.ready;
+        
+        const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+        if (!publicVapidKey) {
+          return toast.error('VAPID public key not configured in frontend');
+        }
+        
+        const urlBase64ToUint8Array = (base64String) => {
+          const padding = '='.repeat((4 - base64String.length % 4) % 4);
+          const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+          const rawData = window.atob(base64);
+          const outputArray = new Uint8Array(rawData.length);
+          for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+          }
+          return outputArray;
+        };
+
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+        });
+        
+        await axiosClient.post('/push/subscribe', sub);
+        setWebPushOptIn(true);
+        toast.success('Subscribed to push notifications');
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to subscribe');
+      }
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -79,7 +149,8 @@ function ProfileSettings() {
         skills: profile.skills.split(',').map(s => s.trim()).filter(Boolean),
         interests: profile.interests.split(',').map(s => s.trim()).filter(Boolean),
         socialLinks: profile.socialLinks,
-        profileVisibility: profile.profileVisibility
+        profileVisibility: profile.profileVisibility,
+        weeklyDigestOptIn: profile.weeklyDigestOptIn
       };
       await axiosClient.patch('/users/me/profile', payload);
       toast.success('Profile settings saved successfully');
@@ -141,9 +212,25 @@ function ProfileSettings() {
           </Card>
 
           <Card style={{ marginBottom: '20px' }}>
-            <h2 style={{ marginTop: 0 }}>Privacy & Visibility</h2>
-            <p style={{ color: 'var(--text)', marginBottom: '20px' }}>Toggle which sections appear on your public profile.</p>
+            <h2 style={{ marginTop: 0 }}>Privacy & Settings</h2>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-h)' }}>
+                <input type="checkbox" checked={profile.weeklyDigestOptIn} onChange={() => setProfile(prev => ({ ...prev, weeklyDigestOptIn: !prev.weeklyDigestOptIn }))} style={{ width: '18px', height: '18px' }} />
+                Receive Weekly Digest Emails
+              </label>
+            </div>
 
+            {pushSupported && (
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-h)' }}>
+                  <input type="checkbox" checked={webPushOptIn} onChange={handlePushToggle} style={{ width: '18px', height: '18px' }} />
+                  Receive Web Push Notifications (Mentions & Replies)
+                </label>
+              </div>
+            )}
+
+            <h3 style={{ marginBottom: '15px' }}>Visibility</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {Object.entries(profile.profileVisibility).map(([key, value]) => (
                 <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-h)' }}>

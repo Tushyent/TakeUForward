@@ -90,7 +90,7 @@ router.patch('/me/profile', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
-    const { about, interests, skills, socialLinks, profileVisibility } = req.body;
+    const { about, interests, skills, socialLinks, profileVisibility, weeklyDigestOptIn } = req.body;
     const user = req.user;
 
     if (about !== undefined) user.about = about;
@@ -98,6 +98,7 @@ router.patch('/me/profile', async (req, res, next) => {
     if (skills !== undefined) user.skills = skills;
     if (socialLinks !== undefined) user.socialLinks = { ...user.socialLinks, ...socialLinks };
     if (profileVisibility !== undefined) user.profileVisibility = { ...user.profileVisibility, ...profileVisibility };
+    if (weeklyDigestOptIn !== undefined) user.weeklyDigestOptIn = weeklyDigestOptIn;
 
     await user.save();
     res.json(user);

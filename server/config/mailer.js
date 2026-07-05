@@ -56,3 +56,20 @@ export const sendNotificationEmail = async (user, type, refId, isAnonymousSender
     console.error('Error sending email:', err);
   }
 };
+
+export const sendDigestEmail = async (user, htmlContent) => {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    return;
+  }
+  
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"TakeUForward" <noreply@takeuforward.com>',
+      to: user.email,
+      subject: 'Your Weekly TakeUForward Digest',
+      html: htmlContent
+    });
+  } catch (err) {
+    console.error(`Error sending digest to ${user.email}:`, err);
+  }
+};

@@ -39,8 +39,17 @@ Status values: Not Started / In Progress / Done / Blocked
 | Interview Experience Repository | 2 | Done | | server/models/InterviewExperience.js, server/routes/interviewExperienceRoutes.js, client/src/pages/InterviewExperiences.jsx | 2026-07-05 |
 | NPTEL / Elective Suggestion Aggregator | 2 | Done | | server/models/ElectiveSuggestion.js, server/routes/electiveRoutes.js, client/src/pages/Electives.jsx | 2026-07-05 |
 | Career Roadmap Templates | 2 | Done | | server/models/CareerRoadmap.js, server/routes/careerRoadmapRoutes.js, client/src/pages/CareerRoadmaps.jsx | 2026-07-05 |
+| Weekly Digest Email | 2 | Done | | server/services/digestService.js, server/routes/jobRoutes.js, server/models/User.js, client/src/pages/ProfileSettings.jsx | 2026-07-05 |
+| Web Push Notifications | 2 | Done | | server/routes/pushRoutes.js, server/services/notificationService.js, client/public/sw.js | 2026-07-05 |
 | Teammate Finder | 2 | Done | | server/models/TeamRequest.js, server/routes/teamRequestRoutes.js, client/src/pages/TeamFinder.jsx | 2026-07-05 |
 | Club Analytics | 2 | Done | | server/routes/clubRoutes.js, client/src/pages/ClubPage.jsx | 2026-07-05 |
 | Course & Professor Reviews | 2 | Done | | server/models/Review.js, server/routes/reviewRoutes.js, client/src/pages/Reviews.jsx | 2026-07-06 |
 | Trending (Hot) Sort | 2 | Done | | server/routes/postRoutes.js, client/src/components/SearchFilterBar.jsx | 2026-07-06 |
 | Personal Tracker (Bookmarks) | 2 | Done | | server/models/Bookmark.js, server/routes/bookmarkRoutes.js, client/src/pages/Bookmarks.jsx | 2026-07-06 |
+
+## Phase 3: Campus Utility Expansion
+**Status: 🏗 IN PROGRESS**
+
+| Feature | Phase | Status | Owner | Files | Last Updated |
+|---|---|---|---|---|---|
+| Lost & Found Board | 3 | Done | | server/models/LostFoundItem.js, server/routes/lostFoundRoutes.js, client/src/pages/LostFound.jsx | 2026-07-05 |

@@ -24,6 +24,7 @@ import InterviewExperiences from './pages/InterviewExperiences';
 import TeamFinder from './pages/TeamFinder';
 import Electives from './pages/Electives';
 import CareerRoadmaps from './pages/CareerRoadmaps';
+import LostFound from './pages/LostFound';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
           <Route path="/team-finder" element={<ProtectedRoute><TeamFinder /></ProtectedRoute>} />
           <Route path="/electives" element={<ProtectedRoute><Electives /></ProtectedRoute>} />
           <Route path="/career-roadmaps" element={<ProtectedRoute><CareerRoadmaps /></ProtectedRoute>} />
+          <Route path="/lost-found" element={<ProtectedRoute><LostFound /></ProtectedRoute>} />
           <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
           <Route path="/bookmarks" element={<ProtectedRoute><Bookmarks /></ProtectedRoute>} />
           <Route path="/moderation" element={<ProtectedRoute><ModerationQueue /></ProtectedRoute>} />

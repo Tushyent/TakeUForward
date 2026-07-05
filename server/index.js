@@ -28,6 +28,9 @@ import interviewExperienceRoutes from './routes/interviewExperienceRoutes.js';
 import teamRequestRoutes from './routes/teamRequestRoutes.js';
 import electiveRoutes from './routes/electiveRoutes.js';
 import careerRoadmapRoutes from './routes/careerRoadmapRoutes.js';
+import jobRoutes from './routes/jobRoutes.js';
+import pushRoutes from './routes/pushRoutes.js';
+import lostFoundRoutes from './routes/lostFoundRoutes.js';
 
 dotenv.config();
 
@@ -105,6 +108,9 @@ app.use('/api/interview-experiences', interviewExperienceRoutes);
 app.use('/api/team-requests', teamRequestRoutes);
 app.use('/api/elective-suggestions', electiveRoutes);
 app.use('/api/career-roadmaps', careerRoadmapRoutes);
+app.use('/api/jobs', jobRoutes);
+app.use('/api/push', pushRoutes);
+app.use('/api/lost-found', lostFoundRoutes);
 
 // Error Handling
 app.get('/', (req, res) => {

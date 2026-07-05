@@ -44,6 +44,15 @@ const userSchema = new mongoose.Schema(
     isPlatformAdmin: { type: Boolean, default: false },
     reputation: { type: Number, default: 0 },
     defaultCommunityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' },
+    weeklyDigestOptIn: { type: Boolean, default: true },
+    lastDigestSentAt: { type: Date },
+    pushSubscriptions: [{
+      endpoint: { type: String, required: true },
+      keys: {
+        p256dh: { type: String, required: true },
+        auth: { type: String, required: true }
+      }
+    }]
   },
   { timestamps: true }
 );
