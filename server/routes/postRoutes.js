@@ -82,8 +82,8 @@ router.get('/', async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit, 10))
-      .populate('authorId', 'name dept role handle')
-      .populate('comments.authorId', 'name dept role handle')
+      .populate('authorId', 'name dept role handle isVerifiedAlumni username')
+      .populate('comments.authorId', 'name dept role handle isVerifiedAlumni username')
       .populate('clubId', 'name'); // Populate club details for announcements
 
     const safePosts = posts.map(applyAnonymity);
@@ -99,8 +99,8 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('authorId', 'name dept role handle')
-      .populate('comments.authorId', 'name dept role handle')
+      .populate('authorId', 'name dept role handle isVerifiedAlumni username')
+      .populate('comments.authorId', 'name dept role handle isVerifiedAlumni username')
       .populate('clubId', 'name');
     
     if (!post) {
@@ -182,7 +182,7 @@ router.post('/:id/comment', postCreationLimiter, async (req, res) => {
     }
 
     // Populate the newly added comment author for the response
-    await post.populate('comments.authorId', 'name dept role handle');
+    await post.populate('comments.authorId', 'name dept role handle isVerifiedAlumni username');
     
     // Find the newly added comment to apply anonymity just to it, or return the whole post
     res.status(201).json(applyAnonymity(post));

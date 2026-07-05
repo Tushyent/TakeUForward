@@ -13,6 +13,11 @@ import ModerationQueue from './pages/ModerationQueue';
 import Chats from './pages/Chats';
 import ChatThread from './pages/ChatThread';
 import Announcements from './pages/Announcements';
+import AlumniDirectory from './pages/AlumniDirectory';
+import ReferralBoard from './pages/ReferralBoard';
+import PublicProfile from './pages/PublicProfile';
+import ProfileSettings from './pages/ProfileSettings';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -22,16 +27,23 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
-          <Route path="/complete-profile" element={<CompleteProfile />} />
-          <Route path="/community/:id" element={<CommunityPosts />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/clubs" element={<ClubsList />} />
-          <Route path="/clubs/:id" element={<ClubPage />} />
-          <Route path="/announcements" element={<Announcements />} />
-          <Route path="/moderation" element={<ModerationQueue />} />
-          <Route path="/chats" element={<Chats />} />
-          <Route path="/chat/:userId" element={<ChatThread />} />
-          <Route path="/home" element={<Home />} />
+          
+          {/* Protected Routes */}
+          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+          <Route path="/community/:id" element={<ProtectedRoute><CommunityPosts /></ProtectedRoute>} />
+          <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
+          <Route path="/clubs" element={<ProtectedRoute><ClubsList /></ProtectedRoute>} />
+          <Route path="/clubs/:id" element={<ProtectedRoute><ClubPage /></ProtectedRoute>} />
+          <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
+          <Route path="/alumni" element={<ProtectedRoute><AlumniDirectory /></ProtectedRoute>} />
+          <Route path="/referrals" element={<ProtectedRoute><ReferralBoard /></ProtectedRoute>} />
+          <Route path="/moderation" element={<ProtectedRoute><ModerationQueue /></ProtectedRoute>} />
+          <Route path="/chats" element={<ProtectedRoute><Chats /></ProtectedRoute>} />
+          <Route path="/chat/:userId" element={<ProtectedRoute><ChatThread /></ProtectedRoute>} />
+          <Route path="/profile/:username" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
+          <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+          
           <Route path="/" element={<Navigate to="/home" replace />} />
         </Routes>
       </Router>

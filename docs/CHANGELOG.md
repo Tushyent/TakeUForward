@@ -8,6 +8,13 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased] - 2026-07-05
 
 ### Added
+- **[Phase 2] Full Profile Pages**: Added `/profile/:username` for public profiles with configurable visibility settings. Logged-in users can update their profile information and privacy settings at `/settings/profile`.
+- **[Phase 2] Data Model Extensions**: Added `username`, `graduationYear`, `currentCompany`, `previousCompany`, `higherEducation`, `about`, `skills`, `interests`, and `socialLinks` to the `User` model.
+- **[Phase 2] Standardized Departments**: Transformed `dept` field into an exact strict enum and constrained `year` to integers `2000-2029`.
+- **[Phase 2] Verified Alumni Identity**: Added `isVerifiedAlumni` flag tracking and introduced a globally shared `<VerifiedAlumniBadge />` that displays a green checkmark next to alumni names across the platform.
+- **[Phase 2] Alumni Directory**: Created `/alumni` page and `GET /api/alumni` endpoint for students to browse and filter verified alumni by company and department.
+- **[Phase 2] Referral Request Board**: Created `/referrals` page where students can post target companies, and verified alumni can instantly match and connect with them.
+- **Referral Workflows**: Integrated `matchedAlumniId` and `status` tracking (`open`, `matched`, `closed`), empowering students to manually close their own requests after receiving help.
 - **Global Auth Handling**: Added Axios interceptor to catch `401 Unauthorized` errors and automatically redirect to `/login` if the session expires.
 - **Global User Feedback**: Installed `react-hot-toast` and replaced all generic `alert()` and silent feedback mechanisms with standardized toasts.
 - **Loading States**: Implemented `isSubmitting`/`isUploading` disabled states for all destructive actions to prevent double-submissions.
@@ -21,6 +28,8 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **UX**: Replaced all raw text `<div>Loading...</div>` placeholders with standard centered `<Spinner />` components for better UX during Render cold-starts.
 
 ### Fixed
+- **CORS Deployment Blocker**: Added trailing-slash sanitization to the `CLIENT_URL` environment variable parser in `server/index.js` to ensure the CORS `Access-Control-Allow-Origin` header strictly matches the frontend origin without trailing slashes.
+- **Route Guarding**: Created `<ProtectedRoute>` to accurately distinguish between network errors (e.g. CORS failures) and genuine 401 unauthenticated states, preventing unauthenticated users from seeing broken UI on `/home`.
 - **UI/UX Consistency**: Standardized button styling, card padding, inputs, and typography globally.
 - **Docs**: Created `docs/UI_UX_DEPLOYMENT_AUDIT.md` mapping out all deployment and visual consistency bugs and fixed them in Phase 2.
 

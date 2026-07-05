@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 
   try {
     const chats = await Chat.find({ participants: req.user._id })
-      .populate('participants', 'name handle dept role')
+      .populate('participants', 'name handle dept role isVerifiedAlumni username')
       .sort({ updatedAt: -1 });
     
     res.status(200).json(chats);
@@ -45,7 +45,8 @@ router.get('/:userId', async (req, res) => {
 
     let chat = await Chat.findOne({
       participants: { $all: [req.user._id, targetUserId] }
-    }).populate('participants', 'name handle dept role')
+    })
+      .populate('participants', 'name handle isVerifiedAlumni username')
       .populate('messages.senderId', 'name handle');
 
     if (!chat) {
@@ -53,7 +54,7 @@ router.get('/:userId', async (req, res) => {
         participants: [req.user._id, targetUserId],
         messages: []
       });
-      chat = await chat.populate('participants', 'name handle dept role');
+      chat = await chat.populate('participants', 'name handle dept role isVerifiedAlumni');
     }
 
     // Optional: Mark messages from other user as read

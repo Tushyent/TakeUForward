@@ -33,9 +33,11 @@ const Navbar = () => {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <Link to="/home" style={{ color: 'white', textDecoration: 'none' }}>Home</Link>
-        <Link to="/clubs" style={{ color: 'white', textDecoration: 'none' }}>Clubs</Link>
         <Link to="/resources" style={{ color: 'white', textDecoration: 'none' }}>Resources</Link>
+        <Link to="/clubs" style={{ color: 'white', textDecoration: 'none' }}>Clubs</Link>
         <Link to="/announcements" style={{ color: 'white', textDecoration: 'none' }}>Announcements</Link>
+        <Link to="/alumni" style={{ color: 'white', textDecoration: 'none' }}>Alumni</Link>
+        <Link to="/referrals" style={{ color: 'white', textDecoration: 'none' }}>Referrals</Link>
         <Link to="/chats" style={{ color: 'white', textDecoration: 'none' }}>Inbox</Link>
         <NotificationsDropdown />
         <button 

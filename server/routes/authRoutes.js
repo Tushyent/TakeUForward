@@ -24,7 +24,12 @@ router.get(
 
 router.get('/me', (req, res) => {
   if (req.isAuthenticated()) {
-    const profileComplete = !!(req.user.dept && req.user.year);
+    let profileComplete = false;
+    if (req.user.role === 'alumni') {
+      profileComplete = !!(req.user.dept && req.user.graduationYear && req.user.currentCompany);
+    } else {
+      profileComplete = !!(req.user.dept && req.user.year);
+    }
     res.status(200).json({ user: req.user, profileComplete });
   } else {
     res.status(401).json({ error: 'Not authenticated' });
@@ -37,18 +42,29 @@ router.patch('/profile', async (req, res) => {
   }
 
   try {
-    const { dept, year } = req.body;
-    if (!dept || !year) {
-      return res.status(400).json({ error: 'Dept and year are required' });
-    }
+    const { dept, year, graduationYear, currentCompany, previousCompany, higherEducation } = req.body;
+    
+    if (req.user.role === 'alumni') {
+      if (!dept || !graduationYear || !currentCompany) {
+        return res.status(400).json({ error: 'Dept, graduation year, and current company are required' });
+      }
+      req.user.dept = dept;
+      req.user.graduationYear = parseInt(graduationYear, 10);
+      req.user.currentCompany = currentCompany;
+      if (previousCompany !== undefined) req.user.previousCompany = previousCompany;
+      if (higherEducation !== undefined) req.user.higherEducation = higherEducation;
+    } else {
+      if (!dept || !year) {
+        return res.status(400).json({ error: 'Dept and year are required' });
+      }
+      req.user.dept = dept;
+      req.user.year = parseInt(year, 10);
 
-    req.user.dept = dept;
-    req.user.year = parseInt(year, 10);
-
-    // Re-run the existing defaultCommunityId matching logic
-    const defaultCommunityId = await assignDefaultCommunity(req.user.dept, req.user.year);
-    if (defaultCommunityId) {
-      req.user.defaultCommunityId = defaultCommunityId;
+      // Re-run the existing defaultCommunityId matching logic for students
+      const defaultCommunityId = await assignDefaultCommunity(req.user.dept, req.user.year);
+      if (defaultCommunityId) {
+        req.user.defaultCommunityId = defaultCommunityId;
+      }
     }
 
     await req.user.save();

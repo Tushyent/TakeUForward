@@ -37,4 +37,73 @@ router.get('/search', async (req, res, next) => {
   }
 });
 
+// @route   GET /api/users/:username
+// @desc    Get public profile
+// @access  Public (or Private depending on if we want guests to see it, I'll make it authenticated for now)
+router.get('/:username', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const user = await User.findOne({ username: req.params.username }).lean();
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Strip fields based on profileVisibility
+    const vis = user.profileVisibility || {};
+    
+    // Always visible basic fields:
+    const publicProfile = {
+      _id: user._id,
+      name: user.name,
+      username: user.username,
+      handle: user.handle,
+      role: user.role,
+      isVerifiedAlumni: user.isVerifiedAlumni,
+      reputation: user.reputation,
+      currentCompany: user.currentCompany,
+    };
+
+    if (vis.showEmail !== false) publicProfile.email = user.email;
+    if (vis.showBio !== false) {
+      publicProfile.bio = user.bio;
+      publicProfile.about = user.about;
+    }
+    if (vis.showSocialLinks !== false) publicProfile.socialLinks = user.socialLinks;
+    if (vis.showInterests !== false) publicProfile.interests = user.interests;
+    if (vis.showSkills !== false) publicProfile.skills = user.skills;
+    if (vis.showEducation !== false) {
+      publicProfile.dept = user.dept;
+      publicProfile.year = user.year;
+      publicProfile.graduationYear = user.graduationYear;
+      publicProfile.higherEducation = user.higherEducation;
+    }
+
+    res.json(publicProfile);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// @route   PATCH /api/users/me/profile
+// @desc    Update user profile and visibility
+// @access  Private
+router.patch('/me/profile', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const { about, interests, skills, socialLinks, profileVisibility } = req.body;
+    const user = req.user;
+
+    if (about !== undefined) user.about = about;
+    if (interests !== undefined) user.interests = interests;
+    if (skills !== undefined) user.skills = skills;
+    if (socialLinks !== undefined) user.socialLinks = { ...user.socialLinks, ...socialLinks };
+    if (profileVisibility !== undefined) user.profileVisibility = { ...user.profileVisibility, ...profileVisibility };
+
+    await user.save();
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

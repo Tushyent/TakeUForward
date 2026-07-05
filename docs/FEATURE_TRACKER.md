@@ -26,3 +26,12 @@ Status values: Not Started / In Progress / Done / Blocked
 | Search & Filter | 1 | Done | | client/src/components/SearchFilterBar.jsx, server/routes/postRoutes.js | 2026-07-05 |
 | Email Notifications | 1 | Done | | server/config/mailer.js, server/services/notificationService.js | 2026-07-05 |
 | @Mentions | 1 | Done | | server/models/Notification.js, server/routes/postRoutes.js | 2026-07-05 |
+
+## Phase 2: Professional Networking & Growth
+**Status: 🏗 IN PROGRESS**
+
+| Feature | Phase | Status | Owner | Files | Last Updated |
+|---|---|---|---|---|---|
+| Verified Alumni Directory | 2 | Done | | server/routes/alumniRoutes.js, client/src/pages/AlumniDirectory.jsx | 2026-07-05 |
+| Referral Request Board | 2 | Done | | server/models/ReferralRequest.js, server/routes/referralRoutes.js, client/src/pages/ReferralBoard.jsx | 2026-07-05 |
+| Full Profile Pages | 2 | Done | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-05 |

@@ -35,3 +35,6 @@
 
 ## I. Health check
 - [OK] 18. Health API: `GET /api/health` accurately checks `mongoose.connection.readyState`.
+
+## J. Database Seeding
+- [Needs Manual Dashboard Step] 19. Seed Production DB: Production MongoDB must be manually seeded with default communities using `NODE_ENV=production npm run seed:communities` before first use, otherwise users will encounter "No communities found" errors and default community assignments will fail silently.

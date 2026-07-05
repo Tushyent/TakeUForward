@@ -19,6 +19,8 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import announcementRoutes from './routes/announcementRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import alumniRoutes from './routes/alumniRoutes.js';
+import referralRoutes from './routes/referralRoutes.js';
 
 dotenv.config();
 
@@ -26,8 +28,9 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : 'http://localhost:5173';
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: clientUrl,
   credentials: true,
 }));
 
@@ -63,6 +66,8 @@ app.use('/api/moderation', moderationRoutes);
 app.use('/api/chats', chatRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/alumni', alumniRoutes);
+app.use('/api/referrals', referralRoutes);
 
 // Error Handling
 app.use(notFound);

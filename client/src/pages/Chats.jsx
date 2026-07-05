@@ -4,6 +4,7 @@ import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
+import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function Chats() {
   const [chats, setChats] = useState([]);
@@ -48,7 +49,10 @@ function Chats() {
               return (
                 <Link key={chat._id} to={`/chat/${otherUser?._id}`} style={{ textDecoration: 'none' }}>
                   <Card style={{ marginBottom: 0, padding: '1rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', ':hover': { transform: 'translateY(-2px)' } }}>
-                    <strong style={{ color: 'var(--primary)', fontSize: '1.1em' }}>{displayName}</strong>
+                    <strong style={{ color: 'var(--primary)', fontSize: '1.1em', display: 'flex', alignItems: 'center' }}>
+                      {displayName}
+                      {otherUser?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={otherUser.isVerifiedAlumni} />}
+                    </strong>
                     {lastMsg ? (
                       <p style={{ margin: '8px 0 0 0', color: 'var(--text)', fontSize: '0.95em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {lastMsg.text}

@@ -10,6 +10,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
+import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function CommunityPosts() {
   const { id } = useParams();
@@ -173,7 +174,14 @@ function CommunityPosts() {
                     <Badge variant="info">📢 Announcement by {post.clubId.name}</Badge>
                   ) : (
                     <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      By: {post.isAnonymous ? 'Anonymous' : `${post.authorId?.name || 'Unknown'} (@${post.authorId?.handle || 'unknown'})`}
+                      By: {post.isAnonymous ? 'Anonymous' : (
+                        <>
+                          <Link to={`/profile/${post.authorId?.username}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                            {post.authorId?.name || 'Unknown'} (@{post.authorId?.handle || 'unknown'})
+                          </Link>
+                          {post.authorId?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={post.authorId.isVerifiedAlumni} />}
+                        </>
+                      )}
                       {!post.isAnonymous && post.authorId && (
                         <Link to={`/chat/${post.authorId._id}`} style={{ textDecoration: 'none' }}>
                           <Badge variant="success">Message</Badge>
@@ -201,7 +209,14 @@ function CommunityPosts() {
                         <li key={c._id} style={{ marginBottom: '10px', padding: '10px', background: 'var(--social-bg)', borderRadius: '6px' }}>
                           <p style={{ marginBottom: '5px', color: 'var(--text-h)' }}>{c.text}</p>
                           <div style={{ fontSize: '0.8em', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            {c.isAnonymous ? 'Anonymous' : `${c.authorId?.name || 'Unknown'} (@${c.authorId?.handle || 'unknown'})`}
+                            {c.isAnonymous ? 'Anonymous' : (
+                              <>
+                                <Link to={`/profile/${c.authorId?.username}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                                  {c.authorId?.name || 'Unknown'} (@{c.authorId?.handle || 'unknown'})
+                                </Link>
+                                {c.authorId?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={c.authorId.isVerifiedAlumni} />}
+                              </>
+                            )}
                             {!c.isAnonymous && c.authorId && (
                               <Link to={`/chat/${c.authorId._id}`} style={{ textDecoration: 'none' }}>
                                 <Badge variant="success">Message</Badge>

@@ -22,6 +22,7 @@ passport.use(
         
         let role = 'student';
         let currentCompany = null;
+        let isVerifiedAlumni = false;
 
         // Domain restriction for students
         if (!email.endsWith(`@${allowedDomain}`)) {
@@ -29,6 +30,7 @@ passport.use(
           if (approvedAlumni) {
             role = 'alumni';
             currentCompany = approvedAlumni.currentCompany;
+            isVerifiedAlumni = true;
           } else {
             return done(null, false, { message: 'Unauthorized domain' });
           }
@@ -42,6 +44,14 @@ passport.use(
           let year = null;
           let defaultCommunityId = await assignDefaultCommunity(dept, year);
 
+          let usernameBase = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+          let username = usernameBase;
+          let counter = 1;
+          while (await User.findOne({ username })) {
+            username = `${usernameBase}${counter}`;
+            counter++;
+          }
+
           const baseHandle = profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, '_');
           const handle = `${baseHandle}_${crypto.randomBytes(2).toString('hex')}`;
 
@@ -49,13 +59,23 @@ passport.use(
             googleId: profile.id,
             name: profile.displayName,
             email: email,
+            username,
             handle,
             role: role,
             dept,
             year,
             defaultCommunityId,
+            isVerifiedAlumni,
             ...(currentCompany && { currentCompany })
           });
+        } else {
+          // If the user already exists but just became a verified alumni, update them
+          if (isVerifiedAlumni && !user.isVerifiedAlumni) {
+            user.isVerifiedAlumni = true;
+            user.role = 'alumni';
+            if (currentCompany) user.currentCompany = currentCompany;
+            await user.save();
+          }
         }
         return done(null, user);
       } catch (err) {

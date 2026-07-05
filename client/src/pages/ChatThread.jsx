@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
 import Button from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function ChatThread() {
   const { userId } = useParams();
@@ -69,7 +70,10 @@ function ChatThread() {
           &larr; Back to Inbox
         </Link>
         
-        <h2 style={{ margin: '0 0 1rem 0' }}>Chat with {otherUser?.name}</h2>
+        <h2 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center' }}>
+          Chat with {otherUser?.name}
+          {otherUser?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={otherUser.isVerifiedAlumni} style={{ marginLeft: '10px' }} />}
+        </h2>
 
         <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg)' }}>
           {chat.messages.length === 0 ? (
