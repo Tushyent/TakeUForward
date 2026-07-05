@@ -28,9 +28,32 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/$/, '') : 'http://localhost:5173';
+// Trust proxy is required for secure cookies behind Render's load balancer
+app.set('trust proxy', 1);
+
+const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/+$/, '') : 'http://localhost:5173';
+
 app.use(cors({
-  origin: clientUrl,
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = [
+      clientUrl,
+      'http://localhost:5173',
+      'http://127.0.0.1:5173'
+    ];
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+
+    // Allow Vercel preview deployments for this project (e.g. *-tushyents-projects.vercel.app)
+    if (/^https:\/\/takeuforward.*\.vercel\.app$/.test(origin)) {
+      return callback(null, true);
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 

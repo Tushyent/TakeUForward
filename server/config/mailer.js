@@ -20,7 +20,7 @@ export const sendNotificationEmail = async (user, type, refId, isAnonymousSender
     return;
   }
 
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+  const clientUrl = (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
   let subject = '';
   let text = '';
   let html = '';

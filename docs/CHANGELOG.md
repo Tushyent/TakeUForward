@@ -21,6 +21,11 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **Chat Notifications**: Integrated 1:1 message notifications in-app, enabling the recipient to instantly see message notifications in their notifications dropdown and navigate directly to the chat thread when clicked.
 - **Deployment Readiness**: Upgraded `express-session` to use persistent MongoDB storage (`connect-mongo`), added production-grade cookie settings (`sameSite`), fixed environment variable names (`AWS_BUCKET_NAME`), and restored local `dev` concurrently script.
 - **Shared UI Components**: Created vanilla CSS-based shared React components (`Button`, `Card`, `Badge`, `Spinner`, `Input`) in `client/src/components/ui/` to unify styling across the application.
+- **[Deployment Hardening] SPA Routing on Vercel**: Added `vercel.json` to correctly rewrite Vercel edge routes to `index.html` to eliminate 404 errors on direct navigation.
+- **[Deployment Hardening] Cross-Origin Cookies**: Explicitly configured Express `app.set('trust proxy', 1)` to allow `sameSite: none` secure cookies to be set correctly when the backend is hosted behind Render's load balancer.
+- **[Deployment Hardening] Dynamic CORS**: Updated backend CORS configuration to dynamically match an array of local origins, the exact production origin, and a regular expression (`^https:\/\/takeuforward.*\.vercel\.app$`) to automatically whitelist all Vercel preview deployment URLs.
+- **[Deployment Hardening] Defensiveness**: Systematically stripped trailing slashes in `server/routes/authRoutes.js`, `server/config/mailer.js`, and `client/src/api/axiosClient.js` wherever env var URLs are read.
+- **[Docs] Deployment Checklist**: Created a permanent, reusable `docs/DEPLOYMENT_CHECKLIST.md` for pre- and post-deploy checks.
 
 ### Changed
 - **Status**: Officially finalized Phase 1 MVP completion and performed Vercel/Render deployment UI/UX polish audit.

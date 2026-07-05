@@ -13,12 +13,13 @@ router.get(
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: (process.env.CLIENT_URL || 'http://localhost:5173') + '/login?error=domain',
-  }),
-  (req, res) => {
-    // Successful authentication, redirect home.
-    res.redirect(process.env.CLIENT_URL || 'http://localhost:5173');
+  (req, res, next) => {
+    const getClientUrl = () => (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
+    
+    passport.authenticate('google', {
+      successRedirect: getClientUrl(),
+      failureRedirect: getClientUrl() + '/login?error=domain',
+    })(req, res, next);
   }
 );
 
@@ -110,7 +111,8 @@ router.post('/alumni/invite', async (req, res) => {
       status: 'pending'
     });
 
-    const inviteLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/alumni-invite/${inviteToken}`;
+    const getClientUrl = () => (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
+    const inviteLink = `${getClientUrl()}/alumni-invite/${inviteToken}`;
     res.status(201).json({ inviteLink });
   } catch (err) {
     if (err.code === 11000) {
