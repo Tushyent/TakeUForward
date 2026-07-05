@@ -18,6 +18,7 @@ function Reviews() {
   const [summary, setSummary] = useState({ averageRating: 0, totalReviews: 0 });
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New review state
@@ -30,6 +31,7 @@ function Reviews() {
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const queryParams = new URLSearchParams(filters).toString();
       const response = await axiosClient.get(`/reviews?${queryParams}`);
@@ -38,6 +40,7 @@ function Reviews() {
     } catch (err) {
       console.error('Error fetching reviews', err);
       toast.error('Failed to load reviews');
+      setError('Failed to load reviews');
     } finally {
       setLoading(false);
     }
@@ -93,7 +96,7 @@ function Reviews() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>Course & Professor Reviews</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Find and share reviews for courses and professors.</p>
         
@@ -110,7 +113,7 @@ function Reviews() {
 
         {/* Aggregate Summary */}
         {(filters.courseCode || filters.professorName) && !loading && (
-          <div style={{ marginBottom: '2rem', padding: '1rem', background: 'var(--social-bg)', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: '2rem', padding: '1rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
             <h3 style={{ margin: '0 0 10px 0' }}>Review Summary</h3>
             <p style={{ margin: 0 }}>
               <strong>Average Rating:</strong> {summary.averageRating > 0 ? summary.averageRating : 'N/A'} / 5.0 
@@ -180,7 +183,9 @@ function Reviews() {
         </Card>
 
         <h2 style={{ marginTop: '3rem' }}>Reviews</h2>
-        {loading ? <Spinner text="Loading reviews..." /> : reviews.length === 0 ? (
+        {error ? (
+          <EmptyState icon={Search} title="Error" message={error} action={{ label: 'Retry', onClick: fetchReviews }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />
+        ) : loading ? <Spinner text="Loading reviews..." /> : reviews.length === 0 ? (
           <EmptyState icon={Search} message="No reviews found matching your filters." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -188,7 +193,7 @@ function Reviews() {
               <Card key={review._id} style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-h)' }}>
+                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-primary)' }}>
                       {review.courseCode} - {review.professorName}
                     </h3>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
@@ -198,7 +203,7 @@ function Reviews() {
                   </div>
                 </div>
                 
-                <p style={{ fontSize: '1.1em', marginBottom: '15px', color: 'var(--text-h)' }}>
+                <p style={{ fontSize: '1.1em', marginBottom: '15px', color: 'var(--text-primary)' }}>
                   {review.comment}
                 </p>
                 

@@ -11,7 +11,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Search } from 'lucide-react';
+import { Search, AlertTriangle } from 'lucide-react';
 
 function Resources() {
   const [resources, setResources] = useState([]);
@@ -22,18 +22,20 @@ function Resources() {
   const [file, setFile] = useState(null);
   
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [filters, setFilters] = useState({});
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   const fetchResources = React.useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const queryParams = new URLSearchParams(filters).toString();
       const response = await axiosClient.get(`/resources?${queryParams}`);
       setResources(response.data);
     } catch (err) {
-      console.error('Error fetching resources', err);
+      setError(err.response?.data?.error?.message || err.message || 'Failed to load resources');
     } finally {
       setLoading(false);
     }
@@ -123,8 +125,8 @@ function Resources() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
-        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
           ← Back to Home
         </Link>
         <h1>Academic Resources</h1>
@@ -151,13 +153,21 @@ function Resources() {
         <h2 style={{ marginTop: '3rem' }}>Available Resources</h2>
         {loading ? (
           <Spinner text="Loading resources..." />
+        ) : error ? (
+          <EmptyState
+            icon={AlertTriangle}
+            title="Error"
+            message={error}
+            action={{ label: 'Retry', onClick: fetchResources }}
+            style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+          />
         ) : resources.length === 0 ? (
-          <EmptyState icon={Search} message="No resources found matching your criteria." />
+          <EmptyState icon={Search} title="No resources found" message="No resources match your current filters." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {resources.map((res) => (
               <Card key={res._id} style={{ marginBottom: 0 }}>
-                <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-h)' }}>
+                <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-primary)' }}>
                   <strong>{res.title}</strong>
                 </p>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '15px', flexWrap: 'wrap' }}>
@@ -169,7 +179,7 @@ function Resources() {
                 </div>
                 
                 {res.aiSummary && (
-                  <div style={{ backgroundColor: 'var(--social-bg)', padding: '15px', borderRadius: '6px', marginBottom: '15px', fontSize: '0.95em', color: 'var(--text-h)', borderLeft: '3px solid var(--primary)' }}>
+                  <div style={{ backgroundColor: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', marginBottom: '15px', fontSize: '0.95em', color: 'var(--text-primary)', borderLeft: '3px solid var(--primary)' }}>
                     <strong>✨ AI Summary:</strong> {res.aiSummary}
                   </div>
                 )}

@@ -6,12 +6,13 @@ import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Search } from 'lucide-react';
+import { Search, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function LostFound() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
   // Filters
@@ -53,8 +54,10 @@ function LostFound() {
       } else {
         setItems(res.data);
       }
+      setError(null);
     } catch (err) {
       console.error(err);
+      setError('Failed to load items');
       toast.error('Failed to load items');
     } finally {
       setLoading(false);
@@ -117,7 +120,7 @@ function LostFound() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h1 style={{ margin: 0 }}>Lost & Found Board</h1>
           <Button onClick={() => setShowForm(!showForm)}>
@@ -191,7 +194,9 @@ function LostFound() {
         </div>
 
         {/* Items List */}
-        {loading && page === 1 ? (
+        {error ? (
+          <EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: () => fetchItems(false) }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />
+        ) : loading && page === 1 ? (
           <Spinner text="Loading items..." />
         ) : items.length === 0 ? (
           <EmptyState icon={Search} message="No items found." />

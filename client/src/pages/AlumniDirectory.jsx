@@ -42,7 +42,7 @@ function AlumniDirectory() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Alumni Directory</h1>
         <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Connect with verified SSN alumni across the industry.
@@ -50,7 +50,7 @@ function AlumniDirectory() {
 
         <Card style={{ marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: '200px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Filter by Company</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Filter by Company</label>
             <Input 
               type="text" 
               placeholder="e.g. Google, Amazon..." 
@@ -60,7 +60,7 @@ function AlumniDirectory() {
             />
           </div>
           <div style={{ flex: 1, minWidth: '200px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Filter by Department</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Filter by Department</label>
             <Select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={{ width: '100%' }}>
               <option value="">All Departments</option>
               <option value="CSE">CSE</option>
@@ -72,7 +72,7 @@ function AlumniDirectory() {
           </div>
         </Card>
 
-        {error && <EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)', marginBottom: '1rem' }} />}
+        {error && <EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchAlumni }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)', marginBottom: '1rem' }} />}
 
         {loading ? (
           <Spinner text="Loading alumni..." />
@@ -102,7 +102,7 @@ function AlumniDirectory() {
                 </div>
 
                 {alumni.bio && (
-                  <p style={{ flexGrow: 1, fontSize: '0.95em', color: 'var(--text-h)', margin: '0 0 20px 0' }}>
+                  <p style={{ flexGrow: 1, fontSize: '0.95em', color: 'var(--text-primary)', margin: '0 0 20px 0' }}>
                     {alumni.bio}
                   </p>
                 )}

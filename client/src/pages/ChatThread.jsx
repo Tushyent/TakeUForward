@@ -35,9 +35,11 @@ function ChatThread() {
 
   useEffect(() => {
     fetchChat();
-    const interval = setInterval(fetchChat, 3000);
+    // 8s polling — real-time enough for chat, 60% fewer requests than 3s
+    const interval = setInterval(fetchChat, 8000);
     return () => clearInterval(interval);
   }, [fetchChat]);
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -59,7 +61,7 @@ function ChatThread() {
     }
   };
 
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchChat }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!chat) return <div><Navbar /><Spinner text="Loading chat..." /></div>;
 
   const otherUser = chat.participants.find(p => p._id !== myUserId);
@@ -67,8 +69,8 @@ function ChatThread() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', height: '80vh' }}>
-        <Link to="/chats" style={{ marginBottom: '1rem', textDecoration: 'none', color: 'var(--text)', display: 'inline-block' }}>
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)', display: 'flex', flexDirection: 'column', height: '80vh' }}>
+        <Link to="/chats" style={{ marginBottom: '1rem', textDecoration: 'none', color: 'var(--text-secondary)', display: 'inline-block' }}>
           &larr; Back to Inbox
         </Link>
         
@@ -77,7 +79,7 @@ function ChatThread() {
           {otherUser?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={otherUser.isVerifiedAlumni} style={{ marginLeft: '10px' }} />}
         </h2>
 
-        <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '8px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg)' }}>
+        <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-base)' }}>
           {chat.messages.length === 0 ? (
             <p style={{ textAlign: 'center', color: 'var(--text)', marginTop: '2rem' }}>No messages yet. Say hi!</p>
           ) : (
@@ -86,8 +88,8 @@ function ChatThread() {
               return (
                 <div key={idx} style={{ alignSelf: isMine ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
                   <div style={{ 
-                    background: isMine ? 'var(--primary)' : 'var(--social-bg)', 
-                    color: isMine ? 'white' : 'var(--text-h)', 
+                    background: isMine ? 'var(--primary)' : 'var(--bg-surface)', 
+                    color: isMine ? 'white' : 'var(--text-primary)', 
                     padding: '10px 15px', 
                     borderRadius: '15px',
                     borderBottomRightRadius: isMine ? '2px' : '15px',

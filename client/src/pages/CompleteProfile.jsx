@@ -62,14 +62,14 @@ function CompleteProfile() {
   const yearOptions = Array.from({ length: 30 }, (_, i) => currentYear + 5 - i); // roughly 2000 to currentYear+5
 
   return (
-    <div className="page-transition" style={{ padding: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
-      <Card style={{ maxWidth: '450px', width: '100%' }}>
+    <div className="page-transition page-col page-col-form" style={{ paddingBlock: 'var(--space-8)', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+      <Card style={{ width: '100%' }}>
         <h1 style={{ marginTop: 0, marginBottom: '10px' }}>Complete Your Profile</h1>
-        <p style={{ color: 'var(--text)', marginBottom: '2rem' }}>Please provide these details to continue.</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Please provide these details to continue.</p>
         
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Department</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Department</label>
             <Select value={dept} onChange={(e) => setDept(e.target.value)} style={{ width: '100%' }}>
               <option value="EEE">Electrical & Electronics (EEE)</option>
               <option value="ECE">Electronics & Communication (ECE)</option>
@@ -86,27 +86,27 @@ function CompleteProfile() {
           {role === 'alumni' ? (
             <>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Graduation Year</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Graduation Year</label>
                 <Select value={graduationYear} onChange={(e) => setGraduationYear(e.target.value)} style={{ width: '100%' }}>
                   {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                 </Select>
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Current Company</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Current Company</label>
                 <Input type="text" required value={currentCompany} onChange={e => setCurrentCompany(e.target.value)} placeholder="Where are you working?" style={{ width: '100%' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Previous Company (Optional)</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Previous Company (Optional)</label>
                 <Input type="text" value={previousCompany} onChange={e => setPreviousCompany(e.target.value)} placeholder="Where else have you worked?" style={{ width: '100%' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Higher Education (Optional)</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Higher Education (Optional)</label>
                 <Input type="text" value={higherEducation} onChange={e => setHigherEducation(e.target.value)} placeholder="E.g., MS at Stanford" style={{ width: '100%' }} />
               </div>
             </>
           ) : (
             <div>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Batch Year (Expected Graduation)</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Batch Year (Expected Graduation)</label>
               <Select value={year} onChange={(e) => setYear(e.target.value)} style={{ width: '100%' }}>
                 {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
               </Select>

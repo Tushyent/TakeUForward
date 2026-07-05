@@ -3,20 +3,107 @@ import { useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
-import Spinner from '../components/ui/Spinner';
+import { SkeletonCard } from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
-import { Users } from 'lucide-react';
+import {
+  Users, BookOpen, Megaphone, ShieldAlert, Sparkles,
+  ArrowRight, ChevronRight, Hash, Zap, Link2
+} from 'lucide-react';
 
+/* ---------------------------------------------------------------
+   QUICK LINK items shown in the "Explore" grid
+   --------------------------------------------------------------- */
+const QUICK_LINKS = [
+  {
+    to: '/resources',
+    icon: BookOpen,
+    label: 'Academic Resources',
+    desc: 'Notes, PYQs & study material',
+    color: '#7C6AF7',
+    glow: 'rgba(124,106,247,0.20)',
+  },
+  {
+    to: '/clubs',
+    icon: Users,
+    label: 'Campus Clubs',
+    desc: 'Explore official club pages',
+    color: '#F97316',
+    glow: 'rgba(249,115,22,0.20)',
+  },
+  {
+    to: '/announcements',
+    icon: Megaphone,
+    label: 'Announcements',
+    desc: 'Latest events & placement news',
+    color: '#60A5FA',
+    glow: 'rgba(96,165,250,0.20)',
+  },
+  {
+    to: '/career-roadmaps',
+    icon: Sparkles,
+    label: 'Career Roadmaps',
+    desc: 'SDE, PM, core & higher studies',
+    color: '#34D399',
+    glow: 'rgba(52,211,153,0.20)',
+  },
+];
+
+/* ---------------------------------------------------------------
+   COMMUNITY TYPE BADGE VARIANT MAP
+   --------------------------------------------------------------- */
+const communityVariant = (type) => {
+  const map = { dept: 'primary', batch: 'info', general: 'success', topic: 'accent' };
+  return map[type] || 'secondary';
+};
+
+/* ---------------------------------------------------------------
+   INITIALS AVATAR — fallback for users without a picture
+   --------------------------------------------------------------- */
+const InitialsAvatar = ({ name, size = 44 }) => {
+  const initials = (name || 'U')
+    .split(' ')
+    .map(w => w[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+  return (
+    <div style={{
+      width: size,
+      height: size,
+      borderRadius: 'var(--radius-full)',
+      background: 'linear-gradient(135deg, var(--primary) 0%, #a78bfa 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontSize: size * 0.38,
+      fontWeight: 700,
+      letterSpacing: '-0.02em',
+      flexShrink: 0,
+    }}>
+      {initials}
+    </div>
+  );
+};
+
+/* ---------------------------------------------------------------
+   HOME PAGE
+   --------------------------------------------------------------- */
 function Home() {
   const [user, setUser] = useState(null);
-  const [error, setError] = useState(null);
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
+  // Alumni invite (admin only)
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLink, setInviteLink] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -28,7 +115,7 @@ function Home() {
           setUser(response.data.user);
         }
       } catch (err) {
-        if (err.response && err.response.status === 401) {
+        if (err.response?.status === 401) {
           navigate('/login');
         } else {
           setError(err.message);
@@ -45,31 +132,24 @@ function Home() {
       try {
         const response = await axiosClient.get('/communities');
         setCommunities(response.data);
-      } catch (err) {
-        console.error('Error fetching communities', err);
+      } catch {
+        // silently fail — communities are supplementary on home
       }
     };
     fetchCommunities();
   }, []);
 
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteLink, setInviteLink] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleGenerateInvite = async () => {
-    if (!inviteEmail) {
-      toast.error('Please enter an email');
-      return;
-    }
+    if (!inviteEmail) { toast.error('Please enter an email'); return; }
     setInviteLink('');
     setIsSubmitting(true);
     try {
       const response = await axiosClient.post('/auth/alumni/invite', {
         email: inviteEmail,
-        currentCompany: 'Test Company'
+        currentCompany: 'Test Company',
       });
       setInviteLink(response.data.inviteLink);
-      toast.success('Invite generated successfully!');
+      toast.success('Invite generated!');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to generate invite');
     } finally {
@@ -77,98 +157,321 @@ function Home() {
     }
   };
 
+  /* ---------- Loading skeleton ---------- */
   if (loading) {
     return (
-      <div>
+      <div className="page-transition">
         <Navbar />
-        <Spinner text="Loading user data..." />
+        <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+          <SkeletonCard lines={2} />
+          <SkeletonCard lines={3} />
+          <SkeletonCard lines={4} />
+        </div>
       </div>
     );
   }
 
+  /* ---------- Full page ---------- */
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
-        <h1>TakeUForward - Home Feed</h1>
-      
-        <Card>
-          <h2>Welcome, {user?.name}</h2>
-          <p>Email: {user?.email}</p>
-          <p>Role: <Badge variant="primary">{user?.role}</Badge></p>
-          {user?.currentCompany && <p>Company: {user?.currentCompany}</p>}
-          {error && <p style={{ color: 'var(--danger)', marginTop: '10px' }}>Error: {error}</p>}
-        </Card>
 
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+
+        {/* ── HERO GREETING CARD ── */}
+        <div style={{
+          position: 'relative',
+          borderRadius: 'var(--radius-xl)',
+          padding: 'var(--space-8)',
+          marginBottom: 'var(--space-6)',
+          background: 'linear-gradient(135deg, #1a1536 0%, #161720 60%, #0f1420 100%)',
+          border: '1px solid rgba(124,106,247,0.25)',
+          boxShadow: '0 0 40px rgba(124,106,247,0.10)',
+          overflow: 'hidden',
+        }}>
+          {/* Decorative gradient blob */}
+          <div style={{
+            position: 'absolute',
+            top: -60,
+            right: -60,
+            width: 220,
+            height: 220,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(124,106,247,0.25) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: -40,
+            left: 80,
+            width: 160,
+            height: 160,
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)',
+            pointerEvents: 'none',
+          }} />
+
+          {/* Content */}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-5)' }}>
+              {user?.picture ? (
+                <img
+                  src={user.picture}
+                  alt={user.name}
+                  referrerPolicy="no-referrer"
+                  style={{ width: 52, height: 52, borderRadius: 'var(--radius-full)', border: '2px solid var(--primary)', objectFit: 'cover' }}
+                />
+              ) : (
+                <InitialsAvatar name={user?.name} size={52} />
+              )}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                  <h2 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>
+                    Hey, {user?.name?.split(' ')[0] || 'there'} 👋
+                  </h2>
+                </div>
+                <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)', flexWrap: 'wrap' }}>
+                  <Badge variant={user?.role === 'alumni' ? 'accent' : user?.role === 'platform_admin' ? 'danger' : 'primary'}>
+                    {user?.role?.replace('_', ' ')}
+                  </Badge>
+                  {user?.dept && <Badge variant="secondary">{user.dept}</Badge>}
+                  {user?.year && <Badge variant="secondary">Class of {user.year}</Badge>}
+                  {user?.currentCompany && <Badge variant="success">{user.currentCompany}</Badge>}
+                </div>
+              </div>
+            </div>
+
+            <p style={{
+              color: 'var(--text-secondary)',
+              fontSize: 'var(--text-sm)',
+              margin: 0,
+              lineHeight: 1.7,
+            }}>
+              Welcome back to <strong style={{ color: 'var(--text-primary)' }}>TakeUForward</strong> — your campus community for academics, placements, and everything in between.
+            </p>
+
+            {error && (
+              <p style={{ color: 'var(--danger)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-3)' }}>
+                ⚠ {error}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* ── MODERATION QUEUE (admin only) ── */}
+        {user?.isPlatformAdmin && (
+          <Card
+            style={{
+              background: 'var(--danger-bg)',
+              borderColor: 'rgba(248,113,113,0.35)',
+              marginBottom: 'var(--space-6)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                <div style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--danger-bg)',
+                  border: '1px solid var(--danger)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <ShieldAlert size={18} color="var(--danger)" />
+                </div>
+                <div>
+                  <h3 style={{ fontSize: 'var(--text-base)', margin: 0, color: 'var(--danger)' }}>Moderation Queue</h3>
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>Review flagged and reported posts</p>
+                </div>
+              </div>
+              <Link to="/moderation" style={{ textDecoration: 'none' }}>
+                <Button variant="danger" size="sm">
+                  Open Dashboard <ArrowRight size={13} />
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        )}
+
+        {/* ── ALUMNI INVITE (platform admin only) ── */}
         {user?.role === 'platform_admin' && (
-          <Card>
-            <h3>[Test] Generate Alumni Invite</h3>
-            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-              <Input 
-                type="email" 
-                placeholder="Alumnus email" 
-                value={inviteEmail} 
-                onChange={(e) => setInviteEmail(e.target.value)}
+          <Card style={{ marginBottom: 'var(--space-6)' }}>
+            <h3 style={{ fontSize: 'var(--text-base)', marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Link2 size={16} color="var(--primary)" />
+              Generate Alumni Invite
+            </h3>
+            <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+              <Input
+                type="email"
+                placeholder="Alumnus email address"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
               />
-              <Button onClick={handleGenerateInvite} disabled={isSubmitting} style={{ whiteSpace: 'nowrap' }}>
-                {isSubmitting ? 'Generating...' : 'Generate Link'}
+              <Button
+                onClick={handleGenerateInvite}
+                disabled={isSubmitting}
+                style={{ flexShrink: 0 }}
+              >
+                {isSubmitting ? 'Generating…' : 'Generate'}
               </Button>
             </div>
-            
             {inviteLink && (
-              <div style={{ marginTop: '15px', padding: '10px', background: 'var(--code-bg)', wordBreak: 'break-all', borderRadius: '4px' }}>
-                <strong>Invite Link:</strong> <a href={inviteLink} target="_blank" rel="noreferrer">{inviteLink}</a>
+              <div style={{
+                marginTop: 'var(--space-4)',
+                padding: 'var(--space-3) var(--space-4)',
+                background: 'var(--bg-input)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border)',
+                wordBreak: 'break-all',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--text-secondary)',
+              }}>
+                <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: 4 }}>Invite link:</span>
+                <a href={inviteLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>{inviteLink}</a>
               </div>
             )}
           </Card>
         )}
 
-        <Card>
-          <h3>Academic Resources</h3>
-          <p style={{ marginBottom: '10px' }}>Access notes, previous year question papers, and study materials.</p>
-          <Link to="/resources" style={{ textDecoration: 'none' }}>
-            <Button variant="secondary">Browse Resources &rarr;</Button>
-          </Link>
-        </Card>
+        {/* ── QUICK LINKS GRID ── */}
+        <div style={{ marginBottom: 'var(--space-8)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-4)' }}>
+            <Zap size={15} color="var(--primary)" />
+            <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>Explore</h3>
+          </div>
 
-        <Card>
-          <h3>Campus Clubs</h3>
-          <p style={{ marginBottom: '10px' }}>View official clubs and their announcements.</p>
-          <Link to="/clubs" style={{ textDecoration: 'none' }}>
-            <Button variant="secondary">Browse Clubs &rarr;</Button>
-          </Link>
-        </Card>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 'var(--space-4)',
+          }}>
+            {QUICK_LINKS.map(({ to, icon: Icon, label, desc, color, glow }) => (
+              <Link key={to} to={to} style={{ textDecoration: 'none' }}>
+                <div
+                  style={{
+                    padding: 'var(--space-5)',
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-md)',
+                    transition: 'box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base)',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.boxShadow = `0 0 0 1px ${glow}, 0 8px 24px rgba(0,0,0,0.4)`;
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.borderColor = color + '55';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.boxShadow = 'none';
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
+                >
+                  <div style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 'var(--radius-sm)',
+                    background: glow,
+                    border: `1px solid ${color}33`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 'var(--space-3)',
+                  }}>
+                    <Icon size={18} color={color} />
+                  </div>
+                  <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+                    {label}
+                  </p>
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>
+                    {desc}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
 
-        {user?.isPlatformAdmin && (
-          <Card style={{ borderColor: 'var(--danger)', background: 'rgba(220, 53, 69, 0.05)' }}>
-            <h3 style={{ color: 'var(--danger)' }}>Moderation Queue</h3>
-            <p style={{ marginBottom: '10px' }}>Review flagged and reported posts.</p>
-            <Link to="/moderation" style={{ textDecoration: 'none' }}>
-              <Button variant="danger">Open Moderation Dashboard &rarr;</Button>
-            </Link>
-          </Card>
-        )}
-
+        {/* ── COMMUNITIES LIST ── */}
         <Card>
-          <h3>Communities List</h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-5)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Hash size={15} color="var(--primary)" />
+              <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>Your Communities</h3>
+            </div>
+            <Badge variant="secondary">{communities.length} total</Badge>
+          </div>
+
           {communities.length === 0 ? (
-            <EmptyState icon={Users} message="No communities found." />
+            <EmptyState
+              icon={Users}
+              title="No communities yet"
+              message="Communities will appear here once your department and batch are set up."
+            />
           ) : (
-            <ul style={{ paddingLeft: '20px', margin: '10px 0 0 0' }}>
-              {communities.map((comm) => (
-                <li key={comm._id} style={{ marginBottom: '10px' }}>
-                  <Link to={`/community/${comm._id}`} style={{ textDecoration: 'none', color: 'var(--primary)', fontWeight: 500 }}>
-                    {comm.name}
-                  </Link> 
-                  {' '}<Badge variant="secondary" style={{ marginLeft: '8px' }}>{comm.type}</Badge>
-                  <span style={{ fontSize: '0.9em', color: 'var(--text)', marginLeft: '8px' }}>
-                    {comm.memberCount} members
-                  </span>
-                </li>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+              {communities.map(comm => (
+                <Link
+                  key={comm._id}
+                  to={`/community/${comm._id}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: 'var(--space-3) var(--space-4)',
+                      borderRadius: 'var(--radius-sm)',
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-subtle)',
+                      transition: 'background var(--transition-fast), border-color var(--transition-fast)',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'var(--bg-input)';
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'var(--bg-elevated)';
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                      <div style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'rgba(124,106,247,0.12)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <Hash size={14} color="var(--primary)" />
+                      </div>
+                      <div>
+                        <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {comm.name}
+                        </p>
+                        <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                          {comm.memberCount} members
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                      <Badge variant={communityVariant(comm.type)} size="sm">{comm.type}</Badge>
+                      <ChevronRight size={14} color="var(--text-muted)" />
+                    </div>
+                  </div>
+                </Link>
               ))}
-            </ul>
+            </div>
           )}
         </Card>
+
       </div>
     </div>
   );

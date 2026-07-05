@@ -26,8 +26,12 @@ export const applyTeamLimiter = rateLimit({
 
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // Limit each IP to 200 requests per windowMs
+  // 500 req/15min per IP — generous enough for real users (normal browsing is 40-80 req/session
+  // but polling + StrictMode dev doubles can spike it). Still blocks scrapers and bots.
+  // Per-route limiters (postCreationLimiter etc.) provide strict controls on write actions.
+  max: 500,
   message: { error: { message: 'Too many requests from this IP, please try again later' } },
   standardHeaders: true,
   legacyHeaders: false,
 });
+

@@ -10,13 +10,14 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Search } from 'lucide-react';
+import { Search, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function Electives() {
   const [electives, setElectives] = useState([]);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New elective state
@@ -34,8 +35,10 @@ function Electives() {
       const queryParams = new URLSearchParams(filters).toString();
       const response = await axiosClient.get(`/elective-suggestions?${queryParams}`);
       setElectives(response.data);
+      setError(null);
     } catch (err) {
       console.error('Error fetching elective suggestions', err);
+      setError('Failed to load elective suggestions');
       toast.error('Failed to load elective suggestions');
     } finally {
       setLoading(false);
@@ -106,7 +109,7 @@ function Electives() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>NPTEL & College Electives</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Find and share recommendations for NPTEL courses and college electives.</p>
         
@@ -192,7 +195,9 @@ function Electives() {
         </Card>
 
         <h2 style={{ marginTop: '3rem' }}>Suggestions</h2>
-        {loading ? <Spinner text="Loading suggestions..." /> : electives.length === 0 ? (
+        {error ? (
+          <EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchElectives }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />
+        ) : loading ? <Spinner text="Loading suggestions..." /> : electives.length === 0 ? (
           <EmptyState icon={Search} message="No elective suggestions found matching your filters." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -200,7 +205,7 @@ function Electives() {
               <Card key={elective._id} style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-h)' }}>
+                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-primary)' }}>
                       {elective.courseCode} - {elective.courseName}
                     </h3>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
@@ -214,7 +219,7 @@ function Electives() {
                   </div>
                 </div>
                 
-                <p style={{ fontSize: '1.1em', marginBottom: '15px', color: 'var(--text-h)', whiteSpace: 'pre-wrap' }}>
+                <p style={{ fontSize: '1.1em', marginBottom: '15px', color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>
                   {elective.comment}
                 </p>
                 

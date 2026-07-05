@@ -1,53 +1,90 @@
 import React from 'react';
 
+/**
+ * Input, Textarea, Select — shared form elements.
+ * All share the same base style for consistent visual language.
+ */
 const baseStyle = {
   width: '100%',
-  padding: '10px 16px',
-  borderRadius: 'var(--radius-btn, 8px)',
-  border: '1px solid var(--border)',
-  background: 'var(--bg)',
-  color: 'var(--text-h)',
-  fontSize: '15px',
+  padding: '10px 14px',
+  borderRadius: 'var(--radius-sm)',
+  border: '1.5px solid var(--border)',
+  background: 'var(--bg-input)',
+  color: 'var(--text-primary)',
+  fontSize: 'var(--text-sm)',
   fontFamily: 'inherit',
+  fontWeight: '400',
   boxSizing: 'border-box',
-  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-  outline: 'none'
+  transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
+  outline: 'none',
+};
+
+const focusStyle = {
+  borderColor: 'var(--primary)',
+  boxShadow: '0 0 0 3px var(--primary-glow)',
+};
+
+const blurStyle = {
+  borderColor: 'var(--border)',
+  boxShadow: 'none',
 };
 
 export const Input = React.forwardRef(({ style, ...props }, ref) => {
+  const [focused, setFocused] = React.useState(false);
   return (
     <input
       ref={ref}
-      style={{ ...baseStyle, ...style }}
+      style={{
+        ...baseStyle,
+        ...(focused ? focusStyle : blurStyle),
+        ...style,
+      }}
       {...props}
-      onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-      onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+      onFocus={(e) => { setFocused(true); props.onFocus?.(e); }}
+      onBlur={(e)  => { setFocused(false); props.onBlur?.(e); }}
     />
   );
 });
+Input.displayName = 'Input';
 
 export const Textarea = React.forwardRef(({ style, ...props }, ref) => {
+  const [focused, setFocused] = React.useState(false);
   return (
     <textarea
       ref={ref}
-      style={{ ...baseStyle, resize: 'vertical', minHeight: '80px', ...style }}
+      style={{
+        ...baseStyle,
+        resize: 'vertical',
+        minHeight: '100px',
+        lineHeight: '1.6',
+        ...(focused ? focusStyle : blurStyle),
+        ...style,
+      }}
       {...props}
-      onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-      onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+      onFocus={(e) => { setFocused(true); props.onFocus?.(e); }}
+      onBlur={(e)  => { setFocused(false); props.onBlur?.(e); }}
     />
   );
 });
+Textarea.displayName = 'Textarea';
 
 export const Select = React.forwardRef(({ style, children, ...props }, ref) => {
+  const [focused, setFocused] = React.useState(false);
   return (
     <select
       ref={ref}
-      style={{ ...baseStyle, appearance: 'auto', paddingRight: '30px', ...style }}
+      style={{
+        ...baseStyle,
+        appearance: 'auto',
+        ...(focused ? focusStyle : blurStyle),
+        ...style,
+      }}
       {...props}
-      onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
-      onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+      onFocus={(e) => { setFocused(true); props.onFocus?.(e); }}
+      onBlur={(e)  => { setFocused(false); props.onBlur?.(e); }}
     >
       {children}
     </select>
   );
 });
+Select.displayName = 'Select';

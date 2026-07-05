@@ -27,35 +27,38 @@ function ClubPage() {
   const [newCategory, setNewCategory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userRes = await axiosClient.get('/auth/me');
-        setUser(userRes.data.user);
+  const fetchData = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const userRes = await axiosClient.get('/auth/me');
+      setUser(userRes.data.user);
 
-        const clubRes = await axiosClient.get(`/clubs/${id}`);
-        setClub(clubRes.data.club);
-        setAnnouncements(clubRes.data.announcements);
+      const clubRes = await axiosClient.get(`/clubs/${id}`);
+      setClub(clubRes.data.club);
+      setAnnouncements(clubRes.data.announcements);
 
-        const fetchedUser = userRes.data.user;
-        const isClubAdmin = clubRes.data.club.adminIds.includes(fetchedUser?._id) || fetchedUser?.clubId === clubRes.data.club._id;
-        
-        if (isClubAdmin) {
-          try {
-            const analyticsRes = await axiosClient.get(`/clubs/${id}/analytics`);
-            setAnalytics(analyticsRes.data);
-          } catch (err) {
-            console.error('Failed to fetch analytics', err);
-          }
+      const fetchedUser = userRes.data.user;
+      const isClubAdmin = clubRes.data.club.adminIds.includes(fetchedUser?._id) || fetchedUser?.clubId === clubRes.data.club._id;
+      
+      if (isClubAdmin) {
+        try {
+          const analyticsRes = await axiosClient.get(`/clubs/${id}/analytics`);
+          setAnalytics(analyticsRes.data);
+        } catch (err) {
+          console.error('Failed to fetch analytics', err);
         }
-      } catch (err) {
-        setError(err.response?.data?.error?.message || err.message);
-      } finally {
-        setLoading(false);
       }
-    };
-    fetchData();
+    } catch (err) {
+      setError(err.response?.data?.error?.message || err.message);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handlePostAnnouncement = async (e) => {
     e.preventDefault();
@@ -88,19 +91,19 @@ function ClubPage() {
   };
 
   if (loading) return <div><Navbar /><Spinner text="Loading club details..." /></div>;
-  if (error || !club) return <div><Navbar /><EmptyState icon={AlertCircle} message={error || 'Club not found'} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error || !club) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error || 'Club not found'} action={{ label: 'Retry', onClick: fetchData }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   const isAdmin = club.adminIds.includes(user?._id) || user?.clubId === club._id;
 
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
-        <Link to="/clubs" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+        <Link to="/clubs" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
           ← Back to Clubs
         </Link>
 
-        <Card style={{ backgroundColor: 'var(--social-bg)' }}>
+        <Card style={{ backgroundColor: 'var(--bg-surface)' }}>
           <h1 style={{ marginTop: 0 }}>{club.name}</h1>
           <p style={{ fontSize: '1.1rem', marginBottom: isAdmin ? '15px' : 0 }}>{club.description}</p>
           {isAdmin && (
@@ -175,7 +178,7 @@ function ClubPage() {
                     <Badge variant="info">{post.category}</Badge>
                   )}
                 </div>
-                <div style={{ whiteSpace: 'pre-wrap', fontSize: '1.1em', color: 'var(--text-h)' }}>
+                <div style={{ whiteSpace: 'pre-wrap', fontSize: '1.1em', color: 'var(--text-primary)' }}>
                   {post.content}
                 </div>
               </Card>
@@ -189,24 +192,24 @@ function ClubPage() {
           <Card style={{ borderColor: 'var(--info)' }}>
             <h2 style={{ marginTop: 0 }}>Club Analytics</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
-              <div style={{ background: 'var(--social-bg)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{analytics.totalPosts}</div>
                 <div style={{ color: 'var(--text)' }}>Total Posts</div>
               </div>
-              <div style={{ background: 'var(--social-bg)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)' }}>{analytics.totalUpvotes}</div>
                 <div style={{ color: 'var(--text)' }}>Total Upvotes</div>
               </div>
-              <div style={{ background: 'var(--social-bg)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
+              <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--info)' }}>{analytics.totalComments}</div>
                 <div style={{ color: 'var(--text)' }}>Total Comments</div>
               </div>
             </div>
 
             {analytics.topPost ? (
-              <div style={{ background: 'var(--bg)', padding: '15px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+              <div style={{ background: 'var(--bg-base)', padding: '15px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
                 <h3 style={{ marginTop: 0 }}>Top Performing Post</h3>
-                <div style={{ fontSize: '1.1em', color: 'var(--text-h)', marginBottom: '10px' }}>
+                <div style={{ fontSize: '1.1em', color: 'var(--text-primary)', marginBottom: '10px' }}>
                   {analytics.topPost.content}
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>

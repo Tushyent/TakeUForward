@@ -31,8 +31,10 @@ function CommunityPosts() {
       const queryParams = new URLSearchParams({ communityId: id, ...filters }).toString();
       const response = await axiosClient.get(`/posts?${queryParams}`);
       setPosts(response.data);
+      setError('');
     } catch (err) {
       console.error('Error fetching posts', err);
+      setError('Failed to load posts');
     }
   }, [id, filters]);
 
@@ -45,23 +47,25 @@ function CommunityPosts() {
     }
   }, []);
 
+  const fetchCommunity = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const response = await axiosClient.get(`/communities/${id}`);
+      setCommunity(response.data);
+    } catch (err) {
+      console.error('Error fetching community', err);
+      setError('Community not found');
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
   useEffect(() => {
-    const fetchCommunity = async () => {
-      try {
-        const response = await axiosClient.get(`/communities/${id}`);
-        setCommunity(response.data);
-      } catch (err) {
-        console.error('Error fetching community', err);
-        setError('Community not found');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     fetchCommunity();
     fetchPosts();
     fetchBookmarks();
-  }, [id, fetchPosts, fetchBookmarks]);
+  }, [fetchCommunity, fetchPosts, fetchBookmarks]);
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
@@ -149,14 +153,14 @@ function CommunityPosts() {
     }
   };
 
-  if (error) return <div><Navbar /><EmptyState icon={Flag} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error) return <div><Navbar /><EmptyState icon={Flag} title="Error" message={error} action={{ label: 'Retry', onClick: () => { fetchCommunity(); fetchPosts(); } }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!community) return <div><Navbar /><Spinner text="Loading..." /></div>;
 
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
-        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
           ← Back to Home
         </Link>
         <h1>{community.name}</h1>
@@ -197,7 +201,7 @@ function CommunityPosts() {
         ) : (<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {posts.map((post) => (
               <Card key={post._id} style={{ marginBottom: 0 }}>
-                <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-h)' }}>
+                <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-primary)' }}>
                   {post.content}
                 </p>
                 <div style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
@@ -240,8 +244,8 @@ function CommunityPosts() {
                   {post.comments && post.comments.length > 0 ? (
                     <ul style={{ listStyleType: 'none', padding: 0, margin: '0 0 15px 0' }}>
                       {post.comments.map(c => (
-                        <li key={c._id} style={{ marginBottom: '10px', padding: '10px', background: 'var(--social-bg)', borderRadius: '6px' }}>
-                          <p style={{ marginBottom: '5px', color: 'var(--text-h)' }}>{c.text}</p>
+                        <li key={c._id} style={{ marginBottom: '10px', padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px' }}>
+                          <p style={{ marginBottom: '5px', color: 'var(--text-primary)' }}>{c.text}</p>
                           <div style={{ fontSize: '0.8em', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {c.isAnonymous ? 'Anonymous' : (
                               <>

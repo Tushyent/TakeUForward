@@ -6,9 +6,12 @@ import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import { Input, Textarea } from '../components/ui/Input';
 import toast from 'react-hot-toast';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle } from 'lucide-react';
 
 function ProfileSettings() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
   const [webPushOptIn, setWebPushOptIn] = useState(false);
   const [pushSupported, setPushSupported] = useState(false);
@@ -28,6 +31,31 @@ function ProfileSettings() {
     weeklyDigestOptIn: true
   });
 
+  const fetchMe = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await axiosClient.get('/auth/me');
+      const u = res.data.user;
+      setProfile({
+        about: u.about || u.bio || '',
+        skills: u.skills ? u.skills.join(', ') : '',
+        interests: u.interests ? u.interests.join(', ') : '',
+        socialLinks: u.socialLinks || { linkedin: '', github: '', instagram: '' },
+        profileVisibility: u.profileVisibility || {
+          showEmail: true, showSocialLinks: true, showInterests: true,
+          showSkills: true, showBio: true, showEducation: true
+        },
+        weeklyDigestOptIn: u.weeklyDigestOptIn !== false
+      });
+    } catch (_) {
+      setError('Failed to load profile settings');
+      toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       setPushSupported(true);
@@ -38,29 +66,8 @@ function ProfileSettings() {
       });
     }
 
-    const fetchMe = async () => {
-      try {
-        const res = await axiosClient.get('/auth/me');
-        const u = res.data.user;
-        setProfile({
-          about: u.about || u.bio || '',
-          skills: u.skills ? u.skills.join(', ') : '',
-          interests: u.interests ? u.interests.join(', ') : '',
-          socialLinks: u.socialLinks || { linkedin: '', github: '', instagram: '' },
-          profileVisibility: u.profileVisibility || {
-            showEmail: true, showSocialLinks: true, showInterests: true,
-            showSkills: true, showBio: true, showEducation: true
-          },
-          weeklyDigestOptIn: u.weeklyDigestOptIn !== false
-        });
-      } catch (_) {
-        toast.error('Failed to load profile');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchMe();
-  }, []);
+  }, [fetchMe]);
 
   const handleChange = (e, section, field) => {
     if (section) {
@@ -161,12 +168,13 @@ function ProfileSettings() {
     }
   };
 
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchMe }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (loading) return <div><Navbar /><Spinner text="Loading settings..." /></div>;
 
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0, marginBottom: '20px' }}>Profile Settings</h1>
         
         <form onSubmit={handleSave}>
@@ -174,7 +182,7 @@ function ProfileSettings() {
             <h2 style={{ marginTop: 0 }}>Public Profile Info</h2>
             
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>About Me</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>About Me</label>
               <Textarea 
                 name="about"
                 value={profile.about}
@@ -185,27 +193,27 @@ function ProfileSettings() {
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Skills (comma separated)</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Skills (comma separated)</label>
               <Input name="skills" value={profile.skills} onChange={e => handleChange(e)} placeholder="React, Node.js, Python..." style={{ width: '100%' }} />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Interests (comma separated)</label>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Interests (comma separated)</label>
               <Input name="interests" value={profile.interests} onChange={e => handleChange(e)} placeholder="Machine Learning, Web Dev, Photography..." style={{ width: '100%' }} />
             </div>
 
             <h3 style={{ marginTop: '25px', marginBottom: '15px' }}>Social Links</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>LinkedIn URL</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>LinkedIn URL</label>
                 <Input value={profile.socialLinks.linkedin} onChange={e => handleChange(e, 'socialLinks', 'linkedin')} placeholder="https://linkedin.com/in/..." style={{ width: '100%' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>GitHub URL</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>GitHub URL</label>
                 <Input value={profile.socialLinks.github} onChange={e => handleChange(e, 'socialLinks', 'github')} placeholder="https://github.com/..." style={{ width: '100%' }} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Instagram URL</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Instagram URL</label>
                 <Input value={profile.socialLinks.instagram} onChange={e => handleChange(e, 'socialLinks', 'instagram')} placeholder="https://instagram.com/..." style={{ width: '100%' }} />
               </div>
             </div>
@@ -215,7 +223,7 @@ function ProfileSettings() {
             <h2 style={{ marginTop: 0 }}>Privacy & Settings</h2>
             
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-h)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-primary)' }}>
                 <input type="checkbox" checked={profile.weeklyDigestOptIn} onChange={() => setProfile(prev => ({ ...prev, weeklyDigestOptIn: !prev.weeklyDigestOptIn }))} style={{ width: '18px', height: '18px' }} />
                 Receive Weekly Digest Emails
               </label>
@@ -223,7 +231,7 @@ function ProfileSettings() {
 
             {pushSupported && (
               <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-h)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-primary)' }}>
                   <input type="checkbox" checked={webPushOptIn} onChange={handlePushToggle} style={{ width: '18px', height: '18px' }} />
                   Receive Web Push Notifications (Mentions & Replies)
                 </label>
@@ -233,7 +241,7 @@ function ProfileSettings() {
             <h3 style={{ marginBottom: '15px' }}>Visibility</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {Object.entries(profile.profileVisibility).map(([key, value]) => (
-                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-h)' }}>
+                <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-primary)' }}>
                   <input type="checkbox" checked={value} onChange={() => handleToggle(key)} style={{ width: '18px', height: '18px' }} />
                   {key.replace('show', 'Show ')}
                 </label>

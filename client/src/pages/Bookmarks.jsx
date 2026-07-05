@@ -7,23 +7,24 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
-import { Bookmark as BookmarkIcon } from 'lucide-react';
+import { Bookmark as BookmarkIcon, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function Bookmarks() {
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filterType, setFilterType] = useState('all'); // all, post, resource
 
   const fetchBookmarks = React.useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const query = filterType !== 'all' ? `?type=${filterType}` : '';
       const response = await axiosClient.get(`/bookmarks${query}`);
       setBookmarks(response.data);
-    } catch (_) {
-      console.error('Error fetching bookmarks');
-      toast.error('Failed to load bookmarks');
+    } catch (err) {
+      setError(err.response?.data?.error?.message || err.message || 'Failed to load bookmarks');
     } finally {
       setLoading(false);
     }
@@ -46,7 +47,7 @@ function Bookmarks() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginBottom: '10px' }}>My Saved Items</h1>
         <p style={{ color: 'var(--text)', marginBottom: '20px' }}>Your personal tracker for posts and resources.</p>
 
@@ -58,8 +59,16 @@ function Bookmarks() {
 
         {loading ? (
           <Spinner text="Loading your bookmarks..." />
+        ) : error ? (
+          <EmptyState
+            icon={AlertTriangle}
+            title="Error"
+            message={error}
+            action={{ label: 'Retry', onClick: fetchBookmarks }}
+            style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+          />
         ) : bookmarks.length === 0 ? (
-          <EmptyState icon={BookmarkIcon} message="No saved items found. Start bookmarking posts and resources!" />
+          <EmptyState icon={BookmarkIcon} title="No saved items yet" message="Start bookmarking posts and resources!" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {bookmarks.map(bookmark => {
@@ -75,7 +84,7 @@ function Bookmarks() {
                         ★ Saved
                       </Button>
                     </div>
-                    <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-h)' }}>
+                    <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-primary)' }}>
                       {item.content}
                     </p>
                     <div style={{ fontSize: '0.85em', color: 'var(--text)', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
@@ -105,7 +114,7 @@ function Bookmarks() {
                         ★ Saved
                       </Button>
                     </div>
-                    <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-h)' }}>
+                    <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-primary)' }}>
                       <strong>{item.title}</strong>
                     </p>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '15px', flexWrap: 'wrap' }}>

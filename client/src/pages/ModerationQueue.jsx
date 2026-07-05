@@ -17,25 +17,28 @@ const ModerationQueue = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchQueue = async () => {
-      try {
-        const { data } = await axiosClient.get('/moderation/queue');
-        setPosts(data);
-      } catch (err) {
-        if (err.response?.status === 401) {
-          navigate('/login');
-        } else if (err.response?.status === 403) {
-          setError('You are not authorized to view this page. Platform Admins only.');
-        } else {
-          setError('Failed to fetch moderation queue');
-        }
-      } finally {
-        setLoading(false);
+  const fetchQueue = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const { data } = await axiosClient.get('/moderation/queue');
+      setPosts(data);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate('/login');
+      } else if (err.response?.status === 403) {
+        setError('You are not authorized to view this page. Platform Admins only.');
+      } else {
+        setError('Failed to fetch moderation queue');
       }
-    };
-    fetchQueue();
+    } finally {
+      setLoading(false);
+    }
   }, [navigate]);
+
+  useEffect(() => {
+    fetchQueue();
+  }, [fetchQueue]);
 
   const handleResolve = async (postId, action, type) => {
     setIsSubmitting(true);
@@ -51,13 +54,13 @@ const ModerationQueue = () => {
   };
 
   if (loading) return <div><Navbar /><Spinner text="Loading moderation queue..." /></div>;
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchQueue }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
           ← Back to Home
         </Link>
         <h1>Moderation Queue</h1>
@@ -79,7 +82,7 @@ const ModerationQueue = () => {
                   </Badge>
                 </div>
                 
-                <div style={{ fontSize: '1.1em', marginBottom: '20px', color: 'var(--text-h)', background: 'var(--social-bg)', padding: '15px', borderRadius: '6px' }}>
+                <div style={{ fontSize: '1.1em', marginBottom: '20px', color: 'var(--text-primary)', background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px' }}>
                   {post.type === 'post' && post.content}
                   {post.type === 'review' && (
                     <>

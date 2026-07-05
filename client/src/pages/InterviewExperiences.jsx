@@ -10,13 +10,14 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Search } from 'lucide-react';
+import { Search, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function InterviewExperiences() {
   const [experiences, setExperiences] = useState([]);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // New experience state
@@ -36,8 +37,10 @@ function InterviewExperiences() {
       const queryParams = new URLSearchParams(filters).toString();
       const response = await axiosClient.get(`/interview-experiences?${queryParams}`);
       setExperiences(response.data);
+      setError(null);
     } catch (err) {
       console.error('Error fetching experiences', err);
+      setError('Failed to load experiences');
       toast.error('Failed to load experiences');
     } finally {
       setLoading(false);
@@ -131,7 +134,7 @@ function InterviewExperiences() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>Interview Experiences</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Read and share detailed interview experiences to help your peers prepare.</p>
         
@@ -236,7 +239,9 @@ function InterviewExperiences() {
         </Card>
 
         <h2 style={{ marginTop: '3rem' }}>Experiences</h2>
-        {loading ? <Spinner text="Loading experiences..." /> : experiences.length === 0 ? (
+        {error ? (
+          <EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchExperiences }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />
+        ) : loading ? <Spinner text="Loading experiences..." /> : experiences.length === 0 ? (
           <EmptyState icon={Search} message="No experiences found matching your filters." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -244,7 +249,7 @@ function InterviewExperiences() {
               <Card key={exp._id} style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-h)' }}>
+                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-primary)' }}>
                       {exp.company} - {exp.role}
                     </h3>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '15px' }}>
@@ -258,9 +263,9 @@ function InterviewExperiences() {
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
                   {exp.rounds?.map((round, idx) => (
-                    <div key={idx} style={{ background: 'var(--social-bg)', padding: '15px', borderRadius: '6px' }}>
+                    <div key={idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                        <strong style={{ color: 'var(--text-h)' }}>Round {idx + 1}: {round.roundName}</strong>
+                        <strong style={{ color: 'var(--text-primary)' }}>Round {idx + 1}: {round.roundName}</strong>
                         <Badge variant="secondary">Difficulty: {round.difficulty}/5</Badge>
                       </div>
                       <p style={{ margin: 0, color: 'var(--text)', whiteSpace: 'pre-wrap' }}>

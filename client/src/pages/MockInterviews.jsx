@@ -99,7 +99,7 @@ function MockInterviews() {
     return 'Mock Interview & Resume';
   };
 
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchData }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   const isStudent = user?.role === 'student';
   const isAlumni = user?.role === 'alumni' && user?.isVerifiedAlumni;
@@ -107,7 +107,7 @@ function MockInterviews() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Mock Interview & Resume Pairing</h1>
         <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Connect students with verified alumni for 1:1 interview prep and resume reviews.
@@ -144,7 +144,7 @@ function MockInterviews() {
             <h2>My Requests</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
               {myRequests.map(req => (
-                <Card key={req._id} style={{ display: 'flex', flexDirection: 'column', marginBottom: 0, backgroundColor: req.status === 'matched' ? 'rgba(40, 167, 69, 0.05)' : 'var(--social-bg)' }}>
+                <Card key={req._id} style={{ display: 'flex', flexDirection: 'column', marginBottom: 0, backgroundColor: req.status === 'matched' ? 'rgba(40, 167, 69, 0.05)' : 'var(--bg-surface)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                     <h3 style={{ margin: 0 }}>{req.targetCompany}</h3>
                     <Badge variant={req.status === 'open' ? 'primary' : req.status === 'matched' ? 'success' : 'secondary'}>
@@ -158,7 +158,7 @@ function MockInterviews() {
 
                   {req.status === 'matched' && req.matchedMentorId && (
                     <div style={{ marginBottom: '15px', padding: '10px', background: 'var(--bg)', borderRadius: '6px' }}>
-                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9em', color: 'var(--text-h)' }}>Matched with:</p>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9em', color: 'var(--text-primary)' }}>Matched with:</p>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span style={{ fontWeight: 500 }}>
                           {req.matchedMentorId.name} <VerifiedAlumniBadge isVerifiedAlumni={true} />
@@ -188,7 +188,7 @@ function MockInterviews() {
 
         <h2>Open Requests</h2>
         <Card style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
-          <label style={{ display: 'block', marginRight: '15px', fontWeight: 500, color: 'var(--text-h)' }}>Filter by Company</label>
+          <label style={{ display: 'block', marginRight: '15px', fontWeight: 500, color: 'var(--text-primary)' }}>Filter by Company</label>
           <Input 
             type="text" 
             placeholder="Search company..." 

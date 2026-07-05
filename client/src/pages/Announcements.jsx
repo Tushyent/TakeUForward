@@ -6,7 +6,7 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import { Select } from '../components/ui/Input';
-import { BellOff, AlertCircle } from 'lucide-react';
+import { BellOff, AlertTriangle } from 'lucide-react';
 
 function Announcements() {
   const [announcements, setAnnouncements] = useState([]);
@@ -30,19 +30,32 @@ function Announcements() {
     fetchAnnouncements();
   }, [fetchAnnouncements]);
 
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error) return (
+    <div className="page-transition">
+      <Navbar />
+      <div className="page-col page-col-feed" style={{ paddingTop: 'var(--space-8)' }}>
+        <EmptyState
+          icon={AlertTriangle}
+          title="Error"
+          message={error}
+          action={{ label: 'Retry', onClick: fetchAnnouncements }}
+          style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Campus Announcements</h1>
         <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Aggregated feed of all official club and CDC announcements.
         </p>
 
         <Card style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '15px', padding: '1rem 1.5rem' }}>
-          <label style={{ fontWeight: 500, color: 'var(--text-h)' }}>Filter by Category:</label>
+          <label style={{ fontWeight: 500, color: 'var(--text-primary)' }}>Filter by Category:</label>
           <Select 
             value={category} 
             onChange={e => setCategory(e.target.value)}
@@ -77,7 +90,7 @@ function Announcements() {
                   </Badge>
                 )}
                 
-                <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-h)', fontSize: '1.1em' }}>
+                <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: '1.1em' }}>
                   {post.content}
                 </div>
               </Card>

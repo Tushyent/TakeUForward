@@ -16,26 +16,29 @@ function PublicProfile() {
   const [error, setError] = useState('');
   const [myUsername, setMyUsername] = useState(null);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const [profRes, meRes] = await Promise.all([
-          axiosClient.get(`/users/${username}`),
-          axiosClient.get('/auth/me').catch(() => ({ data: { user: {} } }))
-        ]);
-        setProfile(profRes.data);
-        setMyUsername(meRes.data.user?.username);
-      } catch (err) {
-        setError(err.response?.data?.error || 'Profile not found');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
+  const fetchProfile = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const [profRes, meRes] = await Promise.all([
+        axiosClient.get(`/users/${username}`),
+        axiosClient.get('/auth/me').catch(() => ({ data: { user: {} } }))
+      ]);
+      setProfile(profRes.data);
+      setMyUsername(meRes.data.user?.username);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Profile not found');
+    } finally {
+      setLoading(false);
+    }
   }, [username]);
 
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
   if (loading) return <div><Navbar /><Spinner text="Loading profile..." /></div>;
-  if (error) return <div><Navbar /><EmptyState icon={UserX} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error) return <div><Navbar /><EmptyState icon={UserX} title="Error" message={error} action={{ label: 'Retry', onClick: fetchProfile }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!profile) return null;
 
   const isMe = myUsername === username;
@@ -43,7 +46,7 @@ function PublicProfile() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
@@ -71,7 +74,7 @@ function PublicProfile() {
           {(profile.bio || profile.about) && (
             <div style={{ marginBottom: '20px' }}>
               <h3 style={{ margin: '0 0 10px 0' }}>About</h3>
-              <p style={{ color: 'var(--text-h)', margin: 0, lineHeight: 1.6 }}>
+              <p style={{ color: 'var(--text-primary)', margin: 0, lineHeight: 1.6 }}>
                 {profile.about || profile.bio}
               </p>
             </div>
@@ -104,9 +107,9 @@ function PublicProfile() {
           {(profile.year || profile.graduationYear || profile.higherEducation) && (
             <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
               <h3 style={{ margin: '0 0 10px 0' }}>Education</h3>
-              {profile.graduationYear && <p style={{ margin: '5px 0', color: 'var(--text-h)' }}><strong>Graduated:</strong> {profile.graduationYear}</p>}
-              {profile.year && !profile.graduationYear && <p style={{ margin: '5px 0', color: 'var(--text-h)' }}><strong>Class of:</strong> {profile.year}</p>}
-              {profile.higherEducation && <p style={{ margin: '5px 0', color: 'var(--text-h)' }}><strong>Higher Ed:</strong> {profile.higherEducation}</p>}
+              {profile.graduationYear && <p style={{ margin: '5px 0', color: 'var(--text-primary)' }}><strong>Graduated:</strong> {profile.graduationYear}</p>}
+              {profile.year && !profile.graduationYear && <p style={{ margin: '5px 0', color: 'var(--text-primary)' }}><strong>Class of:</strong> {profile.year}</p>}
+              {profile.higherEducation && <p style={{ margin: '5px 0', color: 'var(--text-primary)' }}><strong>Higher Ed:</strong> {profile.higherEducation}</p>}
             </div>
           )}
 

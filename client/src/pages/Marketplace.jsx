@@ -7,12 +7,13 @@ import Spinner from '../components/ui/Spinner';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import Badge from '../components/ui/Badge';
-import { Store } from 'lucide-react';
+import { Store, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function Marketplace() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
   // Filters
@@ -52,8 +53,10 @@ function Marketplace() {
       } else {
         setItems(res.data);
       }
+      setError(null);
     } catch (err) {
       console.error(err);
+      setError('Failed to load items');
       toast.error('Failed to load items');
     } finally {
       setLoading(false);
@@ -127,7 +130,7 @@ function Marketplace() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h1 style={{ margin: 0 }}>Secondhand Marketplace</h1>
           <Button onClick={() => setShowForm(!showForm)}>
@@ -218,7 +221,9 @@ function Marketplace() {
         </div>
 
         {/* Items Grid */}
-        {loading && page === 1 ? (
+        {error ? (
+          <EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: () => fetchItems(false) }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />
+        ) : loading && page === 1 ? (
           <Spinner text="Loading marketplace..." />
         ) : items.length === 0 ? (
           <EmptyState icon={Store} message="No items found." />
@@ -227,7 +232,7 @@ function Marketplace() {
             {items.map((item) => (
               <Card key={item._id} style={{ opacity: item.status === 'sold' ? 0.7 : 1, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                  <h3 style={{ margin: '0', color: 'var(--text-h)' }}>{item.title}</h3>
+                  <h3 style={{ margin: '0', color: 'var(--text-primary)' }}>{item.title}</h3>
                   <Badge variant={item.status === 'available' ? (item.price === 0 ? 'success' : 'primary') : 'secondary'}>
                     {item.status === 'sold' ? 'SOLD' : (item.price === 0 ? 'FREE' : `₹${item.price}`)}
                   </Badge>

@@ -9,12 +9,13 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Route } from 'lucide-react';
+import { Route, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function CareerRoadmaps() {
   const [roadmaps, setRoadmaps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -37,8 +38,10 @@ function CareerRoadmaps() {
 
       const response = await axiosClient.get(`/career-roadmaps?${queryParams.toString()}`);
       setRoadmaps(response.data);
+      setError(null);
     } catch (err) {
       console.error('Error fetching roadmaps', err);
+      setError('Failed to load career roadmaps');
       toast.error('Failed to load career roadmaps');
     } finally {
       setLoading(false);
@@ -124,7 +127,7 @@ function CareerRoadmaps() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>Career Roadmaps</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Step-by-step guidance curated by verified alumni.</p>
         
@@ -167,7 +170,7 @@ function CareerRoadmaps() {
 
               <h4 style={{ marginBottom: '10px' }}>Steps</h4>
               {steps.map((step, idx) => (
-                <div key={idx} style={{ background: 'var(--social-bg)', padding: '15px', borderRadius: '6px', marginBottom: '10px' }}>
+                <div key={idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <strong style={{ color: 'var(--text)' }}>Step {idx + 1}</strong>
                     {steps.length > 1 && (
@@ -204,7 +207,9 @@ function CareerRoadmaps() {
         )}
 
         <h2 style={{ marginTop: '3rem' }}>Published Roadmaps</h2>
-        {loading ? <Spinner text="Loading roadmaps..." /> : roadmaps.length === 0 ? (
+        {error ? (
+          <EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchRoadmaps }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />
+        ) : loading ? <Spinner text="Loading roadmaps..." /> : roadmaps.length === 0 ? (
           <EmptyState icon={Route} message="No career roadmaps found." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -241,7 +246,7 @@ function CareerRoadmaps() {
                         {step.order}
                       </div>
                       <div>
-                        <strong style={{ display: 'block', marginBottom: '5px', color: 'var(--text-h)', fontSize: '1.1em' }}>{step.stepTitle}</strong>
+                        <strong style={{ display: 'block', marginBottom: '5px', color: 'var(--text-primary)', fontSize: '1.1em' }}>{step.stepTitle}</strong>
                         <p style={{ margin: 0, color: 'var(--text)', whiteSpace: 'pre-wrap' }}>{step.description}</p>
                       </div>
                     </div>

@@ -10,7 +10,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Users } from 'lucide-react';
+import { Users, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function TeamFinder() {
@@ -18,6 +18,7 @@ function TeamFinder() {
   const [requests, setRequests] = useState([]);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Create request state
@@ -40,8 +41,10 @@ function TeamFinder() {
       const queryParams = new URLSearchParams(filters).toString();
       const response = await axiosClient.get(`/team-requests?${queryParams}`);
       setRequests(response.data);
+      setError(null);
     } catch (err) {
       console.error('Error fetching team requests', err);
+      setError('Failed to load team requests');
       toast.error('Failed to load team requests');
     } finally {
       setLoading(false);
@@ -114,7 +117,7 @@ function TeamFinder() {
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>Teammate Finder</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Find peers to team up for hackathons, projects, and competitions.</p>
         
@@ -181,7 +184,9 @@ function TeamFinder() {
         </Card>
 
         <h2 style={{ marginTop: '3rem' }}>Open Requests</h2>
-        {loading ? <Spinner text="Loading requests..." /> : requests.length === 0 ? (
+        {error ? (
+          <EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchRequests }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />
+        ) : loading ? <Spinner text="Loading requests..." /> : requests.length === 0 ? (
           <EmptyState icon={Users} message="No team requests found. Be the first to post one!" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -189,7 +194,7 @@ function TeamFinder() {
               <Card key={req._id} style={{ marginBottom: 0, opacity: req.status === 'closed' ? 0.7 : 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
                   <div>
-                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-h)' }}>
+                    <h3 style={{ margin: '0 0 5px 0', color: 'var(--text-primary)' }}>
                       {req.eventName}
                     </h3>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
@@ -207,7 +212,7 @@ function TeamFinder() {
                   )}
                 </div>
                 
-                <p style={{ fontSize: '1.1em', marginBottom: '15px', color: 'var(--text-h)', whiteSpace: 'pre-wrap' }}>
+                <p style={{ fontSize: '1.1em', marginBottom: '15px', color: 'var(--text-primary)', whiteSpace: 'pre-wrap' }}>
                   {req.description}
                 </p>
 
@@ -275,10 +280,10 @@ function TeamFinder() {
                     <h4 style={{ margin: '0 0 15px 0' }}>Applicants ({req.applicants.length})</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {req.applicants.map((applicant, idx) => (
-                        <div key={idx} style={{ background: 'var(--social-bg)', padding: '15px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                        <div key={idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                           <div>
                             <div style={{ fontWeight: 500, marginBottom: '5px' }}>
-                              <Link to={`/profile/${applicant.userId?.username}`} style={{ color: 'var(--text-h)', textDecoration: 'none' }}>
+                              <Link to={`/profile/${applicant.userId?.username}`} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>
                                 {applicant.userId?.name} (@{applicant.userId?.handle})
                               </Link>
                             </div>

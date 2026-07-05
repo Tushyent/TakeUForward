@@ -14,30 +14,33 @@ function Chats() {
   const [error, setError] = useState(null);
   const [myUserId, setMyUserId] = useState(null);
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        const meRes = await axiosClient.get('/auth/me');
-        setMyUserId(meRes.data.user._id);
+  const fetchChats = React.useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const meRes = await axiosClient.get('/auth/me');
+      setMyUserId(meRes.data.user._id);
 
-        const response = await axiosClient.get('/chats');
-        setChats(response.data);
-      } catch (err) {
-        setError(err.response?.data?.error || 'Failed to load chats');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchChats();
+      const response = await axiosClient.get('/chats');
+      setChats(response.data);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to load chats');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchChats();
+  }, [fetchChats]);
+
   if (loading) return <div><Navbar /><Spinner text="Loading chats..." /></div>;
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchChats }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   return (
     <div className="page-transition">
       <Navbar />
-      <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Messages</h1>
         {chats.length === 0 ? (
           <EmptyState icon={MessageCircle} message="You have no active chats yet." />
