@@ -306,7 +306,25 @@ the recommendation.
 - **Prevention:** Confirmed login/session actually works on preview URLs 
   too, since we allowed dynamic Regex CORS matching and `sameSite: none` cookies.
 
-### 7.6 [Add new incidents here as they happen]
+### 7.6 ESM and CommonJS interop crash in production
+- **Symptom:** `npm start` crashes with `ERR_MODULE_NOT_FOUND` or `SyntaxError: The requested module ... does not provide an export named 'default'`.
+- **Root cause:** A new backend file used `require` or `module.exports`, but the backend relies on ES Modules (`"type": "module"` in `package.json`).
+- **Fix:** Refactored the offending files to use `import` and `export default`.
+- **Prevention:** Always run `$env:NODE_ENV="production"; npm start` locally before deploying when new backend files are added, and stick strictly to ESM syntax.
+
+### 7.7 Missing authMiddleware import crash
+- **Symptom:** API route crashes when hit because `ensureAuthenticated` is not found or fails to resolve.
+- **Root cause:** There is no global `ensureAuthenticated` middleware exported from `server/middleware/authMiddleware.js`. Routes check `req.isAuthenticated()` manually.
+- **Fix:** Removed the invalid import and inlined `if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });`.
+- **Prevention:** Match existing route files (like `postRoutes.js`) instead of assuming common Express patterns exist in the repo.
+
+### 7.8 S3 Presigned URL PUT Size Limits
+- **Incident:** The S3 integration currently uses a standard `PUT` operation (`PutObjectCommand`) for generating presigned URLs. This means there is no native AWS policy-based mechanism to reject a file upload that exceeds a certain size directly at the bucket edge before the upload starts.
+- **Impact:** A malicious actor could theoretically upload a massive file to the S3 bucket using a valid presigned URL.
+- **Mitigation:** We've implemented a defensive `HeadObject` check on the backend `POST /api/resources` endpoint (which creates the metadata *after* upload). If the uploaded object is >10MB, the backend deletes it from S3 and rejects the request.
+- **Prevention (Future Fix):** Migrate to `createPresignedPost` and update the frontend `axios.put` to a `FormData` POST submission to enforce strict size boundaries natively at the S3 bucket level.
+
+### 7.8 [Add new incidents here as they happen]
 - **Symptom:**
 - **Root cause:**
 - **Fix:**

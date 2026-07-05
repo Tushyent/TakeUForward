@@ -5,12 +5,30 @@ Every commit that adds/changes a feature should have a matching entry here.
 Have orderwise log either based on filewise, or changes did in the codebase.
 Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
+## [Unreleased]
+
+### Fixed
+- **Full Codebase Audit (Part 4):**
+  - **Error Handling:** Standardized `CastError` (invalid ObjectId) handling globally via `errorMiddleware.js` to return `400 Bad Request` instead of 500s. Fixed a missing error instance bug in `clubRoutes.js`.
+  - **Race Conditions:** Refactored upvote endpoints (`postRoutes`, `interviewExperienceRoutes`, `electiveRoutes`, `careerRoadmapRoutes`) and bookmark toggles (`bookmarkRoutes`) to use atomic MongoDB operators (`$addToSet`, `$pull`, `findOneAndDelete`) instead of read-modify-write loops, preventing duplicates on concurrent double-submissions.
+  - **Validation & Security:** Added `.trim()` validation to text inputs across core creation routes (`postRoutes`, `chatRoutes`, `lostFoundRoutes`) to prevent empty whitespace-only submissions. Restricted S3 presigned URL generation in `resourceRoutes.js` to an explicit allowlist of safe file types (PDF, JPEG, PNG, DOC/DOCX).
+  - **Frontend Resiliency:** Standardized error extraction in `axiosClient.js` interceptor so that 500 Object responses from the server are flattened into safe strings, preventing a fatal React crash ("Objects are not valid as a React child").
+  - **Global Rate Limiter:** Mounted a baseline `apiLimiter` globally in `server/index.js` to prevent generic abuse across non-mutating routes.
+  - **Logging:** Cleaned up stray `console.log` statements in production services (`digestService`, `geminiService`, `notificationService`, `mailer`).
+- **Pre-Deployment Bug Fixes (Part 4 Audit):** Fixed a backend crash where `MarketplaceItem.js` and `marketplaceRoutes.js` were using CommonJS syntax instead of ES Modules, breaking the production `npm start`. Removed an invalid import to a non-existent `authMiddleware` file and replaced it with inline `req.isAuthenticated()` checks, preventing API route failures.
+
 ## [Unreleased] - 2026-07-05
+
+### Fixed
+- **[Phase 2/3 Audit Fix] Security & Stability:** Applied regex escaping globally across all feature routes (`referralRoutes`, `mockInterviewRoutes`, `lostFoundRoutes`, `interviewExperienceRoutes`, `electiveRoutes`, `alumniRoutes`, `reviewRoutes`, `resourceRoutes`, `teamRequestRoutes`) to prevent database crashes from unescaped user query strings containing wildcards or brackets.
 
 ### Docs
 - **Phase 2 & 3 Roadmap Refinement**: Updated `docs/MASTER_PLAN.md`. Removed the Roommate Finder feature entirely from Phase 3. Added future Razorpay integration note to Secondhand Marketplace. Added full specs, data models, and API surface for three new Phase 2 features: Interview Experience Repository (#34), Teammate Finder (#35), and Club Analytics (#36). Renumbered the Appendix sequentially.
 
 ### Added
+- **[Phase 3] Secondhand Marketplace:** Implemented Feature #28. Created `MarketplaceItem` model and `/api/marketplace` routes. Built a frontend board for students to buy, sell, or exchange items (books, cycles, electronics). Sellers can list prices (or mark as free), while buyers can use the existing 1:1 chat feature to coordinate the transaction offline. Integrated with the centralized reporting system.
+- **[Phase 3] Global UI/UX Redesign Rollout:** Implemented Feature #3a & 3b. Rolled out a centralized design system using vanilla CSS variables in `index.css`. Replaced all bespoke/ad-hoc layout elements (cards, buttons, inputs, selects, textareas, empty states) across all 18+ feed/list/form pages in the application with shared React components (`client/src/components/ui/`).
+- **[Phase 3] Animation Strategy:** Implemented a controlled `.page-transition` fade-in animation applied globally to the root element of all page components. Ensured polling actions (e.g. `ChatThread`, `Chats`) and feed re-renders do not re-trigger the CSS animation, avoiding jarring UX.
 - **[Phase 3] Lost & Found Board:** Implemented Feature #27. Created `LostFoundItem` model and `/api/lost-found` routes. Built a frontend board to browse, filter, and post lost/found items. Integrated the existing 1:1 chat pattern to allow users to message the poster directly without building new contact-exchange mechanisms. Added manual resolution functionality for item authors. Applied `postCreationLimiter` (10 requests / 10 minutes) to prevent spam. No anonymity by design, as the feature inherently requires identity resolution to exchange items.
 - **[Phase 2] Mock Interview & Resume Review Pairing:** Implemented Feature #17. Created a dedicated board (`/mock-interviews`) where juniors can request 1:1 prep for specific companies, and verified alumni working at those companies can match with them. Integrates seamlessly with the existing real-time chat system for pairing.
 - **[Phase 2] Personal Tracker (Bookmarks)**: Implemented Feature #22. Added a unified `/bookmarks` page for users to track their saved posts and resources. Includes polymorphic `Bookmark` model and toggle buttons on post and resource cards. Strict anonymity enforcement ensures anonymous post authors remain hidden in the bookmarks feed.
@@ -44,6 +62,8 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **[Docs] Deployment Checklist**: Created a permanent, reusable `docs/DEPLOYMENT_CHECKLIST.md` for pre- and post-deploy checks.
 
 ### Fixed
+- **[Pre-Deployment Audit Fix] Error Handling**: Refactored all backend routes globally to use the centralized error middleware (`next(err)`) instead of explicitly sending `res.status(500)` in `catch` blocks, enforcing AGENTS.md code style compliance.
+- **[Pre-Deployment Audit Fix] Rate Limiting**: Added `postCreationLimiter` to the `POST /api/resources` and `POST /api/resources/upload-url` endpoints to protect against S3/Supabase upload abuse.
 - **[Phase 1/2 Audit Fix] Data Integrity**: Added required MongoDB indexes to `ReferralRequest` (`status`, `targetCompany`, `requesterId`, `matchedAlumniId`) and `Review` (`courseCode`, `professorName`, `semester`, `authorId`) models to ensure query performance scales.
 - **[Phase 1/2 Audit Fix] Rate Limiting**: Applied `postCreationLimiter` to `POST /api/referrals` and `POST /api/referrals/:id/match` to close a spam vector.
 - **[Phase 1/2 Audit Fix] UI Consistency**: Fixed non-existent CSS variables (`--card-bg`, `--input-bg`) in `Reviews.jsx` to match the global shared UI tokens.

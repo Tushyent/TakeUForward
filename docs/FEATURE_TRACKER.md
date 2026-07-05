@@ -8,7 +8,7 @@ Status values: Not Started / In Progress / Done / Blocked
 
 ## Phase 1: MVP & Core Systems
 **Status: ✅ COMPLETED, AUDITED, AND POLISHED**
-*(Note: As of July 2026, all Phase 1 features have been built, rigorously audited, and received a full UI/UX deployment polish pass. The platform is ready for Phase 2.)*
+*(Note: As of July 2026, all Phase 1 features have been built, rigorously audited, and received a full UI/UX deployment polish pass. Systemic bugs identified in the pre-deployment audit (error handling middleware violation, missing rate limiters) have been resolved globally. The platform is ready for Phase 2.)*
 
 | Feature | Phase | Status | Owner | Files | Last Updated |
 |---|---|---|---|---|---|
@@ -53,3 +53,4 @@ Status values: Not Started / In Progress / Done / Blocked
 | Feature | Phase | Status | Owner | Files | Last Updated |
 |---|---|---|---|---|---|
 | Lost & Found Board | 3 | Done | | server/models/LostFoundItem.js, server/routes/lostFoundRoutes.js, client/src/pages/LostFound.jsx | 2026-07-05 |
+| Secondhand Marketplace | 3 | Done | | server/models/MarketplaceItem.js, server/routes/marketplaceRoutes.js, client/src/pages/Marketplace.jsx | 2026-07-06 |

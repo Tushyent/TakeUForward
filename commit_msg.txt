@@ -1,6 +1,0 @@
-feat(features): add digest, web push, and lost & found board
-
-- Weekly Digest (#25): Built digestService and secured POST /api/jobs/weekly-digest to aggregate top posts, resources, and events. Added user opt-out toggle.
-- Web Push Notifications (#21): Integrated web-push into notificationService for mentions/replies. Built SW, frontend opt-in, and auto-cleanup of 410 expired subscriptions.
-- Lost & Found Board (#27): Created LostFoundItem model and /api/lost-found routes. Built frontend board with filtering, manual resolution, and 1:1 chat routing.
-- Docs: Updated DEPLOYMENT.md with CRON_SECRET and VAPID keys. Updated CHANGELOG.md and FEATURE_TRACKER.md.
