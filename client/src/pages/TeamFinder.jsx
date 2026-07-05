@@ -8,7 +8,9 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { Input } from '../components/ui/Input';
+import { Input, Select, Textarea } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { Users } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function TeamFinder() {
@@ -110,7 +112,7 @@ function TeamFinder() {
   };
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <h1>Teammate Finder</h1>
@@ -136,17 +138,17 @@ function TeamFinder() {
                 value={eventName} 
                 onChange={(e) => setEventName(e.target.value)} 
               />
-              <select 
+              <Select 
                 value={eventType} 
                 onChange={(e) => setEventType(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+                style={{ width: '100%' }}
               >
                 <option value="">Select Type</option>
                 <option value="hackathon">Hackathon</option>
                 <option value="project">Project</option>
                 <option value="competition">Competition</option>
                 <option value="other">Other</option>
-              </select>
+              </Select>
               <Input 
                 type="number"
                 placeholder="Team Size Needed" 
@@ -163,11 +165,11 @@ function TeamFinder() {
               style={{ marginBottom: '15px' }}
             />
             
-            <textarea 
+            <Textarea 
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the project/event and what kind of teammates you are looking for..."
-              style={{ width: '100%', minHeight: '80px', marginBottom: '15px', padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', minHeight: '80px', marginBottom: '15px' }}
             />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -180,7 +182,7 @@ function TeamFinder() {
 
         <h2 style={{ marginTop: '3rem' }}>Open Requests</h2>
         {loading ? <Spinner text="Loading requests..." /> : requests.length === 0 ? (
-          <div className="empty-state">No team requests found. Be the first to post one!</div>
+          <EmptyState icon={Users} message="No team requests found. Be the first to post one!" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {requests.map((req) => (

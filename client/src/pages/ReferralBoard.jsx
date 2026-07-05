@@ -8,6 +8,8 @@ import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 import { Input } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle, FileSearch } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function ReferralBoard() {
@@ -85,13 +87,13 @@ function ReferralBoard() {
     }
   };
 
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   const isStudent = user?.role === 'student';
   const isAlumni = user?.role === 'alumni' && user?.isVerifiedAlumni;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
         <h1 style={{ marginTop: 0 }}>Referral Request Board</h1>
@@ -175,7 +177,7 @@ function ReferralBoard() {
         {loading ? (
           <Spinner text="Loading requests..." />
         ) : openRequests.length === 0 ? (
-          <div className="empty-state">No open referral requests found.</div>
+          <EmptyState icon={FileSearch} message="No open referral requests found." />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {openRequests.map(req => {

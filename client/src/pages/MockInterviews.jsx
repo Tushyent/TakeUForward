@@ -7,7 +7,9 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
-import { Input } from '../components/ui/Input';
+import { Input, Select } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function MockInterviews() {
@@ -97,13 +99,13 @@ function MockInterviews() {
     return 'Mock Interview & Resume';
   };
 
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   const isStudent = user?.role === 'student';
   const isAlumni = user?.role === 'alumni' && user?.isVerifiedAlumni;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
         <h1 style={{ marginTop: 0 }}>Mock Interview & Resume Pairing</h1>
@@ -122,15 +124,14 @@ function MockInterviews() {
                 onChange={e => setNewTargetCompany(e.target.value)}
                 style={{ flex: 1, minWidth: '200px' }}
               />
-              <select 
+              <Select 
                 value={newRequestType}
                 onChange={e => setNewRequestType(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)' }}
               >
                 <option value="both">Both</option>
                 <option value="mock_interview">Mock Interview</option>
                 <option value="resume_review">Resume Review</option>
-              </select>
+              </Select>
               <Button type="submit" disabled={isSubmitting || !newTargetCompany.trim()}>
                 {isSubmitting ? 'Posting...' : 'Post Request'}
               </Button>
@@ -200,7 +201,7 @@ function MockInterviews() {
         {loading ? (
           <Spinner text="Loading requests..." />
         ) : openRequests.length === 0 ? (
-          <div className="empty-state">No open requests found.</div>
+          <EmptyState icon={UserCheck} message="No open requests found." />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {openRequests.map(req => {

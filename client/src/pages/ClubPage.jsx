@@ -7,7 +7,9 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { Input, Textarea } from '../components/ui/Input';
+import { Input, Textarea, Select } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle, BellOff } from 'lucide-react';
 
 function ClubPage() {
   const { id } = useParams();
@@ -86,12 +88,12 @@ function ClubPage() {
   };
 
   if (loading) return <div><Navbar /><Spinner text="Loading club details..." /></div>;
-  if (error || !club) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error || 'Club not found'}</div></div>;
+  if (error || !club) return <div><Navbar /><EmptyState icon={AlertCircle} message={error || 'Club not found'} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   const isAdmin = club.adminIds.includes(user?._id) || user?.clubId === club._id;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <Link to="/clubs" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
@@ -135,17 +137,17 @@ function ClubPage() {
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
               />
-              <select
+              <Select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)', fontSize: '15px', outline: 'none' }}
+                style={{ width: '100%' }}
               >
                 <option value="">No Category</option>
                 <option value="event">Event</option>
                 <option value="placement">Placement</option>
                 <option value="hackathon">Hackathon</option>
                 <option value="workshop">Workshop</option>
-              </select>
+              </Select>
               <Textarea
                 placeholder="Write your announcement details here..."
                 value={newContent}
@@ -161,7 +163,7 @@ function ClubPage() {
         <h2 style={{ marginTop: '3rem' }}>Club Announcements</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {announcements.length === 0 ? (
-            <div className="empty-state">No announcements posted yet.</div>
+            <EmptyState icon={BellOff} message="No announcements posted yet." />
           ) : (
             announcements.map(post => (
               <Card key={post._id} style={{ marginBottom: 0 }}>

@@ -8,7 +8,9 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { Input } from '../components/ui/Input';
+import { Input, Select, Textarea } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { Search } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function Electives() {
@@ -102,7 +104,7 @@ function Electives() {
   };
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <h1>NPTEL & College Electives</h1>
@@ -133,41 +135,37 @@ function Electives() {
                 value={courseName} 
                 onChange={(e) => setCourseName(e.target.value)} 
               />
-              <select 
+              <Select 
                 value={platform} 
                 onChange={(e) => setPlatform(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
               >
                 <option value="">Select Platform</option>
                 <option value="nptel">NPTEL</option>
                 <option value="college_elective">College Elective</option>
                 <option value="other">Other</option>
-              </select>
-              <select 
+              </Select>
+              <Select 
                 value={semester} 
                 onChange={(e) => setSemester(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
               >
                 <option value="">Taken in Semester</option>
                 <option value="Fall 2026">Fall 2026</option>
                 <option value="Spring 2026">Spring 2026</option>
                 <option value="Fall 2025">Fall 2025</option>
                 <option value="Spring 2025">Spring 2025</option>
-              </select>
-              <select 
+              </Select>
+              <Select 
                 value={recommendation} 
                 onChange={(e) => setRecommendation(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
               >
                 <option value="">Overall Recommendation</option>
                 <option value="recommend">Strongly Recommend</option>
                 <option value="neutral">Neutral</option>
                 <option value="avoid">Avoid</option>
-              </select>
-              <select 
+              </Select>
+              <Select 
                 value={workloadRating} 
                 onChange={(e) => setWorkloadRating(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
               >
                 <option value="">Workload (1-5)</option>
                 <option value="1">1 - Very Light</option>
@@ -175,14 +173,14 @@ function Electives() {
                 <option value="3">3 - Moderate</option>
                 <option value="4">4 - Heavy</option>
                 <option value="5">5 - Very Heavy</option>
-              </select>
+              </Select>
             </div>
             
-            <textarea 
+            <Textarea 
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Why do you recommend (or not recommend) this elective? Mention grading, assignments, etc."
-              style={{ width: '100%', minHeight: '80px', marginBottom: '15px', padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', minHeight: '80px', marginBottom: '15px' }}
             />
 
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
@@ -195,7 +193,7 @@ function Electives() {
 
         <h2 style={{ marginTop: '3rem' }}>Suggestions</h2>
         {loading ? <Spinner text="Loading suggestions..." /> : electives.length === 0 ? (
-          <div className="empty-state">No elective suggestions found matching your filters.</div>
+          <EmptyState icon={Search} message="No elective suggestions found matching your filters." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {electives.map((elective) => (

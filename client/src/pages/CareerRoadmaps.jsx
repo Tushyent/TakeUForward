@@ -7,7 +7,9 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { Input } from '../components/ui/Input';
+import { Input, Select, Textarea } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { Route } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function CareerRoadmaps() {
@@ -120,17 +122,16 @@ function CareerRoadmaps() {
   const isEligibleMentor = user?.role === 'alumni' && user?.isVerifiedAlumni;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <h1>Career Roadmaps</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Step-by-step guidance curated by verified alumni.</p>
         
         <div style={{ marginBottom: '2rem', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <select 
+          <Select 
             value={careerPathFilter} 
             onChange={(e) => setCareerPathFilter(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
           >
             <option value="">All Career Paths</option>
             <option value="sde">Software Development (SDE)</option>
@@ -138,7 +139,7 @@ function CareerRoadmaps() {
             <option value="core">Core Engineering</option>
             <option value="higher_studies">Higher Studies</option>
             <option value="other">Other</option>
-          </select>
+          </Select>
         </div>
 
         {isEligibleMentor && (
@@ -151,10 +152,9 @@ function CareerRoadmaps() {
                   value={title} 
                   onChange={(e) => setTitle(e.target.value)} 
                 />
-                <select 
+                <Select 
                   value={careerPath} 
                   onChange={(e) => setCareerPath(e.target.value)}
-                  style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
                 >
                   <option value="">Select Career Path</option>
                   <option value="sde">Software Development (SDE)</option>
@@ -162,7 +162,7 @@ function CareerRoadmaps() {
                   <option value="core">Core Engineering</option>
                   <option value="higher_studies">Higher Studies</option>
                   <option value="other">Other</option>
-                </select>
+                </Select>
               </div>
 
               <h4 style={{ marginBottom: '10px' }}>Steps</h4>
@@ -182,11 +182,11 @@ function CareerRoadmaps() {
                     onChange={(e) => handleStepChange(idx, 'stepTitle', e.target.value)} 
                     style={{ marginBottom: '10px' }}
                   />
-                  <textarea 
+                  <Textarea 
                     value={step.description}
                     onChange={(e) => handleStepChange(idx, 'description', e.target.value)}
                     placeholder="Describe what needs to be done in this step..."
-                    style={{ width: '100%', minHeight: '60px', padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+                    style={{ width: '100%', minHeight: '60px' }}
                   />
                 </div>
               ))}
@@ -205,7 +205,7 @@ function CareerRoadmaps() {
 
         <h2 style={{ marginTop: '3rem' }}>Published Roadmaps</h2>
         {loading ? <Spinner text="Loading roadmaps..." /> : roadmaps.length === 0 ? (
-          <div className="empty-state">No career roadmaps found.</div>
+          <EmptyState icon={Route} message="No career roadmaps found." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             {roadmaps.map((roadmap) => (

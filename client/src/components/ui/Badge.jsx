@@ -15,9 +15,9 @@ const Badge = ({ children, variant = 'primary', style }) => {
   const variants = {
     primary: { background: 'var(--accent-bg)', color: 'var(--accent)' },
     secondary: { background: 'var(--border)', color: 'var(--text-h)' },
-    danger: { background: 'rgba(220, 53, 69, 0.1)', color: 'var(--danger)' },
-    success: { background: 'rgba(40, 167, 69, 0.1)', color: 'var(--success)' },
-    info: { background: 'rgba(0, 123, 255, 0.1)', color: '#007BFF' }
+    danger: { background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)' },
+    success: { background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)' },
+    info: { background: 'rgba(59, 130, 246, 0.1)', color: 'var(--primary)' }
   };
 
   return (

@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import { Input } from '../components/ui/Input';
+import { Input, Textarea } from '../components/ui/Input';
 import toast from 'react-hot-toast';
 
 function ProfileSettings() {
@@ -164,7 +164,7 @@ function ProfileSettings() {
   if (loading) return <div><Navbar /><Spinner text="Loading settings..." /></div>;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ marginTop: 0, marginBottom: '20px' }}>Profile Settings</h1>
@@ -175,11 +175,11 @@ function ProfileSettings() {
             
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>About Me</label>
-              <textarea 
+              <Textarea 
                 name="about"
                 value={profile.about}
                 onChange={e => handleChange(e)}
-                style={{ width: '100%', minHeight: '100px', padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)', fontFamily: 'inherit' }}
+                style={{ width: '100%', minHeight: '100px' }}
                 placeholder="Write a little about yourself..."
               />
             </div>

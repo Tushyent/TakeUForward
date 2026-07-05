@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle, Search } from 'lucide-react';
 
 function ClubsList() {
   const [clubs, setClubs] = useState([]);
@@ -28,7 +30,7 @@ function ClubsList() {
   if (loading) return <div><Navbar /><Spinner text="Loading clubs..." /></div>;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
@@ -36,11 +38,11 @@ function ClubsList() {
         </Link>
         <h1>Campus Clubs</h1>
 
-        {error && <div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div>}
+        {error && <EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} />}
 
         <div style={{ display: 'grid', gap: '1.5rem', marginTop: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
           {clubs.length === 0 && !error ? (
-            <div className="empty-state" style={{ gridColumn: '1 / -1' }}>No clubs found.</div>
+            <EmptyState icon={Search} message="No clubs found." style={{ gridColumn: '1 / -1' }} />
           ) : (
             clubs.map(club => (
               <Card key={club._id} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>

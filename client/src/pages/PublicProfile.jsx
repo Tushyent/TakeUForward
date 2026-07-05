@@ -6,6 +6,8 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
+import EmptyState from '../components/ui/EmptyState';
+import { UserX } from 'lucide-react';
 
 function PublicProfile() {
   const { username } = useParams();
@@ -33,13 +35,13 @@ function PublicProfile() {
   }, [username]);
 
   if (loading) return <div><Navbar /><Spinner text="Loading profile..." /></div>;
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (error) return <div><Navbar /><EmptyState icon={UserX} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!profile) return null;
 
   const isMe = myUsername === username;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
         <Card>

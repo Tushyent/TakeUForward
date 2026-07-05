@@ -10,6 +10,8 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { Search } from 'lucide-react';
 
 function Resources() {
   const [resources, setResources] = useState([]);
@@ -97,7 +99,7 @@ function Resources() {
       fetchResources();
     } catch (err) {
       console.error('Upload error', err);
-      toast.error('Failed to upload resource');
+      toast.error(err.response?.data?.error?.message || err.response?.data?.error || 'Failed to upload resource');
     } finally {
       setIsUploading(false);
     }
@@ -119,7 +121,7 @@ function Resources() {
   };
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
@@ -150,7 +152,7 @@ function Resources() {
         {loading ? (
           <Spinner text="Loading resources..." />
         ) : resources.length === 0 ? (
-          <div className="empty-state">No resources found matching your criteria.</div>
+          <EmptyState icon={Search} message="No resources found matching your criteria." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {resources.map((res) => (

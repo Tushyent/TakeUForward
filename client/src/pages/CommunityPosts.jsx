@@ -11,6 +11,8 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
+import { ThumbsUp, Send, Bookmark, Flag, MessageSquare } from 'lucide-react';
+import EmptyState from '../components/ui/EmptyState';
 
 function CommunityPosts() {
   const { id } = useParams();
@@ -147,11 +149,11 @@ function CommunityPosts() {
     }
   };
 
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
-  if (loading) return <div><Navbar /><Spinner text="Loading community..." /></div>;
+  if (error) return <div><Navbar /><EmptyState icon={Flag} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (!community) return <div><Navbar /><Spinner text="Loading..." /></div>;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
@@ -181,15 +183,18 @@ function CommunityPosts() {
                 Post Anonymously
               </label>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Posting...' : 'Post'}
+                <Send size={16} /> {isSubmitting ? 'Posting...' : 'Post'}
               </Button>
             </div>
           </form>
         </Card>
 
         <h2 style={{ marginTop: '3rem' }}>Posts</h2>
-        {posts.length === 0 ? <div className="empty-state">No posts yet. Be the first to post!</div> : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {loading ? (
+          <Spinner text="Loading posts..." />
+        ) : posts.length === 0 ? (
+          <EmptyState icon={MessageSquare} message="No posts in this community yet." />
+        ) : (<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {posts.map((post) => (
               <Card key={post._id} style={{ marginBottom: 0 }}>
                 <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-h)' }}>
@@ -220,13 +225,13 @@ function CommunityPosts() {
 
                 <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                   <Button variant="secondary" onClick={() => handleUpvote(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
-                    ▲ Upvote ({post.upvotes?.length || 0})
+                    <ThumbsUp size={14} /> Upvote ({post.upvotes?.length || 0})
                   </Button>
                   <Button variant="secondary" onClick={() => handleBookmark(post._id)} style={{ padding: '6px 12px', fontSize: '13px', color: bookmarkedIds.has(post._id) ? 'var(--primary)' : 'inherit' }}>
-                    {bookmarkedIds.has(post._id) ? '★ Saved' : '☆ Save'}
+                    <Bookmark size={14} fill={bookmarkedIds.has(post._id) ? "currentColor" : "none"} /> {bookmarkedIds.has(post._id) ? 'Saved' : 'Save'}
                   </Button>
                   <Button variant="secondary" onClick={() => handleReport(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
-                    ⚑ Report
+                    <Flag size={14} /> Report
                   </Button>
                 </div>
 
@@ -280,7 +285,7 @@ function CommunityPosts() {
                       onClick={() => handleComment(post._id)}
                       disabled={isSubmitting || !commentInputs[post._id]?.trim()}
                     >
-                      Reply
+                      <Send size={14} /> Reply
                     </Button>
                   </div>
                 </div>

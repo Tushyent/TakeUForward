@@ -7,6 +7,8 @@ import Spinner from '../components/ui/Spinner';
 import Button from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle } from 'lucide-react';
 
 function ChatThread() {
   const { userId } = useParams();
@@ -57,13 +59,13 @@ function ChatThread() {
     }
   };
 
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!chat) return <div><Navbar /><Spinner text="Loading chat..." /></div>;
 
   const otherUser = chat.participants.find(p => p._id !== myUserId);
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', height: '80vh' }}>
         <Link to="/chats" style={{ marginBottom: '1rem', textDecoration: 'none', color: 'var(--text)', display: 'inline-block' }}>

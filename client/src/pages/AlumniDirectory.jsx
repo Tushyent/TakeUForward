@@ -7,7 +7,9 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import Button from '../components/ui/Button';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
-import { Input } from '../components/ui/Input';
+import { Input, Select } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle, Search } from 'lucide-react';
 
 function AlumniDirectory() {
   const [alumniList, setAlumniList] = useState([]);
@@ -37,19 +39,8 @@ function AlumniDirectory() {
     fetchAlumni();
   }, [fetchAlumni]);
 
-  const selectStyle = {
-    padding: '10px 12px',
-    borderRadius: '6px',
-    border: '1px solid var(--border)',
-    background: 'var(--bg)',
-    color: 'var(--text-h)',
-    fontSize: '15px',
-    outline: 'none',
-    minWidth: '200px'
-  };
-
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
         <h1 style={{ marginTop: 0 }}>Alumni Directory</h1>
@@ -70,23 +61,23 @@ function AlumniDirectory() {
           </div>
           <div style={{ flex: 1, minWidth: '200px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Filter by Department</label>
-            <select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={{ ...selectStyle, width: '100%' }}>
+            <Select value={deptFilter} onChange={e => setDeptFilter(e.target.value)} style={{ width: '100%' }}>
               <option value="">All Departments</option>
               <option value="CSE">CSE</option>
               <option value="ECE">ECE</option>
               <option value="EEE">EEE</option>
               <option value="IT">IT</option>
               <option value="MECH">MECH</option>
-            </select>
+            </Select>
           </div>
         </Card>
 
-        {error && <div className="empty-state" style={{ color: 'var(--danger)', marginBottom: '1rem' }}>{error}</div>}
+        {error && <EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)', marginBottom: '1rem' }} />}
 
         {loading ? (
           <Spinner text="Loading alumni..." />
         ) : alumniList.length === 0 ? (
-          <div className="empty-state">No verified alumni found matching these filters.</div>
+          <EmptyState icon={Search} message="No verified alumni found matching these filters." />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {alumniList.map(alumni => (

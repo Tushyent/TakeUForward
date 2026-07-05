@@ -8,7 +8,9 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { Input } from '../components/ui/Input';
+import { Input, Select, Textarea } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { Search } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function Reviews() {
@@ -89,7 +91,7 @@ function Reviews() {
   };
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <h1>Course & Professor Reviews</h1>
@@ -131,21 +133,19 @@ function Reviews() {
                 value={professorName} 
                 onChange={(e) => setProfessorName(e.target.value)} 
               />
-              <select 
+              <Select 
                 value={semester} 
                 onChange={(e) => setSemester(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
               >
                 <option value="">Select Semester</option>
                 <option value="Fall 2026">Fall 2026</option>
                 <option value="Spring 2026">Spring 2026</option>
                 <option value="Fall 2025">Fall 2025</option>
                 <option value="Spring 2025">Spring 2025</option>
-              </select>
-              <select 
+              </Select>
+              <Select 
                 value={rating} 
                 onChange={(e) => setRating(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
               >
                 <option value="">Select Rating (1-5)</option>
                 <option value="5">5 - Excellent</option>
@@ -153,14 +153,14 @@ function Reviews() {
                 <option value="3">3 - Average</option>
                 <option value="2">2 - Poor</option>
                 <option value="1">1 - Terrible</option>
-              </select>
+              </Select>
             </div>
             
-            <textarea 
+            <Textarea 
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Write your review here..."
-              style={{ width: '100%', minHeight: '80px', marginBottom: '15px', padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={{ width: '100%', minHeight: '80px', marginBottom: '15px' }}
             />
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -181,7 +181,7 @@ function Reviews() {
 
         <h2 style={{ marginTop: '3rem' }}>Reviews</h2>
         {loading ? <Spinner text="Loading reviews..." /> : reviews.length === 0 ? (
-          <div className="empty-state">No reviews found matching your filters.</div>
+          <EmptyState icon={Search} message="No reviews found matching your filters." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {reviews.map((review) => (

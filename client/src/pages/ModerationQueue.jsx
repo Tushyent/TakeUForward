@@ -7,6 +7,8 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 const ModerationQueue = () => {
   const [posts, setPosts] = useState([]);
@@ -49,10 +51,10 @@ const ModerationQueue = () => {
   };
 
   if (loading) return <div><Navbar /><Spinner text="Loading moderation queue..." /></div>;
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
         <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text)', marginBottom: '20px', display: 'inline-block' }}>
@@ -61,7 +63,7 @@ const ModerationQueue = () => {
         <h1>Moderation Queue</h1>
         
         {posts.length === 0 ? (
-          <div className="empty-state">No reported posts! The queue is clean.</div>
+          <EmptyState icon={CheckCircle} message="No reported posts! The queue is clean." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {posts.map(post => (

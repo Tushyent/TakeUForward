@@ -4,7 +4,7 @@ import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import { Input } from '../components/ui/Input';
+import { Input, Select } from '../components/ui/Input';
 
 function CompleteProfile() {
   const [role, setRole] = useState(null);
@@ -56,24 +56,13 @@ function CompleteProfile() {
     }
   };
 
-  const selectStyle = {
-    width: '100%',
-    padding: '10px 12px',
-    borderRadius: '6px',
-    border: '1px solid var(--border)',
-    background: 'var(--bg)',
-    color: 'var(--text-h)',
-    fontSize: '15px',
-    outline: 'none'
-  };
-
   if (loadingUser) return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '4rem' }}><Spinner text="Loading..." /></div>;
 
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: 30 }, (_, i) => currentYear + 5 - i); // roughly 2000 to currentYear+5
 
   return (
-    <div style={{ padding: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+    <div className="page-transition" style={{ padding: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
       <Card style={{ maxWidth: '450px', width: '100%' }}>
         <h1 style={{ marginTop: 0, marginBottom: '10px' }}>Complete Your Profile</h1>
         <p style={{ color: 'var(--text)', marginBottom: '2rem' }}>Please provide these details to continue.</p>
@@ -81,7 +70,7 @@ function CompleteProfile() {
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Department</label>
-            <select value={dept} onChange={(e) => setDept(e.target.value)} style={selectStyle}>
+            <Select value={dept} onChange={(e) => setDept(e.target.value)} style={{ width: '100%' }}>
               <option value="EEE">Electrical & Electronics (EEE)</option>
               <option value="ECE">Electronics & Communication (ECE)</option>
               <option value="CSE">Computer Science & Engineering (CSE)</option>
@@ -91,16 +80,16 @@ function CompleteProfile() {
               <option value="Biomedical">Biomedical Engineering</option>
               <option value="Civil">Civil Engineering</option>
               <option value="English">English</option>
-            </select>
+            </Select>
           </div>
 
           {role === 'alumni' ? (
             <>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Graduation Year</label>
-                <select value={graduationYear} onChange={(e) => setGraduationYear(e.target.value)} style={selectStyle}>
+                <Select value={graduationYear} onChange={(e) => setGraduationYear(e.target.value)} style={{ width: '100%' }}>
                   {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
+                </Select>
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Current Company</label>
@@ -118,9 +107,9 @@ function CompleteProfile() {
           ) : (
             <div>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-h)' }}>Batch Year (Expected Graduation)</label>
-              <select value={year} onChange={(e) => setYear(e.target.value)} style={selectStyle}>
+              <Select value={year} onChange={(e) => setYear(e.target.value)} style={{ width: '100%' }}>
                 {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
+              </Select>
             </div>
           )}
 

@@ -6,6 +6,8 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import { Bookmark as BookmarkIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function Bookmarks() {
@@ -42,7 +44,7 @@ function Bookmarks() {
   };
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ marginBottom: '10px' }}>My Saved Items</h1>
@@ -57,7 +59,7 @@ function Bookmarks() {
         {loading ? (
           <Spinner text="Loading your bookmarks..." />
         ) : bookmarks.length === 0 ? (
-          <div className="empty-state">No saved items found. Start bookmarking posts and resources!</div>
+          <EmptyState icon={BookmarkIcon} message="No saved items found. Start bookmarking posts and resources!" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {bookmarks.map(bookmark => {

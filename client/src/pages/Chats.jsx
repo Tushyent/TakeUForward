@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
+import EmptyState from '../components/ui/EmptyState';
+import { AlertCircle, MessageCircle } from 'lucide-react';
 
 function Chats() {
   const [chats, setChats] = useState([]);
@@ -30,15 +32,15 @@ function Chats() {
   }, []);
 
   if (loading) return <div><Navbar /><Spinner text="Loading chats..." /></div>;
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
         <h1 style={{ marginTop: 0 }}>Messages</h1>
         {chats.length === 0 ? (
-          <div className="empty-state">You have no active chats yet.</div>
+          <EmptyState icon={MessageCircle} message="You have no active chats yet." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {chats.map(chat => {

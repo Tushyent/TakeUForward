@@ -1,22 +1,23 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+:root {
+  --text: #64748B;
+  --text-h: #0F172A;
+  --bg: #F8FAFC;
+  --border: #E2E8F0;
+  --code-bg: #F1F5F9;
+  --accent: #F59E0B;
+  --accent-bg: rgba(245, 158, 11, 0.1);
+  --accent-border: rgba(245, 158, 11, 0.5);
+  --social-bg: #FFFFFF;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+
+  --sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --heading: 'Inter', system-ui, -apple-system, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
+  font: 16px/1.5 var(--sans);
+  letter-spacing: normal;
   color-scheme: light dark;
   color: var(--text);
   background: var(--bg);
@@ -112,24 +113,26 @@ code {
 
 /* Global Shared UI Classes */
 :root {
-  --primary: #aa3bff;
-  --primary-hover: #922ae3;
-  --danger: #dc3545;
-  --danger-hover: #c82333;
-  --success: #28a745;
-  --success-hover: #218838;
-  --border-light: #e0e0e0;
+  --primary: #3B82F6;
+  --primary-hover: #2563EB;
+  --danger: #EF4444;
+  --danger-hover: #DC2626;
+  --success: #10B981;
+  --success-hover: #059669;
+  --border-light: #E2E8F0;
+  --radius-card: 12px;
+  --radius-btn: 8px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary: #c084fc;
-    --primary-hover: #d8b4fe;
-    --danger: #ef4444;
-    --danger-hover: #f87171;
-    --success: #10b981;
-    --success-hover: #34d399;
-    --border-light: #2e303a;
+    --primary: #60A5FA;
+    --primary-hover: #93C5FD;
+    --danger: #F87171;
+    --danger-hover: #FCA5A5;
+    --success: #34D399;
+    --success-hover: #6EE7B7;
+    --border-light: #334155;
   }
 }
 
@@ -152,8 +155,17 @@ code {
   padding: 3rem 1rem;
   color: var(--text);
   background: var(--code-bg);
-  border-radius: 8px;
+  border-radius: var(--radius-card, 12px);
   border: 1px dashed var(--border);
   margin: 1rem 0;
+}
+
+.page-transition {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 

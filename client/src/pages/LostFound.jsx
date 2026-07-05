@@ -4,7 +4,9 @@ import Navbar from '../components/Navbar';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
-import { Input, Select } from '../components/ui/Input';
+import { Input, Select, Textarea } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function LostFound() {
@@ -113,7 +115,7 @@ function LostFound() {
   };
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -142,11 +144,11 @@ function LostFound() {
 
               <div>
                 <label style={{ display: 'block', marginBottom: '5px' }}>Description</label>
-                <textarea 
+                <Textarea 
                   value={formData.description} 
                   onChange={e => setFormData({ ...formData, description: e.target.value })} 
                   placeholder="Provide details like color, brand, distinct marks..." 
-                  style={{ width: '100%', minHeight: '80px', padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)', fontFamily: 'inherit' }}
+                  style={{ width: '100%', minHeight: '80px' }}
                   required 
                 />
               </div>
@@ -192,7 +194,7 @@ function LostFound() {
         {loading && page === 1 ? (
           <Spinner text="Loading items..." />
         ) : items.length === 0 ? (
-          <p style={{ textAlign: 'center', color: 'var(--text)', marginTop: '40px' }}>No items found.</p>
+          <EmptyState icon={Search} message="No items found." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {items.map((item) => (

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import Button from '../components/ui/Button';
 
 function AlumniInvite() {
   const { token } = useParams();
@@ -22,7 +23,7 @@ function AlumniInvite() {
   }, [token]);
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+    <div className="page-transition" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
       <h1>Alumni Invite Verification</h1>
       
       {status === 'loading' && <p>Verifying invite token...</p>}
@@ -30,18 +31,18 @@ function AlumniInvite() {
       {status === 'success' && (
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'green', fontSize: '18px' }}>{message}</p>
-          <Link to="/login" style={{ marginTop: '15px', display: 'inline-block', padding: '10px 20px', background: '#007BFF', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+          <Button onClick={() => window.location.href = '/login'} style={{ marginTop: '15px' }}>
             Go to Login
-          </Link>
+          </Button>
         </div>
       )}
 
       {status === 'error' && (
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'red', fontSize: '18px' }}>{message}</p>
-          <Link to="/login" style={{ marginTop: '15px', display: 'inline-block', padding: '10px 20px', background: '#ccc', color: 'black', textDecoration: 'none', borderRadius: '4px' }}>
+          <Button variant="secondary" onClick={() => window.location.href = '/login'} style={{ marginTop: '15px' }}>
             Return to Login
-          </Link>
+          </Button>
         </div>
       )}
     </div>

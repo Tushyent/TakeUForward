@@ -8,7 +8,9 @@ import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
-import { Input } from '../components/ui/Input';
+import { Input, Select, Textarea } from '../components/ui/Input';
+import EmptyState from '../components/ui/EmptyState';
+import { Search } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function InterviewExperiences() {
@@ -127,7 +129,7 @@ function InterviewExperiences() {
   };
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <h1>Interview Experiences</h1>
@@ -164,16 +166,15 @@ function InterviewExperiences() {
                 value={batchYear} 
                 onChange={(e) => setBatchYear(e.target.value)} 
               />
-              <select 
+              <Select 
                 value={overallOutcome} 
                 onChange={(e) => setOverallOutcome(e.target.value)}
-                style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
               >
                 <option value="">Select Outcome</option>
                 <option value="selected">Selected</option>
                 <option value="rejected">Rejected</option>
                 <option value="withdrawn">Withdrawn</option>
-              </select>
+              </Select>
             </div>
             
             <h4 style={{ marginBottom: '10px' }}>Interview Rounds</h4>
@@ -192,10 +193,9 @@ function InterviewExperiences() {
                     value={round.roundName} 
                     onChange={(e) => handleRoundChange(index, 'roundName', e.target.value)} 
                   />
-                  <select 
+                  <Select 
                     value={round.difficulty} 
                     onChange={(e) => handleRoundChange(index, 'difficulty', e.target.value)}
-                    style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
                   >
                     <option value="">Difficulty (1-5)</option>
                     <option value="1">1 - Very Easy</option>
@@ -203,14 +203,14 @@ function InterviewExperiences() {
                     <option value="3">3 - Medium</option>
                     <option value="4">4 - Hard</option>
                     <option value="5">5 - Very Hard</option>
-                  </select>
+                  </Select>
                 </div>
                 
-                <textarea 
+                <Textarea 
                   value={round.description}
                   onChange={(e) => handleRoundChange(index, 'description', e.target.value)}
                   placeholder="Describe the round, questions asked, platform used..."
-                  style={{ width: '100%', minHeight: '60px', padding: '10px', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+                  style={{ width: '100%', minHeight: '60px' }}
                 />
               </div>
             ))}
@@ -237,7 +237,7 @@ function InterviewExperiences() {
 
         <h2 style={{ marginTop: '3rem' }}>Experiences</h2>
         {loading ? <Spinner text="Loading experiences..." /> : experiences.length === 0 ? (
-          <div className="empty-state">No experiences found matching your filters.</div>
+          <EmptyState icon={Search} message="No experiences found matching your filters." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {experiences.map((exp) => (

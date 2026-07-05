@@ -8,6 +8,8 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import { Users } from 'lucide-react';
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -85,7 +87,7 @@ function Home() {
   }
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem' }}>
         <h1>TakeUForward - Home Feed</h1>
@@ -150,7 +152,7 @@ function Home() {
         <Card>
           <h3>Communities List</h3>
           {communities.length === 0 ? (
-            <div className="empty-state">No communities found.</div>
+            <EmptyState icon={Users} message="No communities found." />
           ) : (
             <ul style={{ paddingLeft: '20px', margin: '10px 0 0 0' }}>
               {communities.map((comm) => (

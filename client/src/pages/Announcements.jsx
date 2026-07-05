@@ -4,6 +4,9 @@ import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import { Select } from '../components/ui/Input';
+import { BellOff, AlertCircle } from 'lucide-react';
 
 function Announcements() {
   const [announcements, setAnnouncements] = useState([]);
@@ -27,10 +30,10 @@ function Announcements() {
     fetchAnnouncements();
   }, [fetchAnnouncements]);
 
-  if (error) return <div><Navbar /><div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div></div>;
+  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} message={error} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   return (
-    <div>
+    <div className="page-transition">
       <Navbar />
       <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
         <h1 style={{ marginTop: 0 }}>Campus Announcements</h1>
@@ -40,23 +43,23 @@ function Announcements() {
 
         <Card style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '15px', padding: '1rem 1.5rem' }}>
           <label style={{ fontWeight: 500, color: 'var(--text-h)' }}>Filter by Category:</label>
-          <select 
+          <Select 
             value={category} 
             onChange={e => setCategory(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-h)', fontSize: '15px', outline: 'none' }}
+            style={{ width: '200px' }}
           >
             <option value="">All Announcements</option>
             <option value="event">Event</option>
             <option value="placement">Placement</option>
             <option value="hackathon">Hackathon</option>
             <option value="workshop">Workshop</option>
-          </select>
+          </Select>
         </Card>
 
         {loading ? (
           <Spinner text="Loading announcements..." />
         ) : announcements.length === 0 ? (
-          <div className="empty-state">No announcements found.</div>
+          <EmptyState icon={BellOff} message="No announcements found." />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {announcements.map(post => (
