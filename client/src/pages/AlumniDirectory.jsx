@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -41,8 +40,7 @@ function AlumniDirectory() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Alumni Directory</h1>
         <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Connect with verified SSN alumni across the industry.

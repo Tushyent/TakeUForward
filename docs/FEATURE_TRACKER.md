@@ -54,3 +54,13 @@ Status values: Not Started / In Progress / Done / Blocked
 |---|---|---|---|---|---|
 | Lost & Found Board | 3 | Done | | server/models/LostFoundItem.js, server/routes/lostFoundRoutes.js, client/src/pages/LostFound.jsx | 2026-07-05 |
 | Secondhand Marketplace | 3 | Done | | server/models/MarketplaceItem.js, server/routes/marketplaceRoutes.js, client/src/pages/Marketplace.jsx | 2026-07-06 |
+
+## Phase 4: UI/UX & PWA
+**Status: ✅ COMPLETED**
+
+| Feature | Phase | Status | Owner | Files | Last Updated |
+|---|---|---|---|---|---|
+| Sidebar Migration & AppLayout | 4 | Done | | client/src/components/Sidebar.jsx, client/src/components/AppLayout.jsx, client/src/App.jsx | 2026-07-06 |
+| Dashboard Redesign (Home.jsx) | 4 | Done | | client/src/pages/Home.jsx | 2026-07-06 |
+| Progressive Web App (PWA) | 4 | Done | | client/public/manifest.json, client/public/sw.js, client/index.html | 2026-07-06 |
+| Pre-Deployment Audit & Security | 4 | Done | | AGENTS.md, docs/DEPLOYMENT.md, docs/CHANGELOG.md | 2026-07-06 |

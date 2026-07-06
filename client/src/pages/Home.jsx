@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
 import { SkeletonCard } from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
@@ -10,47 +9,93 @@ import { Input } from '../components/ui/Input';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import {
-  Users, BookOpen, Megaphone, ShieldAlert, Sparkles,
-  ArrowRight, ChevronRight, Hash, Zap, Link2
+  Users, BookOpen, ShieldAlert,
+  ArrowRight, ChevronRight, Hash, Link2, MessageSquare, Briefcase, GraduationCap, FileText, Map, Star, Lightbulb, UserCheck, Package, ShoppingBag
 } from 'lucide-react';
 
 /* ---------------------------------------------------------------
-   QUICK LINK items shown in the "Explore" grid
+   DASHBOARD CATEGORIES
    --------------------------------------------------------------- */
-const QUICK_LINKS = [
-  {
-    to: '/resources',
-    icon: BookOpen,
-    label: 'Academic Resources',
-    desc: 'Notes, PYQs & study material',
-    color: '#7C6AF7',
-    glow: 'rgba(124,106,247,0.20)',
-  },
-  {
-    to: '/clubs',
-    icon: Users,
-    label: 'Campus Clubs',
-    desc: 'Explore official club pages',
-    color: '#F97316',
-    glow: 'rgba(249,115,22,0.20)',
-  },
-  {
-    to: '/announcements',
-    icon: Megaphone,
-    label: 'Announcements',
-    desc: 'Latest events & placement news',
-    color: '#60A5FA',
-    glow: 'rgba(96,165,250,0.20)',
-  },
-  {
-    to: '/career-roadmaps',
-    icon: Sparkles,
-    label: 'Career Roadmaps',
-    desc: 'SDE, PM, core & higher studies',
-    color: '#34D399',
-    glow: 'rgba(52,211,153,0.20)',
-  },
+const ACADEMIC_LINKS = [
+  { to: '/resources', icon: BookOpen, label: 'Resources', desc: 'Notes & materials', color: '#60A5FA', glow: 'rgba(96,165,250,0.2)' },
+  { to: '/electives', icon: Lightbulb, label: 'Electives', desc: 'Course insights', color: '#FBBF24', glow: 'rgba(251,191,36,0.2)' },
+  { to: '/reviews', icon: Star, label: 'Reviews', desc: 'Professors & courses', color: '#34D399', glow: 'rgba(52,211,153,0.2)' },
 ];
+
+const CAREER_LINKS = [
+  { to: '/mock-interviews', icon: MessageSquare, label: 'Mock Interviews', desc: 'Practice with peers', color: '#7C6AF7', glow: 'rgba(124,106,247,0.2)' },
+  { to: '/referrals', icon: Briefcase, label: 'Referrals', desc: 'Get referred', color: '#F97316', glow: 'rgba(249,115,22,0.2)' },
+  { to: '/alumni', icon: GraduationCap, label: 'Alumni', desc: 'Network & connect', color: '#60A5FA', glow: 'rgba(96,165,250,0.2)' },
+  { to: '/interview-experiences', icon: FileText, label: 'Experiences', desc: 'Read past stories', color: '#FBBF24', glow: 'rgba(251,191,36,0.2)' },
+  { to: '/career-roadmaps', icon: Map, label: 'Roadmaps', desc: 'Guided paths', color: '#34D399', glow: 'rgba(52,211,153,0.2)' },
+];
+
+const CAMPUS_LINKS = [
+  { to: '/clubs', icon: Users, label: 'Clubs', desc: 'Join communities', color: '#F97316', glow: 'rgba(249,115,22,0.2)' },
+  { to: '/team-finder', icon: UserCheck, label: 'Team Finder', desc: 'Find hackathon mates', color: '#34D399', glow: 'rgba(52,211,153,0.2)' },
+  { to: '/lost-found', icon: Package, label: 'Lost & Found', desc: 'Report & find', color: '#60A5FA', glow: 'rgba(96,165,250,0.2)' },
+  { to: '/marketplace', icon: ShoppingBag, label: 'Marketplace', desc: 'Buy & sell', color: '#7C6AF7', glow: 'rgba(124,106,247,0.2)' },
+];
+
+const renderGrid = (title, items, icon) => (
+  <div style={{ marginBottom: 'var(--space-8)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-4)' }}>
+      {icon}
+      <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{title}</h3>
+    </div>
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+      gap: 'var(--space-4)',
+    }}>
+      {items.map(({ to, icon: Icon, label, desc, color, glow }) => (
+        <Link key={to} to={to} style={{ textDecoration: 'none' }}>
+          <div
+            style={{
+              padding: 'var(--space-4)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              transition: 'box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base)',
+              cursor: 'pointer',
+              height: '100%'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.boxShadow = `0 0 0 1px ${glow}, 0 8px 24px rgba(0,0,0,0.4)`;
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.borderColor = color + '55';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.transform = 'none';
+              e.currentTarget.style.borderColor = 'var(--border)';
+            }}
+          >
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: 'var(--radius-sm)',
+              background: glow,
+              border: `1px solid ${color}33`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 'var(--space-3)',
+            }}>
+              <Icon size={16} color={color} />
+            </div>
+            <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+              {label}
+            </p>
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>
+              {desc}
+            </p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  </div>
+);
 
 /* ---------------------------------------------------------------
    COMMUNITY TYPE BADGE VARIANT MAP
@@ -161,8 +206,7 @@ function Home() {
   if (loading) {
     return (
       <div className="page-transition">
-        <Navbar />
-        <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+                <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
           <SkeletonCard lines={2} />
           <SkeletonCard lines={3} />
           <SkeletonCard lines={4} />
@@ -174,9 +218,8 @@ function Home() {
   /* ---------- Full page ---------- */
   return (
     <div className="page-transition">
-      <Navbar />
-
-      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+      
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
 
         {/* ── HERO GREETING CARD ── */}
         <div style={{
@@ -335,64 +378,10 @@ function Home() {
           </Card>
         )}
 
-        {/* ── QUICK LINKS GRID ── */}
-        <div style={{ marginBottom: 'var(--space-8)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-4)' }}>
-            <Zap size={15} color="var(--primary)" />
-            <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>Explore</h3>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: 'var(--space-4)',
-          }}>
-            {QUICK_LINKS.map(({ to, icon: Icon, label, desc, color, glow }) => (
-              <Link key={to} to={to} style={{ textDecoration: 'none' }}>
-                <div
-                  style={{
-                    padding: 'var(--space-5)',
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-md)',
-                    transition: 'box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base)',
-                    cursor: 'pointer',
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.boxShadow = `0 0 0 1px ${glow}, 0 8px 24px rgba(0,0,0,0.4)`;
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.borderColor = color + '55';
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.boxShadow = 'none';
-                    e.currentTarget.style.transform = 'none';
-                    e.currentTarget.style.borderColor = 'var(--border)';
-                  }}
-                >
-                  <div style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 'var(--radius-sm)',
-                    background: glow,
-                    border: `1px solid ${color}33`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 'var(--space-3)',
-                  }}>
-                    <Icon size={18} color={color} />
-                  </div>
-                  <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-                    {label}
-                  </p>
-                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>
-                    {desc}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
+        {/* ── DASHBOARD GRIDS ── */}
+        {renderGrid('Academics', ACADEMIC_LINKS, <BookOpen size={16} color="var(--info)" />)}
+        {renderGrid('Career & Placements', CAREER_LINKS, <Briefcase size={16} color="var(--accent)" />)}
+        {renderGrid('Campus Life', CAMPUS_LINKS, <Users size={16} color="var(--success)" />)}
 
         {/* ── COMMUNITIES LIST ── */}
         <Card>

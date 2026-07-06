@@ -49,27 +49,27 @@ const MentionTextarea = ({ value, onChange, placeholder, style }) => {
           position: 'absolute',
           top: '100%',
           left: 0,
-          background: 'white',
-          color: '#000',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
+          background: 'var(--bg-elevated)',
+          color: 'var(--text-primary)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
           listStyleType: 'none',
           padding: 0,
           margin: 0,
           maxHeight: '150px',
           overflowY: 'auto',
           zIndex: 10,
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+          boxShadow: 'var(--shadow-md)'
         }}>
           {suggestions.map(user => (
             <li 
               key={user._id} 
               onClick={() => handleSelectMention(user.handle)}
-              style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #eee' }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
+              style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid var(--border-subtle)' }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-input)'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-elevated)'}
             >
-              <strong>{user.name}</strong> <span style={{ color: '#666' }}>(@{user.handle})</span>
+              <strong>{user.name}</strong> <span style={{ color: 'var(--text-muted)' }}>(@{user.handle})</span>
             </li>
           ))}
         </ul>

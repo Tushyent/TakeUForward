@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import SearchFilterBar from '../components/SearchFilterBar';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
@@ -116,8 +115,7 @@ function TeamFinder() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>Teammate Finder</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Find peers to team up for hackathons, projects, and competitions.</p>
         

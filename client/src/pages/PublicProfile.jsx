@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -37,16 +36,15 @@ function PublicProfile() {
     fetchProfile();
   }, [fetchProfile]);
 
-  if (loading) return <div><Navbar /><Spinner text="Loading profile..." /></div>;
-  if (error) return <div><Navbar /><EmptyState icon={UserX} title="Error" message={error} action={{ label: 'Retry', onClick: fetchProfile }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (loading) return <div><Spinner text="Loading profile..." /></div>;
+  if (error) return <div><EmptyState icon={UserX} title="Error" message={error} action={{ label: 'Retry', onClick: fetchProfile }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!profile) return null;
 
   const isMe = myUsername === username;
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>

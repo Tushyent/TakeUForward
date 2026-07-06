@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -46,8 +45,7 @@ function Bookmarks() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginBottom: '10px' }}>My Saved Items</h1>
         <p style={{ color: 'var(--text)', marginBottom: '20px' }}>Your personal tracker for posts and resources.</p>
 

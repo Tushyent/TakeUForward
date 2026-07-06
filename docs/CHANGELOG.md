@@ -7,7 +7,13 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased]
 
+### Added
+- **[Phase 4] Progressive Web App (PWA):** Created `manifest.json`, added theme colors, and registered a base fetch service worker (`sw.js`). The app is now fully installable on mobile and desktop as a PWA.
+- **[Phase 4] Global Sidebar Redesign:** Replaced the legacy horizontal `Navbar` with a responsive, persistent `Sidebar` wrapped in a new `AppLayout` component. It automatically collapses into a drawer on mobile screens. Removed manual navbar imports from all 25+ pages.
+- **[Phase 4] Dashboard Redesign:** Transformed `Home.jsx` into a comprehensive dashboard featuring structured grids for Academics, Careers, and Campus Life, mapped to global design tokens.
+
 ### Fixed
+- **[Phase 4 Security] Secret Leak Prevention:** Audited the entire codebase to guarantee no `mongodb+srv://` or AWS keys were hardcoded in scripts (`check-db.cjs`, migrations). Strengthened `AGENTS.md` and `DEPLOYMENT.md` to strictly enforce reading from `process.env`.
 - **Full Codebase Audit (Part 4):**
   - **Error Handling:** Standardized `CastError` (invalid ObjectId) handling globally via `errorMiddleware.js` to return `400 Bad Request` instead of 500s. Fixed a missing error instance bug in `clubRoutes.js`.
   - **Race Conditions:** Refactored upvote endpoints (`postRoutes`, `interviewExperienceRoutes`, `electiveRoutes`, `careerRoadmapRoutes`) and bookmark toggles (`bookmarkRoutes`) to use atomic MongoDB operators (`$addToSet`, `$pull`, `findOneAndDelete`) instead of read-modify-write loops, preventing duplicates on concurrent double-submissions.

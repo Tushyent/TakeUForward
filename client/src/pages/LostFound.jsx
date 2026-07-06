@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
@@ -119,8 +118,7 @@ function LostFound() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h1 style={{ margin: 0 }}>Lost & Found Board</h1>
           <Button onClick={() => setShowForm(!showForm)}>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import SearchFilterBar from '../components/SearchFilterBar';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
@@ -95,8 +94,7 @@ function Reviews() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>Course & Professor Reviews</h1>
         <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Find and share reviews for courses and professors.</p>
         

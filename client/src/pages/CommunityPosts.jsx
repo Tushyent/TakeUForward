@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import MentionTextarea from '../components/MentionTextarea';
-import Navbar from '../components/Navbar';
+
 import SearchFilterBar from '../components/SearchFilterBar';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
@@ -153,12 +153,12 @@ function CommunityPosts() {
     }
   };
 
-  if (error) return <div><Navbar /><EmptyState icon={Flag} title="Error" message={error} action={{ label: 'Retry', onClick: () => { fetchCommunity(); fetchPosts(); } }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
-  if (!community) return <div><Navbar /><Spinner text="Loading..." /></div>;
+  if (error) return <div><EmptyState icon={Flag} title="Error" message={error} action={{ label: 'Retry', onClick: () => { fetchCommunity(); fetchPosts(); } }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (!community) return <div><Spinner text="Loading..." /></div>;
 
   return (
     <div className="page-transition">
-      <Navbar />
+      
       <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
           ← Back to Home

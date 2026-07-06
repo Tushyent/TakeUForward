@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
@@ -32,8 +31,7 @@ function Announcements() {
 
   if (error) return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-feed" style={{ paddingTop: 'var(--space-8)' }}>
+            <div className="page-col page-col-feed" style={{ paddingTop: 'var(--space-8)' }}>
         <EmptyState
           icon={AlertTriangle}
           title="Error"
@@ -47,8 +45,7 @@ function Announcements() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Campus Announcements</h1>
         <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Aggregated feed of all official club and CDC announcements.

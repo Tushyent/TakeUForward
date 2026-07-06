@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
@@ -168,13 +167,12 @@ function ProfileSettings() {
     }
   };
 
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchMe }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
-  if (loading) return <div><Navbar /><Spinner text="Loading settings..." /></div>;
+  if (error) return <div><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchMe }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (loading) return <div><Spinner text="Loading settings..." /></div>;
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0, marginBottom: '20px' }}>Profile Settings</h1>
         
         <form onSubmit={handleSave}>

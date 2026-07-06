@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../api/axiosClient';
 import { useNavigate, Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
@@ -53,13 +52,12 @@ const ModerationQueue = () => {
     }
   };
 
-  if (loading) return <div><Navbar /><Spinner text="Loading moderation queue..." /></div>;
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchQueue }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (loading) return <div><Spinner text="Loading moderation queue..." /></div>;
+  if (error) return <div><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchQueue }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
           ← Back to Home
         </Link>

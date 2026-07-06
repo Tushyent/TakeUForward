@@ -1,0 +1,8 @@
+feat(ui): implement sidebar layout, dashboard redesign, and PWA capabilities
+
+- Structural Overhaul: Replaced the horizontal `Navbar` with a responsive, globally centralized `Sidebar` inside a new `AppLayout` wrapper. Removed manual `Navbar` imports from 25+ page components.
+- Dashboard Redesign: Transformed `Home.jsx` into a comprehensive dashboard featuring structured grids for Academics, Careers, and Campus Life.
+- PWA Support: Added `manifest.json`, theme colors in `index.html`, and a base `fetch` handler in `sw.js` to enable "Add to Home Screen" installability. Global service worker registration enabled in `main.jsx`.
+- UI Cleanup: Swept codebase to enforce usage of centralized CSS variables from `index.css` over hardcoded hex values in `SearchFilterBar.jsx`, `MentionTextarea.jsx`, and various pages.
+- Security Hardening: Strengthened rules in `AGENTS.md` and `docs/DEPLOYMENT.md` forbidding hardcoded secrets in scripts and adding explicit pre-deploy checks.
+- Code Quality: Fixed linting warnings, removed unused imports globally.

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
@@ -34,13 +33,12 @@ function Chats() {
     fetchChats();
   }, [fetchChats]);
 
-  if (loading) return <div><Navbar /><Spinner text="Loading chats..." /></div>;
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchChats }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (loading) return <div><Spinner text="Loading chats..." /></div>;
+  if (error) return <div><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchChats }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Messages</h1>
         {chats.length === 0 ? (
           <EmptyState icon={MessageCircle} message="You have no active chats yet." />

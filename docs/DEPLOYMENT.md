@@ -415,6 +415,9 @@ an Atlas backup (if enabled on your tier) or manually reverse the change.
   pattern) — never a wildcard `*` alongside `credentials: true`.
 - [ ] No `.env` file, real credential, or API key has ever been committed to git 
   history (check history, not just current `.gitignore`).
+- [ ] **No hardcoded secrets in utility scripts:** Ensure that files like `server/check-db.cjs`, 
+  `seed.js`, and migration scripts read from `process.env` and do not contain hardcoded `mongodb+srv://` 
+  or similar credentials.
 - [ ] S3 bucket policy does not allow public write access — only presigned-URL 
   scoped uploads.
 - [ ] Rate limiting (`express-rate-limit`) is actually applied to post/comment/
@@ -455,6 +458,8 @@ Run this every time, not just when something breaks:
 - [ ] `npm test` passes in `/server` (or documented exceptions noted)
 - [ ] No new env var was added without also documenting it in Section 3 above and 
   adding it to Render/Vercel dashboards
+- [ ] **Secret leak audit:** Searched codebase for `mongodb+srv://`, `AIza`, or AWS keys 
+  to guarantee no credentials were leaked in standalone scripts or tests.
 - [ ] Any new post/comment/user-serializing endpoint re-checked against the 
   anonymity model (§11)
 

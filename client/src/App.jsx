@@ -27,6 +27,7 @@ import CareerRoadmaps from './pages/CareerRoadmaps';
 import LostFound from './pages/LostFound';
 import Marketplace from './pages/Marketplace';
 import ProtectedRoute from './components/ProtectedRoute';
+import AppLayout from './components/AppLayout';
 
 function App() {
   return (
@@ -34,35 +35,43 @@ function App() {
       <Toaster position="top-right" />
       <Router>
         <Routes>
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
           
-          {/* Protected Routes */}
-          <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
-          <Route path="/community/:id" element={<ProtectedRoute><CommunityPosts /></ProtectedRoute>} />
-          <Route path="/resources" element={<ProtectedRoute><Resources /></ProtectedRoute>} />
-          <Route path="/clubs" element={<ProtectedRoute><ClubsList /></ProtectedRoute>} />
-          <Route path="/clubs/:id" element={<ProtectedRoute><ClubPage /></ProtectedRoute>} />
-          <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
-          <Route path="/alumni" element={<ProtectedRoute><AlumniDirectory /></ProtectedRoute>} />
-          <Route path="/referrals" element={<ProtectedRoute><ReferralBoard /></ProtectedRoute>} />
-          <Route path="/mock-interviews" element={<ProtectedRoute><MockInterviews /></ProtectedRoute>} />
-          <Route path="/interview-experiences" element={<ProtectedRoute><InterviewExperiences /></ProtectedRoute>} />
-          <Route path="/team-finder" element={<ProtectedRoute><TeamFinder /></ProtectedRoute>} />
-          <Route path="/electives" element={<ProtectedRoute><Electives /></ProtectedRoute>} />
-          <Route path="/career-roadmaps" element={<ProtectedRoute><CareerRoadmaps /></ProtectedRoute>} />
-          <Route path="/lost-found" element={<ProtectedRoute><LostFound /></ProtectedRoute>} />
-          <Route path="/marketplace" element={<ProtectedRoute><Marketplace /></ProtectedRoute>} />
-          <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
-          <Route path="/bookmarks" element={<ProtectedRoute><Bookmarks /></ProtectedRoute>} />
-          <Route path="/moderation" element={<ProtectedRoute><ModerationQueue /></ProtectedRoute>} />
-          <Route path="/chats" element={<ProtectedRoute><Chats /></ProtectedRoute>} />
-          <Route path="/chat/:userId" element={<ProtectedRoute><ChatThread /></ProtectedRoute>} />
-          <Route path="/profile/:username" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
-          <Route path="/settings/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
-          <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-          
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          {/* Protected Routes inside AppLayout */}
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <AppLayout>
+                <Routes>
+                  <Route path="/complete-profile" element={<CompleteProfile />} />
+                  <Route path="/community/:id" element={<CommunityPosts />} />
+                  <Route path="/resources" element={<Resources />} />
+                  <Route path="/clubs" element={<ClubsList />} />
+                  <Route path="/clubs/:id" element={<ClubPage />} />
+                  <Route path="/announcements" element={<Announcements />} />
+                  <Route path="/alumni" element={<AlumniDirectory />} />
+                  <Route path="/referrals" element={<ReferralBoard />} />
+                  <Route path="/mock-interviews" element={<MockInterviews />} />
+                  <Route path="/interview-experiences" element={<InterviewExperiences />} />
+                  <Route path="/team-finder" element={<TeamFinder />} />
+                  <Route path="/electives" element={<Electives />} />
+                  <Route path="/career-roadmaps" element={<CareerRoadmaps />} />
+                  <Route path="/lost-found" element={<LostFound />} />
+                  <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/reviews" element={<Reviews />} />
+                  <Route path="/bookmarks" element={<Bookmarks />} />
+                  <Route path="/moderation" element={<ModerationQueue />} />
+                  <Route path="/chats" element={<Chats />} />
+                  <Route path="/chat/:userId" element={<ChatThread />} />
+                  <Route path="/profile/:username" element={<PublicProfile />} />
+                  <Route path="/settings/profile" element={<ProfileSettings />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/" element={<Navigate to="/home" replace />} />
+                </Routes>
+              </AppLayout>
+            </ProtectedRoute>
+          } />
         </Routes>
       </Router>
     </>

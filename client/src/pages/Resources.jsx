@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import axios from 'axios';
-import Navbar from '../components/Navbar';
 import SearchFilterBar from '../components/SearchFilterBar';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
@@ -124,8 +123,7 @@ function Resources() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
           ← Back to Home
         </Link>

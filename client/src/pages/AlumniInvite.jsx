@@ -30,7 +30,7 @@ function AlumniInvite() {
       
       {status === 'success' && (
         <div style={{ textAlign: 'center' }}>
-          <p style={{ color: 'green', fontSize: '18px' }}>{message}</p>
+          <p style={{ color: 'var(--success)', fontSize: '18px' }}>{message}</p>
           <Button onClick={() => window.location.href = '/login'} style={{ marginTop: '15px' }}>
             Go to Login
           </Button>
@@ -39,7 +39,7 @@ function AlumniInvite() {
 
       {status === 'error' && (
         <div style={{ textAlign: 'center' }}>
-          <p style={{ color: 'red', fontSize: '18px' }}>{message}</p>
+          <p style={{ color: 'var(--danger)', fontSize: '18px' }}>{message}</p>
           <Button variant="secondary" onClick={() => window.location.href = '/login'} style={{ marginTop: '15px' }}>
             Return to Login
           </Button>

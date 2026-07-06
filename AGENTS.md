@@ -25,8 +25,11 @@ read it before implementing any feature not yet scaffolded.
    exists in this repo, check the actual file before answering or writing code that
    assumes it. Do not invent API responses, library methods, or config values that
    "seem right." If unsure, say so and ask, don't guess.
-2. **Never commit secrets.** `.env` is gitignored — never write real credentials into
-   any tracked file. Use `.env.example` with placeholder values only.
+2. **Never commit secrets (CRITICAL).** `.env` is gitignored — never write real credentials 
+   (like MongoDB URIs, AWS keys, or JWT secrets) into ANY tracked file, including test scripts, 
+   migration scripts, or one-off checks like `check-db.cjs`. Always use `process.env.VARIABLE_NAME`. 
+   If you need to test a connection, load it from the `.env` file. Leaking a URI/key is a 
+   critical failure. Use `.env.example` with placeholder values only.
 3. **Anonymity is a security requirement, not a UI feature.** When `isAnonymous: true`
    on a post/comment, `authorId` must be stripped server-side before the response
    is serialized — never filtered client-side only. Any change touching posts/comments
@@ -58,6 +61,7 @@ read it before implementing any feature not yet scaffolded.
 1. `npm run lint` passes in both /client and /server, zero errors
 2. `npm test` passes (or explicitly note which tests are expected to fail and why)
 3. No `.env`, `node_modules`, or build artifacts staged (`git status` check)
+3a. Audit codebase for hardcoded secrets: Ensure no URI strings or keys were accidentally written into scripts (e.g. `check-db.cjs` or `migrations/*.js`).
 4. No leftover `console.log`/debugger statements
 5. Update /docs/CHANGELOG.md with what changed (see format there)
 6. Update /docs/FEATURE_TRACKER.md status for any feature touched

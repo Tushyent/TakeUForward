@@ -113,7 +113,7 @@ function CompleteProfile() {
             </div>
           )}
 
-          {error && <div style={{ color: 'var(--danger)', padding: '10px', background: 'rgba(220, 53, 69, 0.1)', borderRadius: '6px' }}>{error}</div>}
+          {error && <div style={{ color: 'var(--danger)', padding: '10px', background: 'var(--danger-bg)', borderRadius: '6px' }}>{error}</div>}
 
           <Button type="submit" disabled={loading} style={{ marginTop: '10px' }}>
             {loading ? 'Saving...' : 'Save and Continue'}

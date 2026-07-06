@@ -30,3 +30,9 @@ self.addEventListener('notificationclick', function(event) {
     })
   );
 });
+
+// Basic fetch handler for PWA installability
+self.addEventListener('fetch', function(event) {
+  // Let the browser do its default thing
+  // (Offline capability can be expanded later)
+});

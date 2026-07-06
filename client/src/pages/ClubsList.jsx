@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import Spinner from '../components/ui/Spinner';
 import { SkeletonCard } from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
@@ -87,8 +86,7 @@ function ClubsList() {
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-wide" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-8)' }}>
+            <div className="page-col page-col-wide" style={{ paddingTop: 'var(--space-8)', paddingBottom: 'var(--space-8)' }}>
         <div style={{ marginBottom: 'var(--space-8)' }}>
           <h1 style={{ marginBottom: 'var(--space-2)' }}>Campus Clubs</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)' }}>

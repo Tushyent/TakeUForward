@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Navbar from '../components/Navbar';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
 import Button from '../components/ui/Button';
@@ -61,15 +60,14 @@ function ChatThread() {
     }
   };
 
-  if (error) return <div><Navbar /><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchChat }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
-  if (!chat) return <div><Navbar /><Spinner text="Loading chat..." /></div>;
+  if (error) return <div><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchChat }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
+  if (!chat) return <div><Spinner text="Loading chat..." /></div>;
 
   const otherUser = chat.participants.find(p => p._id !== myUserId);
 
   return (
     <div className="page-transition">
-      <Navbar />
-      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)', display: 'flex', flexDirection: 'column', height: '80vh' }}>
+            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)', display: 'flex', flexDirection: 'column', height: '80vh' }}>
         <Link to="/chats" style={{ marginBottom: '1rem', textDecoration: 'none', color: 'var(--text-secondary)', display: 'inline-block' }}>
           &larr; Back to Inbox
         </Link>
