@@ -23,11 +23,57 @@ router.get(
   }
 );
 
+// DEV LOGIN (Only active outside production)
+if (process.env.NODE_ENV !== 'production') {
+  router.post('/dev-login', async (req, res, next) => {
+    try {
+      const { role } = req.body;
+      const User = (await import('../models/User.js')).default;
+      let email = 'dev@ssn.edu.in';
+      let name = 'Dev Admin';
+      if (role === 'student') {
+        email = 'devstudent1234567@ssn.edu.in';
+        name = 'Dev Student';
+      } else if (role === 'alumni') {
+        email = 'devalumni@gmail.com';
+        name = 'Dev Alumni';
+      }
+      
+      let user = await User.findOne({ email });
+      if (!user) {
+        user = await User.create({
+          googleId: 'dev_mock_' + role,
+          name,
+          email,
+          username: 'dev_' + role,
+          role,
+          dept: role === 'student' ? 'CSE' : undefined,
+          year: role === 'student' ? 3 : undefined,
+          isVerifiedAlumni: false // Let alumni be unverified by default to test flow
+        });
+      } else if (role === 'student' && (!user.dept || !user.year)) {
+        user.dept = 'CSE';
+        user.year = 3;
+        await user.save();
+      }
+      
+      req.login(user, (err) => {
+        if (err) return next(err);
+        return res.status(200).json({ message: 'Dev login successful' });
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+}
+
 router.get('/me', (req, res) => {
   if (req.isAuthenticated()) {
     let profileComplete = false;
     if (req.user.role === 'alumni') {
       profileComplete = !!(req.user.dept && req.user.graduationYear && req.user.currentCompany);
+    } else if (req.user.role === 'club_admin') {
+      profileComplete = !!req.user.clubId;
     } else {
       profileComplete = !!(req.user.dept && req.user.year);
     }
@@ -54,6 +100,29 @@ router.patch('/profile', async (req, res, next) => {
       req.user.currentCompany = currentCompany;
       if (previousCompany !== undefined) req.user.previousCompany = previousCompany;
       if (higherEducation !== undefined) req.user.higherEducation = higherEducation;
+    } else if (req.user.role === 'club_admin') {
+      const { clubName, clubDescription } = req.body;
+      if (!clubName || !clubDescription) {
+        return res.status(400).json({ error: 'Club Name and Description are required' });
+      }
+      
+      const Club = (await import('../models/Club.js')).default;
+      let club = await Club.findOne({ name: clubName });
+      
+      if (!club) {
+        club = await Club.create({
+          name: clubName,
+          description: clubDescription,
+          adminIds: [req.user._id]
+        });
+      } else {
+        if (!club.adminIds.includes(req.user._id)) {
+          club.adminIds.push(req.user._id);
+          await club.save();
+        }
+      }
+      
+      req.user.clubId = club._id;
     } else {
       if (!dept || !year) {
         return res.status(400).json({ error: 'Dept and year are required' });

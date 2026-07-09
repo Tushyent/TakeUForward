@@ -70,6 +70,9 @@ router.get('/:username', async (req, res, next) => {
     if (vis.showSocialLinks !== false) publicProfile.socialLinks = user.socialLinks;
     if (vis.showInterests !== false) publicProfile.interests = user.interests;
     if (vis.showSkills !== false) publicProfile.skills = user.skills;
+    if (vis.showExperience !== false) publicProfile.experience = user.experience;
+    if (vis.showProjects !== false) publicProfile.projects = user.projects;
+    if (vis.showWhatsapp !== false && user.whatsappNumber) publicProfile.whatsappNumber = user.whatsappNumber;
     if (vis.showEducation !== false) {
       publicProfile.dept = user.dept;
       publicProfile.year = user.year;
@@ -90,12 +93,15 @@ router.patch('/me/profile', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
-    const { about, interests, skills, socialLinks, profileVisibility, weeklyDigestOptIn } = req.body;
+    const { about, interests, skills, experience, projects, whatsappNumber, socialLinks, profileVisibility, weeklyDigestOptIn } = req.body;
     const user = req.user;
 
     if (about !== undefined) user.about = about;
     if (interests !== undefined) user.interests = interests;
     if (skills !== undefined) user.skills = skills;
+    if (experience !== undefined) user.experience = experience;
+    if (projects !== undefined) user.projects = projects;
+    if (whatsappNumber !== undefined) user.whatsappNumber = whatsappNumber;
     if (socialLinks !== undefined) user.socialLinks = { ...user.socialLinks, ...socialLinks };
     if (profileVisibility !== undefined) user.profileVisibility = { ...user.profileVisibility, ...profileVisibility };
     if (weeklyDigestOptIn !== undefined) user.weeklyDigestOptIn = weeklyDigestOptIn;

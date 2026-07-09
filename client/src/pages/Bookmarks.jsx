@@ -38,7 +38,8 @@ function Bookmarks() {
       await axiosClient.post('/bookmarks', { itemType, itemId });
       toast.success('Bookmark removed');
       fetchBookmarks(); // Refresh list
-    } catch (_) {
+    } catch (err) {
+      console.error(err);
       toast.error('Failed to remove bookmark');
     }
   };

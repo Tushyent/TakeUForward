@@ -65,7 +65,7 @@ router.post('/', requireAuth, postCreationLimiter, async (req, res, next) => {
 router.get('/', async (req, res, next) => {
   try {
     const { courseCode, professorName, semester, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
     let filter = { isHidden: false };
     if (courseCode) {

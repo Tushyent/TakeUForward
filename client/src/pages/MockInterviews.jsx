@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Spinner from '../components/ui/Spinner';
@@ -17,7 +18,7 @@ function MockInterviews() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [companyFilter, setCompanyFilter] = useState('');
   
   const [newTargetCompany, setNewTargetCompany] = useState('');
@@ -27,7 +28,7 @@ function MockInterviews() {
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const userRes = await axiosClient.get('/auth/me');
+      
       setUser(userRes.data.user);
 
       const queryParams = new URLSearchParams();

@@ -101,6 +101,7 @@ function Electives() {
         e._id === id ? { ...e, upvotesCount: data.upvotesCount } : e
       ));
     } catch (err) {
+      console.error(err);
       toast.error('Failed to upvote');
     }
   };

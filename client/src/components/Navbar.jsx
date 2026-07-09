@@ -5,7 +5,7 @@ import NotificationsDropdown from './NotificationsDropdown';
 import {
   Home, BookOpen, Users, Megaphone, GraduationCap, Briefcase,
   MessageSquare, FileText, UserCheck, Lightbulb, Map,
-  Package, ShoppingBag, Star, Bookmark, LogOut, Zap, Menu, X
+  Package, ShoppingBag, Star, Bookmark, LogOut, Zap, Menu, X, Info, Cloud, Settings
 } from 'lucide-react';
 
 /* ---------------------------------------------------------------
@@ -14,9 +14,11 @@ import {
    --------------------------------------------------------------- */
 const NAV_PRIMARY = [
   { to: '/home',                icon: Home,           label: 'Home' },
+  { to: '/about',               icon: Info,           label: 'About TUF' },
   { to: '/resources',           icon: BookOpen,        label: 'Resources' },
   { to: '/clubs',               icon: Users,           label: 'Clubs' },
   { to: '/announcements',       icon: Megaphone,       label: 'Announcements' },
+  { to: '/drive',               icon: Cloud,           label: 'My Drive' },
 ];
 
 const NAV_CAREERS = [
@@ -180,6 +182,31 @@ const Navbar = () => {
         {/* Right cluster */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexShrink: 0 }}>
           <NotificationsDropdown />
+          
+          <Link
+            to="/settings/profile"
+            title="Profile Settings"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              color: 'var(--text-muted)',
+              padding: '6px',
+              borderRadius: 'var(--radius-sm)',
+              textDecoration: 'none',
+              transition: 'background var(--transition-fast), color var(--transition-fast)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--bg-elevated)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--text-muted)';
+            }}
+          >
+            <Settings size={16} />
+          </Link>
 
           <button
             onClick={handleLogout}
@@ -290,33 +317,66 @@ const Navbar = () => {
           <NavItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} drawer onClick={closeDrawer} />
         ))}
 
-        {/* Logout in drawer */}
-        <span className="nav-section-label">Account</span>
-        <button
-          onClick={() => { closeDrawer(); handleLogout(); }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-3)',
-            padding: 'var(--space-3) var(--space-4)',
-            borderRadius: 'var(--radius-sm)',
-            color: 'var(--danger)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            fontSize: 'var(--text-sm)',
-            fontWeight: 500,
-            width: '100%',
-            textAlign: 'left',
-            transition: 'background var(--transition-fast)',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-bg)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}
-        >
-          <LogOut size={16} />
-          Logout
-        </button>
+        {/* Account in drawer */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--space-4)' }}>
+          <Link
+            to="/settings/profile"
+            onClick={closeDrawer}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-3)',
+              padding: '8px 12px',
+              marginLeft: '-12px',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-secondary)',
+              textDecoration: 'none',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 500,
+              transition: 'background var(--transition-fast), color var(--transition-fast)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--bg-input)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
+          >
+            <Settings size={16} />
+            Profile Settings
+          </Link>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
+            <NotificationsDropdown placement="bottom-right" />
+            <button
+              title="Logout"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                closeDrawer();
+                handleLogout();
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '8px',
+                cursor: 'pointer',
+                color: 'var(--danger)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-sm)',
+                transition: 'background var(--transition-fast)',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-bg)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );

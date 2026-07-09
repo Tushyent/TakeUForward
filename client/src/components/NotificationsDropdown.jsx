@@ -10,7 +10,7 @@ const typeConfig = {
   message:  { icon: MessageSquare, color: 'var(--accent)',   label: 'New message' },
 };
 
-const NotificationsDropdown = () => {
+const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
   const [notifications, setNotifications] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -96,8 +96,7 @@ const NotificationsDropdown = () => {
       {isOpen && (
         <div style={{
           position: 'absolute',
-          top: 'calc(100% + 8px)',
-          right: 0,
+          ...(placement === 'top-left' ? { bottom: 'calc(100% + 8px)', left: 0 } : { top: 'calc(100% + 8px)', right: 0 }),
           width: 320,
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-strong)',

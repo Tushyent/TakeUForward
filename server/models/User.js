@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema(
     about: { type: String },
     interests: [{ type: String }],
     skills: [{ type: String }],
+    experience: [{ type: String }],
+    projects: [{ type: String }],
+    whatsappNumber: { type: String },
     socialLinks: {
       linkedin: { type: String },
       instagram: { type: String },
@@ -37,6 +40,9 @@ const userSchema = new mongoose.Schema(
       showSocialLinks: { type: Boolean, default: true },
       showInterests: { type: Boolean, default: true },
       showSkills: { type: Boolean, default: true },
+      showExperience: { type: Boolean, default: true },
+      showProjects: { type: Boolean, default: true },
+      showWhatsapp: { type: Boolean, default: true },
       showBio: { type: Boolean, default: true },
       showEducation: { type: Boolean, default: true }
     },

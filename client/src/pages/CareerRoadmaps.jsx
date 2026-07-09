@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import toast from 'react-hot-toast';
@@ -16,7 +17,7 @@ function CareerRoadmaps() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
 
   // Filter state
   const [careerPathFilter, setCareerPathFilter] = useState('');
@@ -29,7 +30,7 @@ function CareerRoadmaps() {
   const fetchRoadmaps = useCallback(async () => {
     setLoading(true);
     try {
-      const userRes = await axiosClient.get('/auth/me').catch(() => ({ data: { user: null } }));
+      
       setUser(userRes.data.user);
 
       const queryParams = new URLSearchParams();
@@ -117,6 +118,7 @@ function CareerRoadmaps() {
         r._id === id ? { ...r, upvotesCount: data.upvotesCount } : r
       ));
     } catch (err) {
+      console.error(err);
       toast.error('Failed to upvote');
     }
   };

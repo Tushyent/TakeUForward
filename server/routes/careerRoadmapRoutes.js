@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     const { careerPath, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = { isHidden: { $ne: true } };
     if (careerPath) query.careerPath = careerPath;

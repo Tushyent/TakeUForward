@@ -18,21 +18,26 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails[0].value;
-        const allowedDomain = process.env.ALLOWED_EMAIL_DOMAIN || 'ssn.edu.in';
-        
-        let role = 'student';
-        let currentCompany = null;
+        let role;
         let isVerifiedAlumni = false;
 
-        // Domain restriction for students
-        if (!email.endsWith(`@${allowedDomain}`)) {
+        const isStudentEmail = /^[a-zA-Z]+\d{7}@ssn\.edu\.in$/.test(email);
+        const isSsnDomain = email.endsWith('@ssn.edu.in');
+
+        if (isStudentEmail) {
+          role = 'student';
+        } else if (isSsnDomain) {
+          role = 'club_admin';
+        } else {
+          role = 'alumni';
+        }
+
+        let currentCompany = null;
+        if (role === 'alumni') {
           const approvedAlumni = await ApprovedAlumniEmail.findOne({ email, status: 'verified' });
           if (approvedAlumni) {
-            role = 'alumni';
             currentCompany = approvedAlumni.currentCompany;
             isVerifiedAlumni = true;
-          } else {
-            return done(null, false, { message: 'Unauthorized domain' });
           }
         }
 

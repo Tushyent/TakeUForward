@@ -149,6 +149,7 @@ function CommunityPosts() {
       });
       toast.success('Bookmark updated');
     } catch (err) {
+      console.error(err);
       toast.error('Failed to update bookmark');
     }
   };

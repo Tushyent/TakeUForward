@@ -45,7 +45,6 @@ const useMentionSearch = (text, cursorPosition) => {
       }
     } else {
       setShowSuggestions(false);
-      setActiveQuery('');
       setMentionStartIndex(-1);
     }
   }, [text, cursorPosition]);

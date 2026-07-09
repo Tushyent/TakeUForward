@@ -1,4 +1,5 @@
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const axiosClient = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/+$/, ''),
@@ -8,8 +9,17 @@ const axiosClient = axios.create({
 axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Prevent infinite loop if we are already on the login page
     if (error.response && error.response.status === 401) {
-      window.location.href = '/login';
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/alumni-invite') {
+        window.location.href = '/login';
+      }
+    } else if (error.response) {
+      // Show toast for non-401 errors
+      const errorMsg = error.response.data?.error?.message || error.response.data?.error || 'An unexpected error occurred';
+      if (typeof errorMsg === 'string') {
+        toast.error(errorMsg);
+      }
     }
     
     // Normalize error format so React doesn't crash on objects

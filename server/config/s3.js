@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import dotenv from 'dotenv';
 
@@ -31,6 +31,36 @@ export const generatePresignedUrl = async (fileName, fileType) => {
   const fileUrl = `https://${bucketName}.s3.${process.env.AWS_REGION || 'us-east-1'}.amazonaws.com/${key}`;
 
   return { uploadUrl, fileUrl, key };
+};
+
+export const generatePrivateUploadUrl = async (fileName, fileType, userId) => {
+  const bucketName = process.env.AWS_BUCKET_NAME;
+  if (!bucketName) throw new Error('AWS_BUCKET_NAME is missing');
+
+  const key = `private/${userId}/${Date.now()}-${fileName}`;
+
+  const command = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+    ContentType: fileType,
+  });
+
+  const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 300 });
+  return { uploadUrl, key };
+};
+
+export const generatePrivateDownloadUrl = async (key) => {
+  const bucketName = process.env.AWS_BUCKET_NAME;
+  if (!bucketName) throw new Error('AWS_BUCKET_NAME is missing');
+
+  const command = new GetObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+  });
+
+  // URL expires in 1 hour (3600 seconds)
+  const downloadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+  return downloadUrl;
 };
 
 export const validateObjectSize = async (key, maxSizeInBytes) => {

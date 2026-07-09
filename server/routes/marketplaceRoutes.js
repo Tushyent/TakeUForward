@@ -10,7 +10,7 @@ router.get('/', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
   try {
     const { category, status, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = {};
     if (category) query.category = category;

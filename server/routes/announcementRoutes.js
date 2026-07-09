@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     const { category, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
     const query = { type: 'announcement', isHidden: { $ne: true } };
     if (category) {

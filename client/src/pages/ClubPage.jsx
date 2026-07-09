@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import toast from 'react-hot-toast';
@@ -20,7 +21,7 @@ function ClubPage() {
   
   const [activeTab, setActiveTab] = useState('announcements');
   
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [newTitle, setNewTitle] = useState('');
   const [newContent, setNewContent] = useState('');
   const [newCategory, setNewCategory] = useState('');
@@ -30,7 +31,7 @@ function ClubPage() {
     try {
       setLoading(true);
       setError('');
-      const userRes = await axiosClient.get('/auth/me');
+      
       setUser(userRes.data.user);
 
       const clubRes = await axiosClient.get(`/clubs/${id}`);

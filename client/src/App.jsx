@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './context/AuthContext';
 import Login from './pages/Login';
+import PendingApproval from './pages/PendingApproval';
 import Home from './pages/Home';
 import AlumniInvite from './pages/AlumniInvite';
 import CompleteProfile from './pages/CompleteProfile';
@@ -26,6 +28,8 @@ import Electives from './pages/Electives';
 import CareerRoadmaps from './pages/CareerRoadmaps';
 import LostFound from './pages/LostFound';
 import Marketplace from './pages/Marketplace';
+import PersonalDrive from './pages/PersonalDrive';
+import About from './pages/About';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 
@@ -33,10 +37,12 @@ function App() {
   return (
     <>
       <Toaster position="top-right" />
-      <Router>
+      <AuthProvider>
+        <Router>
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
           
           {/* Protected Routes inside AppLayout */}
@@ -59,6 +65,8 @@ function App() {
                   <Route path="/career-roadmaps" element={<CareerRoadmaps />} />
                   <Route path="/lost-found" element={<LostFound />} />
                   <Route path="/marketplace" element={<Marketplace />} />
+                  <Route path="/drive" element={<PersonalDrive />} />
+                  <Route path="/about" element={<About />} />
                   <Route path="/reviews" element={<Reviews />} />
                   <Route path="/bookmarks" element={<Bookmarks />} />
                   <Route path="/moderation" element={<ModerationQueue />} />
@@ -73,7 +81,8 @@ function App() {
             </ProtectedRoute>
           } />
         </Routes>
-      </Router>
+        </Router>
+      </AuthProvider>
     </>
   );
 }

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { AlertTriangle, Zap, ArrowRight, BookOpen, Users, Briefcase } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import axiosClient from '../api/axiosClient';
+import { AlertTriangle, Zap, ArrowRight, BookOpen, Users, Briefcase, Bug } from 'lucide-react';
 
 /* ---------------------------------------------------------------
    GOOGLE SIGN-IN SVG LOGO
@@ -54,11 +56,30 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [hovered, setHovered] = useState(false);
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (errorParam) {
+      toast.error(`Login failed: ${decodeURIComponent(errorParam)}`);
+      // Clean up the URL
+      navigate('/login', { replace: true });
+    }
+  }, [errorParam, navigate]);
+
   const handleLogin = () => {
     setLoading(true);
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     window.location.href = `${apiUrl}/auth/google`;
-    // No need to reset loading — page navigates away
+  };
+
+  const handleDevLogin = async (role) => {
+    try {
+      await axiosClient.post('/auth/dev-login', { role });
+      toast.success(`Logged in as Dev ${role}`);
+      window.location.href = '/home';
+    } catch (err) {
+      toast.error('Dev login failed');
+    }
   };
 
   return (
@@ -218,29 +239,7 @@ function Login() {
             Sign in with your official SSN College email to continue.
           </p>
 
-          {/* Error state */}
-          {errorParam === 'domain' && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 'var(--space-3)',
-              padding: 'var(--space-4)',
-              background: 'var(--danger-bg)',
-              borderRadius: 'var(--radius-sm)',
-              border: '1px solid rgba(248,113,113,0.3)',
-              marginBottom: 'var(--space-6)',
-            }}>
-              <AlertTriangle size={16} color="var(--danger)" style={{ flexShrink: 0, marginTop: 1 }} />
-              <div>
-                <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--danger)', margin: '0 0 2px 0' }}>
-                  Access denied
-                </p>
-                <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                  You must use your official <strong>@ssn.edu.in</strong> email address to sign in. Personal Gmail accounts are not permitted.
-                </p>
-              </div>
-            </div>
-          )}
+
 
           {/* Google sign-in button */}
           <button
@@ -307,6 +306,20 @@ function Login() {
             Only <strong style={{ color: 'var(--text-secondary)' }}>@ssn.edu.in</strong> email addresses are accepted.
             <br />Alumni? You'll need an invite link to register.
           </p>
+
+          {/* Dev Mode Only Shortcuts */}
+          {import.meta.env.DEV && (
+            <div style={{ marginTop: 'var(--space-8)', padding: 'var(--space-4)', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-strong)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-secondary)', fontSize: 'var(--text-xs)', marginBottom: 'var(--space-3)' }}>
+                <Bug size={14} /> Dev Mode Quick Login
+              </div>
+              <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                <button className="btn" onClick={() => handleDevLogin('student')} style={{ flex: 1, padding: '6px', fontSize: '11px', background: 'var(--bg-input)' }}>Student</button>
+                <button className="btn" onClick={() => handleDevLogin('alumni')} style={{ flex: 1, padding: '6px', fontSize: '11px', background: 'var(--bg-input)' }}>Alumni</button>
+                <button className="btn" onClick={() => handleDevLogin('club_admin')} style={{ flex: 1, padding: '6px', fontSize: '11px', background: 'var(--bg-input)' }}>Admin</button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

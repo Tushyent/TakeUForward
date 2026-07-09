@@ -2,6 +2,7 @@ import express from 'express';
 import LostFoundItem from '../models/LostFoundItem.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { generatePresignedUrl } from '../config/s3.js';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
     const { type, locationTag, status, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = {};
     if (type) query.type = type;
@@ -32,12 +33,29 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// POST /api/lost-found/upload-url
+router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+
+  try {
+    const { fileName, fileType } = req.body;
+    if (!fileName || !fileType) return res.status(400).json({ error: { message: 'Missing file details' } });
+    if (!fileType.startsWith('image/')) return res.status(400).json({ error: { message: 'Only images are allowed' } });
+
+    const { uploadUrl, fileUrl } = await generatePresignedUrl(fileName, fileType);
+    res.status(200).json({ uploadUrl, fileUrl });
+  } catch (err) {
+    console.error('Error generating upload url for lost-found:', err);
+    next(err);
+  }
+});
+
 // POST /api/lost-found
 router.post('/', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
-    const { type, itemName, description, locationTag, contactPreference } = req.body;
+    const { type, itemName, description, locationTag, contactPreference, whatsappNumber, dateLostFound, imageUrl, proofRequired } = req.body;
 
     if (!type || !itemName || !itemName.trim() || !description || !description.trim() || !locationTag || !locationTag.trim()) {
       return res.status(400).json({ error: { message: 'Required fields missing or empty' } });
@@ -49,6 +67,10 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       itemName,
       description,
       locationTag,
+      whatsappNumber,
+      dateLostFound: dateLostFound || Date.now(),
+      imageUrl,
+      proofRequired,
       contactPreference: contactPreference || 'Message me via app'
     });
 

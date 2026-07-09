@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Spinner from '../components/ui/Spinner';
@@ -59,6 +60,19 @@ function PublicProfile() {
                 <Badge variant="primary" style={{ padding: '8px 12px', cursor: 'pointer' }}>Edit Profile</Badge>
               </Link>
             )}
+            {!isMe && profile.whatsappNumber && (
+              <a 
+                href={`https://wa.me/91${profile.whatsappNumber.replace(/\D/g, '')}?text=Hi ${profile.name}, I found your profile on TakeUForward.`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+              >
+                <Badge variant="success" style={{ padding: '8px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                  WhatsApp
+                </Badge>
+              </a>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
@@ -96,6 +110,34 @@ function PublicProfile() {
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {profile.interests.map((interest, i) => (
                     <Badge key={i} variant="primary">{interest}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px' }}>
+            {profile.experience && profile.experience.length > 0 && (
+              <div>
+                <h3 style={{ margin: '0 0 10px 0' }}>Experience</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {profile.experience.map((exp, i) => (
+                    <div key={i} style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{exp}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {profile.projects && profile.projects.length > 0 && (
+              <div>
+                <h3 style={{ margin: '0 0 10px 0' }}>Projects</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {profile.projects.map((proj, i) => (
+                    <div key={i} style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                      <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{proj}</span>
+                    </div>
                   ))}
                 </div>
               </div>

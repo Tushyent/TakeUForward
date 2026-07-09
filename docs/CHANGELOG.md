@@ -7,6 +7,16 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased]
 
+### Changed
+- **[Phase 4] Global Auth Optimization:** Completely removed redundant `/auth/me` network calls from all 14+ feature pages. The application now exclusively relies on the global `AuthContext` to distribute user identity state, eliminating infinite reload loops on session expiry and drastically reducing initial page load times.
+- **[Phase 4] Profile Settings UX:** Replaced hardcoded CSS grid templates with adaptive `grid-2-col` classes to ensure the Contact Links form renders correctly on mobile devices. Checkbox labels for privacy settings are now dynamically generated from camelCase keys (e.g. `showEmail` to "Show Email"). Added a global state resync trigger upon save.
+- **[Phase 3] Marketplace & Lost/Found Storage Cleanup:** Safely removed legacy `localStorage.getItem('user')` invocations from the Secondhand Marketplace and Lost & Found boards, migrating them entirely to `useAuth()` to prevent state desynchronization.
+- **[Phase 3] Unified Date Formatting:** Refactored timestamp rendering in Personal Drive, Marketplace, and Lost & Found to use a consistent, human-readable locale format instead of the browser default.
+
+### Fixed
+- **[Phase 1] Feed Post Creation Crash:** Resolved a critical React runtime error inside the `useMentionSearch` hook. Removing an undefined call to `setActiveQuery` restored the ability to type into the post creation textarea without triggering a white screen of death.
+- **[Phase 4] Navigation UI Glitch:** Fixed an issue where the mobile drawer and desktop sidebar were wasting vertical space. The Notifications bell and Logout button are now grouped side-by-side cleanly at the bottom.
+
 ### Added
 - **[Phase 4] Progressive Web App (PWA):** Created `manifest.json`, added theme colors, and registered a base fetch service worker (`sw.js`). The app is now fully installable on mobile and desktop as a PWA.
 - **[Phase 4] Global Sidebar Redesign:** Replaced the legacy horizontal `Navbar` with a responsive, persistent `Sidebar` wrapped in a new `AppLayout` component. It automatically collapses into a drawer on mobile screens. Removed manual navbar imports from all 25+ pages.

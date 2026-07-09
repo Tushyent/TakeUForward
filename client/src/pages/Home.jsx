@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { SkeletonCard } from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
@@ -139,9 +140,9 @@ const InitialsAvatar = ({ name, size = 44 }) => {
    HOME PAGE
    --------------------------------------------------------------- */
 function Home() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [communities, setCommunities] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -149,28 +150,6 @@ function Home() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLink, setInviteLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axiosClient.get('/auth/me');
-        if (response.data.profileComplete === false) {
-          navigate('/complete-profile');
-        } else {
-          setUser(response.data.user);
-        }
-      } catch (err) {
-        if (err.response?.status === 401) {
-          navigate('/login');
-        } else {
-          setError(err.message);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, [navigate]);
 
   useEffect(() => {
     const fetchCommunities = async () => {

@@ -126,6 +126,7 @@ function InterviewExperiences() {
         exp._id === expId ? { ...exp, upvotes: Array(data.upvoteCount).fill('placeholder') } : exp
       ));
     } catch (err) {
+      console.error(err);
       toast.error('Failed to upvote');
     }
   };

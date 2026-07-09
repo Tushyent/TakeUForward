@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import SearchFilterBar from '../components/SearchFilterBar';
@@ -13,7 +14,7 @@ import { Users, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
 function TeamFinder() {
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
   const [requests, setRequests] = useState([]);
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(true);
@@ -34,7 +35,7 @@ function TeamFinder() {
   const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
-      const userRes = await axiosClient.get('/auth/me');
+      
       setUser(userRes.data.user);
 
       const queryParams = new URLSearchParams(filters).toString();

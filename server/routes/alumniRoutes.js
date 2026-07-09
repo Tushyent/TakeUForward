@@ -10,7 +10,7 @@ router.get('/', async (req, res, next) => {
 
   try {
     const { company, dept, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = { role: 'alumni', isVerifiedAlumni: true };
     if (company) {

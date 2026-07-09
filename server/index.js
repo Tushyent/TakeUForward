@@ -33,6 +33,7 @@ import jobRoutes from './routes/jobRoutes.js';
 import pushRoutes from './routes/pushRoutes.js';
 import lostFoundRoutes from './routes/lostFoundRoutes.js';
 import marketplaceRoutes from './routes/marketplaceRoutes.js';
+import privateFileRoutes from './routes/privateFileRoutes.js';
 
 dotenv.config();
 
@@ -115,6 +116,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/push', pushRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
+app.use('/api/drive', privateFileRoutes);
 
 // Error Handling
 app.get('/', (req, res) => {

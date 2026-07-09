@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import Spinner from '../components/ui/Spinner';
+
 import { SkeletonCard } from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';

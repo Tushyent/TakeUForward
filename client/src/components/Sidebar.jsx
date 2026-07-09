@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
 import {
   Home, BookOpen, Users, Megaphone, GraduationCap, Briefcase,
   MessageSquare, FileText, UserCheck, Lightbulb, Map,
-  Package, ShoppingBag, Star, Bookmark, LogOut, Zap, Menu, X
+  Package, ShoppingBag, Star, Bookmark, LogOut, Zap, X, Info, Cloud, Settings
 } from 'lucide-react';
 
 /* ---------------------------------------------------------------
@@ -13,9 +13,11 @@ import {
    --------------------------------------------------------------- */
 const NAV_PRIMARY = [
   { to: '/home',                icon: Home,           label: 'Home' },
+  { to: '/about',               icon: Info,           label: 'About TUF' },
   { to: '/resources',           icon: BookOpen,        label: 'Resources' },
   { to: '/clubs',               icon: Users,           label: 'Clubs' },
   { to: '/announcements',       icon: Megaphone,       label: 'Announcements' },
+  { to: '/drive',               icon: Cloud,           label: 'My Drive' },
 ];
 
 const NAV_CAREERS = [
@@ -134,35 +136,66 @@ const Sidebar = ({ isOpen, onClose }) => {
       </div>
 
       <div style={{ marginTop: 'auto', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--space-2)', marginBottom: 'var(--space-2)' }}>
-          <span style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-muted)' }}>Account</span>
-          <NotificationsDropdown />
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--space-4)' }}>
+          <Link
+            to="/settings/profile"
+            onClick={onClose}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-3)',
+              padding: '8px 12px',
+              marginLeft: '-12px',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-secondary)',
+              textDecoration: 'none',
+              fontSize: 'var(--text-sm)',
+              fontWeight: 500,
+              transition: 'background var(--transition-fast), color var(--transition-fast)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'var(--bg-input)';
+              e.currentTarget.style.color = 'var(--text-primary)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--text-secondary)';
+            }}
+          >
+            <Settings size={16} />
+            Profile Settings
+          </Link>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
+            <NotificationsDropdown placement="top-left" />
+            <button
+              title="Logout"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+                handleLogout();
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '8px',
+                cursor: 'pointer',
+                color: 'var(--danger)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 'var(--radius-sm)',
+                transition: 'background var(--transition-fast)',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-bg)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => { onClose(); handleLogout(); }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-3)',
-            padding: '10px var(--space-4)',
-            borderRadius: 'var(--radius-sm)',
-            color: 'var(--danger)',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-            fontSize: 'var(--text-sm)',
-            fontWeight: 600,
-            width: '100%',
-            textAlign: 'left',
-            transition: 'background var(--transition-fast)',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-bg)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}
-        >
-          <LogOut size={16} />
-          Logout
-        </button>
       </div>
     </>
   );

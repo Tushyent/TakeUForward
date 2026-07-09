@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Search, AlertCircle } from 'lucide-react';
+import { Search, AlertCircle, MessageCircle, Calendar, MapPin, User, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function LostFound() {
@@ -28,11 +29,15 @@ function LostFound() {
     itemName: '',
     description: '',
     locationTag: '',
-    contactPreference: 'Message me via app'
+    contactPreference: 'Message me via app',
+    whatsappNumber: '',
+    dateLostFound: new Date().toISOString().split('T')[0],
+    imageUrl: '',
+    proofRequired: ''
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
-  const currentUserStr = localStorage.getItem('user');
-  const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+  const { user: currentUser } = useAuth();
 
   const fetchItems = async (isNewPage = false) => {
     try {
@@ -86,7 +91,11 @@ function LostFound() {
         itemName: '',
         description: '',
         locationTag: '',
-        contactPreference: 'Message me via app'
+        contactPreference: 'Message me via app',
+        whatsappNumber: '',
+        dateLostFound: new Date().toISOString().split('T')[0],
+        imageUrl: '',
+        proofRequired: ''
       });
       toast.success('Item posted successfully');
     } catch (err) {
@@ -102,6 +111,7 @@ function LostFound() {
       setItems(items.map(item => item._id === id ? res.data : item));
       toast.success('Marked as resolved');
     } catch (err) {
+      console.error(err);
       toast.error('Failed to resolve item');
     }
   };
@@ -112,7 +122,42 @@ function LostFound() {
       // Redirect to chat
       window.location.href = `/chat/${res.data._id}`;
     } catch (err) {
+      console.error(err);
       toast.error('Failed to start chat');
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      return toast.error('Only images are allowed');
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      return toast.error('Image size must be less than 5MB');
+    }
+
+    setUploadingImage(true);
+    try {
+      const { data } = await axiosClient.post('/lost-found/upload-url', {
+        fileName: file.name,
+        fileType: file.type
+      });
+
+      await fetch(data.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file
+      });
+
+      setFormData({ ...formData, imageUrl: data.fileUrl });
+      toast.success('Image uploaded successfully');
+    } catch (err) {
+      console.error(err);
+      toast.error('Image upload failed');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -154,14 +199,43 @@ function LostFound() {
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Location (Free text)</label>
-                <Input value={formData.locationTag} onChange={e => setFormData({ ...formData, locationTag: e.target.value })} placeholder="e.g., Library 2nd Floor, Main Canteen" required />
+              <div className="grid-2-col">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>Location (Free text)</label>
+                  <Input value={formData.locationTag} onChange={e => setFormData({ ...formData, locationTag: e.target.value })} placeholder="e.g., Library 2nd Floor, Main Canteen" required />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>Date {formData.type === 'lost' ? 'Lost' : 'Found'}</label>
+                  <Input type="date" value={formData.dateLostFound} onChange={e => setFormData({ ...formData, dateLostFound: e.target.value })} required />
+                </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Contact Preference</label>
-                <Input value={formData.contactPreference} onChange={e => setFormData({ ...formData, contactPreference: e.target.value })} placeholder="e.g., Message me via app" />
+              <div className="grid-2-col">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>Contact Preference</label>
+                  <Input value={formData.contactPreference} onChange={e => setFormData({ ...formData, contactPreference: e.target.value })} placeholder="e.g., Message me via app" />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>WhatsApp Number (Optional)</label>
+                  <Input type="tel" value={formData.whatsappNumber} onChange={e => setFormData({ ...formData, whatsappNumber: e.target.value })} placeholder="e.g., 9876543210" />
+                </div>
+              </div>
+
+              <div className="grid-2-col">
+                <div>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>Upload Image (Optional)</label>
+                  <Input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+                  {uploadingImage && <span style={{ fontSize: '0.8em', color: 'var(--primary)' }}>Uploading...</span>}
+                  {formData.imageUrl && <span style={{ fontSize: '0.8em', color: 'var(--success)' }}>✓ Image uploaded</span>}
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>Proof Required (Optional)</label>
+                  <Input 
+                    value={formData.proofRequired} 
+                    onChange={e => setFormData({ ...formData, proofRequired: e.target.value })} 
+                    placeholder="e.g., Describe the wallpaper on the phone to claim" 
+                  />
+                </div>
               </div>
 
               <Button type="submit" disabled={submitting}>
@@ -197,50 +271,74 @@ function LostFound() {
         ) : loading && page === 1 ? (
           <Spinner text="Loading items..." />
         ) : items.length === 0 ? (
-          <EmptyState icon={Search} message="No items found." />
+          <EmptyState icon={Search} title="No Items Found" message="There are currently no lost or found items matching your criteria. Be the first to post one!" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             {items.map((item) => (
               <Card key={item._id} style={{ opacity: item.status === 'resolved' ? 0.7 : 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <span style={{ 
-                      display: 'inline-block', 
-                      padding: '4px 8px', 
-                      borderRadius: '4px', 
-                      fontSize: '0.8em', 
-                      fontWeight: 'bold',
-                      backgroundColor: item.type === 'lost' ? '#ff4d4f' : '#52c41a',
-                      color: 'white',
-                      marginBottom: '10px'
-                    }}>
-                      {item.type.toUpperCase()}
-                    </span>
-                    {item.status === 'resolved' && (
-                      <span style={{ marginLeft: '10px', color: 'var(--text)', fontSize: '0.85em', fontWeight: 600 }}>[RESOLVED]</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
+                  <div style={{ flex: 1, minWidth: '250px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                      <span style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center',
+                        padding: '4px 10px', 
+                        borderRadius: 'var(--radius-full)', 
+                        fontSize: '0.75em', 
+                        fontWeight: '700',
+                        backgroundColor: item.type === 'lost' ? 'var(--danger-bg)' : 'var(--success-bg)',
+                        color: item.type === 'lost' ? 'var(--danger)' : 'var(--success)',
+                        border: `1px solid ${item.type === 'lost' ? 'var(--danger)' : 'var(--success)'}`
+                      }}>
+                        {item.type.toUpperCase()}
+                      </span>
+                      {item.status === 'resolved' && (
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85em', fontWeight: 600 }}>[RESOLVED]</span>
+                      )}
+                    </div>
+                    <h3 style={{ margin: '0 0 10px 0', fontSize: '1.25rem', color: 'var(--text-primary)' }}>{item.itemName}</h3>
+                    <p style={{ margin: '0 0 15px 0', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{item.description}</p>
+                    
+                    {item.imageUrl && (
+                      <div style={{ marginBottom: '15px', maxWidth: '300px' }}>
+                        <img src={item.imageUrl} alt="Lost item" style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} />
+                      </div>
                     )}
-                    <h3 style={{ margin: '0 0 10px 0' }}>{item.itemName}</h3>
-                    <p style={{ margin: '0 0 10px 0', color: 'var(--text)' }}>{item.description}</p>
-                    <p style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
-                      <strong>Location:</strong> {item.locationTag}
-                    </p>
-                    <p style={{ margin: '0 0 10px 0', fontSize: '0.9em' }}>
-                      <strong>Posted by:</strong> {item.authorId?.name} ({item.authorId?.dept})
-                    </p>
-                    <p style={{ margin: '0', fontSize: '0.8em', color: 'var(--text)' }}>
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </p>
+
+                    {item.proofRequired && (
+                      <div style={{ marginBottom: '15px', padding: '10px', background: 'var(--warning-bg)', color: 'var(--warning)', borderRadius: 'var(--radius-sm)', fontSize: '0.9em' }}>
+                        <strong>Proof Required to Claim:</strong> {item.proofRequired}
+                      </div>
+                    )}
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85em', color: 'var(--text-muted)' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={14}/> <strong>Location:</strong> {item.locationTag}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14}/> <strong>Date {item.type === 'lost' ? 'Lost' : 'Found'}:</strong> {item.dateLostFound ? new Date(item.dateLostFound).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><User size={14}/> <strong>Posted by:</strong> {item.authorId?.name} ({item.authorId?.dept})</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={14}/> <strong>Posted on:</strong> {new Date(item.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
                   </div>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '150px' }}>
                     {currentUser && item.authorId && currentUser.id !== item.authorId._id && item.status === 'open' && (
-                      <Button variant="outline" onClick={() => handleMessageUser(item.authorId._id)}>
-                        Message {item.authorId.name.split(' ')[0]}
-                      </Button>
+                      <>
+                        <Button variant="primary" onClick={() => handleMessageUser(item.authorId._id)} style={{ width: '100%' }}>
+                          Message in App
+                        </Button>
+                        {item.whatsappNumber && (
+                          <Button 
+                            variant="outline" 
+                            onClick={() => window.open(`https://wa.me/91${item.whatsappNumber.replace(/\D/g, '')}?text=Hi, I am messaging regarding your ${item.type} item: ${item.itemName} on TakeUForward.`, '_blank')}
+                            style={{ width: '100%', borderColor: '#25D366', color: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                          >
+                            <MessageCircle size={16} /> WhatsApp
+                          </Button>
+                        )}
+                      </>
                     )}
                     
                     {currentUser && item.authorId && currentUser.id === item.authorId._id && item.status === 'open' && (
-                      <Button variant="outline" onClick={() => handleResolve(item._id)}>
+                      <Button variant="outline" onClick={() => handleResolve(item._id)} style={{ width: '100%' }}>
                         Mark as Resolved
                       </Button>
                     )}

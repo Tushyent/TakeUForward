@@ -14,7 +14,7 @@ router.get('/', async (req, res, next) => {
 
   try {
     const { page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
     const notifications = await Notification.find({ userId: req.user._id })
       .sort({ createdAt: -1 })

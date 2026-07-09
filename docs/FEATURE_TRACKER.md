@@ -34,7 +34,7 @@ Status values: Not Started / In Progress / Done / Blocked
 |---|---|---|---|---|---|
 | Verified Alumni Directory | 2 | Done | | server/routes/alumniRoutes.js, client/src/pages/AlumniDirectory.jsx | 2026-07-05 |
 | Referral Request Board | 2 | Done | | server/models/ReferralRequest.js, server/routes/referralRoutes.js, client/src/pages/ReferralBoard.jsx | 2026-07-05 |
-| Full Profile Pages | 2 | Done | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-05 |
+| Full Profile Pages | 2 | Done | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-09 |
 | Mock Interview / Resume Review Pairing | 2 | Done | | server/models/MockInterviewRequest.js, server/routes/mockInterviewRoutes.js, client/src/pages/MockInterviews.jsx | 2026-07-05 |
 | Interview Experience Repository | 2 | Done | | server/models/InterviewExperience.js, server/routes/interviewExperienceRoutes.js, client/src/pages/InterviewExperiences.jsx | 2026-07-05 |
 | NPTEL / Elective Suggestion Aggregator | 2 | Done | | server/models/ElectiveSuggestion.js, server/routes/electiveRoutes.js, client/src/pages/Electives.jsx | 2026-07-05 |
@@ -52,15 +52,15 @@ Status values: Not Started / In Progress / Done / Blocked
 
 | Feature | Phase | Status | Owner | Files | Last Updated |
 |---|---|---|---|---|---|
-| Lost & Found Board | 3 | Done | | server/models/LostFoundItem.js, server/routes/lostFoundRoutes.js, client/src/pages/LostFound.jsx | 2026-07-05 |
-| Secondhand Marketplace | 3 | Done | | server/models/MarketplaceItem.js, server/routes/marketplaceRoutes.js, client/src/pages/Marketplace.jsx | 2026-07-06 |
+| Lost & Found Board | 3 | Done | | server/models/LostFoundItem.js, server/routes/lostFoundRoutes.js, client/src/pages/LostFound.jsx | 2026-07-09 |
+| Secondhand Marketplace | 3 | Done | | server/models/MarketplaceItem.js, server/routes/marketplaceRoutes.js, client/src/pages/Marketplace.jsx | 2026-07-09 |
 
 ## Phase 4: UI/UX & PWA
 **Status: ✅ COMPLETED**
 
 | Feature | Phase | Status | Owner | Files | Last Updated |
 |---|---|---|---|---|---|
-| Sidebar Migration & AppLayout | 4 | Done | | client/src/components/Sidebar.jsx, client/src/components/AppLayout.jsx, client/src/App.jsx | 2026-07-06 |
-| Dashboard Redesign (Home.jsx) | 4 | Done | | client/src/pages/Home.jsx | 2026-07-06 |
+| Sidebar Migration & AppLayout | 4 | Done | | client/src/components/Sidebar.jsx, client/src/components/AppLayout.jsx, client/src/App.jsx | 2026-07-09 |
+| Dashboard Redesign (Home.jsx) | 4 | Done | | client/src/pages/Home.jsx | 2026-07-09 |
 | Progressive Web App (PWA) | 4 | Done | | client/public/manifest.json, client/public/sw.js, client/index.html | 2026-07-06 |
 | Pre-Deployment Audit & Security | 4 | Done | | AGENTS.md, docs/DEPLOYMENT.md, docs/CHANGELOG.md | 2026-07-06 |

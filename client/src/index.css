@@ -413,6 +413,28 @@ code, .counter {
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* ============================================================
+   RESPONSIVE UTILITIES
+   ============================================================ */
+
+.grid-auto-fill {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-4);
+}
+
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-4);
+}
+
+.grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+/* ============================================================
    APP LAYOUT & SIDEBAR
    ============================================================ */
 
@@ -544,6 +566,10 @@ code, .counter {
 
   /* Hero cards on Home */
   .hero-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .grid-2-col {
     grid-template-columns: 1fr !important;
   }
 }

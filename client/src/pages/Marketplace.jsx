@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -31,8 +32,7 @@ function Marketplace() {
     condition: 'good'
   });
 
-  const currentUserStr = localStorage.getItem('user');
-  const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+  const { user: currentUser } = useAuth();
 
   const fetchItems = async (isNewPage = false) => {
     try {
@@ -246,7 +246,7 @@ function Marketplace() {
                 </p>
 
                 <p style={{ margin: '0 0 15px 0', fontSize: '0.85em', color: 'var(--text)' }}>
-                  Posted by {item.sellerId?.name} • {new Date(item.createdAt).toLocaleDateString()}
+                  Posted by {item.sellerId?.name} • {new Date(item.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </p>
                 
                 <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>

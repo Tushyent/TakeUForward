@@ -31,7 +31,7 @@ const maskContactInfo = (request, currentUserId) => {
 router.get('/', async (req, res, next) => {
   try {
     const { eventType, skill, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
     const query = { status: 'open', isHidden: { $ne: true } };
     if (eventType) query.eventType = eventType;

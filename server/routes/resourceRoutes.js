@@ -81,7 +81,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 router.get('/', async (req, res, next) => {
   try {
     const { courseCode, q, page: pageQuery, limit: limitQuery } = req.query;
-    const { page, limit, skip } = getPaginationParams(pageQuery, limitQuery);
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = {};
     if (courseCode) {
