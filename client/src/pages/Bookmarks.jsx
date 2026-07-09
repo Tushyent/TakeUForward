@@ -23,7 +23,7 @@ function Bookmarks() {
       const response = await axiosClient.get(`/bookmarks${query}`);
       setBookmarks(response.data);
     } catch (err) {
-      setError(err.response?.data?.error?.message || err.message || 'Failed to load bookmarks');
+      setError(err.response?.data?.error || err.message || 'Failed to load bookmarks');
     } finally {
       setLoading(false);
     }

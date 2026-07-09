@@ -6,6 +6,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import { Input, Select } from '../components/ui/Input';
+import toast from 'react-hot-toast';
 
 function CompleteProfile() {
   const [role, setRole] = useState(null);
@@ -23,6 +24,7 @@ function CompleteProfile() {
   const [clubName, setClubName] = useState('');
   const [clubDescription, setClubDescription] = useState('');
 
+  const { fetchAuth } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -58,9 +60,13 @@ function CompleteProfile() {
       }
 
       await axiosClient.patch('/auth/profile', payload);
+      toast.success('Profile completed successfully!');
+      // Refresh global auth state so ProtectedRoute sees profileComplete: true
+      await fetchAuth();
       navigate('/home');
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update profile');
+      toast.error(err.response?.data?.error || 'Failed to update profile');
       setLoading(false);
     }
   };

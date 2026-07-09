@@ -7,10 +7,19 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased]
 
+### Added
+- **[Phase 4] Global Error Boundary:** Added a top-level `ErrorBoundary` component to catch unexpected React rendering errors. Instead of a white screen of death, users now see a friendly fallback UI with a button to reload the page, containing the specific error trace for developers.
+- **[Phase 4] PWA Offline Support:** Upgraded the Service Worker with Workbox caching strategies. API requests now use a Network-First strategy, Google Fonts use Cache-First, and navigating to un-cached pages while offline shows a custom offline fallback HTML page instead of the browser's dinosaur screen.
+
 ### Changed
+- **[Deployment] Vercel Reverse Proxy (Third-Party Cookie Fix):** Migrated the API request path from cross-origin (browser → Render directly) to same-origin via a Vercel rewrite proxy (`/api/*` → Render backend). This makes the session cookie first-party, permanently fixing third-party cookie blocking on Safari, iOS, and future Chrome versions. Changed `axiosClient.js` default baseURL from absolute Render URL to relative `/api`. Changed session cookie `sameSite` from `'none'` to `'lax'` in production. Updated `DEPLOYMENT.md` with new architecture diagram, updated Google OAuth callback URL instructions (must use Vercel URL, not Render URL), and removed `VITE_API_URL` from required Vercel env vars. **Deployment action required:** see `DEPLOYMENT.md` §4 for updated steps.
 - **[Phase 4] Global Auth Optimization:** Completely removed redundant `/auth/me` network calls from all 14+ feature pages. The application now exclusively relies on the global `AuthContext` to distribute user identity state, eliminating infinite reload loops on session expiry and drastically reducing initial page load times.
-- **[Phase 4] Profile Settings UX:** Replaced hardcoded CSS grid templates with adaptive `grid-2-col` classes to ensure the Contact Links form renders correctly on mobile devices. Checkbox labels for privacy settings are now dynamically generated from camelCase keys (e.g. `showEmail` to "Show Email"). Added a global state resync trigger upon save.
-- **[Phase 3] Marketplace & Lost/Found Storage Cleanup:** Safely removed legacy `localStorage.getItem('user')` invocations from the Secondhand Marketplace and Lost & Found boards, migrating them entirely to `useAuth()` to prevent state desynchronization.
+- **[Phase 4] Mobile Responsiveness Polish:** Applied comprehensive mobile CSS rules. Buttons now enforce a 44x44px minimum touch target for accessibility, text overflow is prevented on small screens via `word-break`, and grid layouts strictly collapse to 1-column below 600px.
+- **[Phase 4] Standardized API Error Feedback:** Refactored `axiosClient` to normalize all 4xx/5xx error responses into a consistent string format, removing the aggressive global error interceptor that caused double-toasts. Frontend components now reliably display specific backend validation messages instead of generic fallbacks.
+
+### Fixed
+- **[Phase 4] Stuck Profile Completion Page:** Fixed a critical navigation bug where users were trapped on the complete-profile page even after a successful form submission because the global auth state was not being explicitly refreshed before redirecting.
+- **[Phase 4] Mobile UI Clipping:** Fixed the notification dropdown width calculating incorrectly on small screens and clipping off the viewport edge. Also fixed the `ChatThread` message input box being pushed off-screen by the mobile keyboard by migrating from `80vh` to `100dvh`.
 - **[Phase 3] Unified Date Formatting:** Refactored timestamp rendering in Personal Drive, Marketplace, and Lost & Found to use a consistent, human-readable locale format instead of the browser default.
 
 ### Fixed

@@ -82,7 +82,7 @@ function TeamFinder() {
       toast.success('Team request posted successfully!');
       fetchRequests();
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to post team request');
+      toast.error(err.response?.data?.error || 'Failed to post team request');
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +97,7 @@ function TeamFinder() {
       setApplyingTo(null);
       setApplyMessage('');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to apply');
+      toast.error(err.response?.data?.error || 'Failed to apply');
     } finally {
       setIsSubmitting(false);
     }
@@ -110,7 +110,7 @@ function TeamFinder() {
       setRequests(requests.map(r => r._id === reqId ? data : r));
       toast.success('Team request closed');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to close request');
+      toast.error(err.response?.data?.error || 'Failed to close request');
     }
   };
 

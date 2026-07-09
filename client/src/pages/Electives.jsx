@@ -77,7 +77,7 @@ function Electives() {
       toast.success('Elective suggestion shared successfully!');
       fetchElectives();
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to share elective suggestion');
+      toast.error(err.response?.data?.error || 'Failed to share elective suggestion');
     } finally {
       setIsSubmitting(false);
     }
@@ -90,7 +90,7 @@ function Electives() {
       await axiosClient.post(`/elective-suggestions/${id}/report`, { reason });
       toast.success('Suggestion reported successfully');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to report suggestion');
+      toast.error(err.response?.data?.error || 'Failed to report suggestion');
     }
   };
 

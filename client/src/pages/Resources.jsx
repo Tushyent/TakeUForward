@@ -34,7 +34,7 @@ function Resources() {
       const response = await axiosClient.get(`/resources?${queryParams}`);
       setResources(response.data);
     } catch (err) {
-      setError(err.response?.data?.error?.message || err.message || 'Failed to load resources');
+      setError(err.response?.data?.error || err.message || 'Failed to load resources');
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ function Resources() {
       fetchResources();
     } catch (err) {
       console.error('Upload error', err);
-      toast.error(err.response?.data?.error?.message || err.response?.data?.error || 'Failed to upload resource');
+      toast.error(err.response?.data?.error || 'Failed to upload resource');
     } finally {
       setIsUploading(false);
     }

@@ -15,21 +15,24 @@
 ## 1. Architecture Overview
 
 ```
-                         ┌─────────────────────────┐
-                         │   Vercel (Frontend)      │
-                         │   /client — React+Vite   │
-                         │   takeuforward-ssn        │
-                         │   .vercel.app             │
-                         └────────────┬─────────────┘
-                                      │ REST/JSON (credentials: include)
-                                      │ session cookie (cross-domain)
-                         ┌────────────▼─────────────┐
-                         │   Render (Backend)        │
-                         │   /server — Node/Express  │
-                         │   Passport.js OAuth        │
-                         │   express-session +        │
-                         │   connect-mongo store      │
-                         └──┬──────────┬──────────┬──┘
+                         ┌─────────────────────────────┐
+                         │   Vercel (Frontend + Proxy)  │
+                         │   /client — React+Vite       │
+                         │   takeuforward-ssn.vercel.app│
+                         │                              │
+                         │   /api/* → reverse proxy     │
+                         │   to Render backend          │
+                         └──────┬──────────┬────────────┘
+                    static SPA  │          │  proxied /api/* requests
+                    assets      │          │  (same-origin cookie)
+                                │          │
+                         ┌──────▼──────────▼────────────┐
+                         │   Render (Backend)            │
+                         │   /server — Node/Express      │
+                         │   Passport.js OAuth            │
+                         │   express-session +            │
+                         │   connect-mongo store          │
+                         └──┬──────────┬──────────┬──────┘
                             │          │          │
               ┌─────────────▼──┐  ┌────▼────┐  ┌──▼────────────┐
               │ MongoDB Atlas   │  │ AWS S3  │  │ Gemini API    │
@@ -45,8 +48,13 @@
                   │ transactional email │
                   └──────────────────────┘
 
+Key: All /api/* requests from the browser go to Vercel first, which proxies
+them to Render. This makes the session cookie FIRST-PARTY (same origin as
+the frontend), fixing third-party cookie blocking on Safari/mobile/Chrome.
+
 UptimeRobot pings GET /api/health every 5–10 min to prevent Render free-tier
-cold starts (per MASTER_PLAN §7.9).
+cold starts (per MASTER_PLAN §7.9). This should ping the RENDER URL directly
+(not through the Vercel proxy) to keep Render warm.
 ```
 
 **Repo → Service mapping:**
@@ -110,12 +118,15 @@ across the project so far.
 
 | Variable | Required | Example | Notes |
 |----------|----------|---------|-------|
-| `VITE_API_BASE_URL` | Yes | `https://<render-backend>.onrender.com/api` (no trailing slash) | Every API call fails / hits localhost in production |
+| `VITE_API_URL` | **No** (production) | Not set on Vercel — API calls use `/api` (relative, same-origin via reverse proxy) | Only set in local dev `.env` as `http://localhost:5000/api` |
 | `VITE_VAPID_PUBLIC_KEY`| Yes (for Web Push)| Same as Backend `VAPID_PUBLIC_KEY` | Used by the frontend to subscribe to Web Push |
 
-**CRITICAL:** Confirm `VITE_API_BASE_URL` is set for **all three** Vercel 
-environments (Production, Preview, Development) in the Vercel dashboard — a var set 
-only for Production will silently break every Preview deployment.
+**IMPORTANT (changed from previous):** `VITE_API_URL` (previously documented as 
+`VITE_API_BASE_URL`) is **no longer needed on Vercel** in production. The `vercel.json` 
+rewrite rule proxies `/api/*` to the Render backend, making all API calls same-origin. 
+The `axiosClient.js` defaults to `/api` when `VITE_API_URL` is not set. If you had 
+`VITE_API_BASE_URL` or `VITE_API_URL` set on Vercel previously, **remove it** to 
+activate the proxy path.
 
 **Security note:** anything prefixed `VITE_` is bundled into the client and publicly 
 visible in the browser. Never put a secret (API key, SMTP password, S3 secret) behind 
@@ -137,14 +148,20 @@ a `VITE_` prefix.
 2. **Google Cloud Console (OAuth)**
    - Create OAuth 2.0 credentials (Web application type).
    - Add Authorized redirect URIs for **both**:
-     - `http://localhost:<port>/api/auth/google/callback` (local dev)
-     - `https://<render-backend>.onrender.com/api/auth/google/callback` (production)
+     - `http://localhost:5000/api/auth/google/callback` (local dev)
+     - `https://<your-vercel-app>.vercel.app/api/auth/google/callback` (production — goes through Vercel proxy)
+   - **IMPORTANT:** The production callback URI must use the **Vercel** URL (not the 
+     Render URL), because the OAuth callback must go through the reverse proxy so the 
+     session cookie is set as first-party on the Vercel domain.
    - Copy Client ID/Secret into Render env vars.
 
 3. **Render (Backend)**
    - New Web Service → connect this repo → root directory `/server`.
    - Build command: `npm install`. Start command: `npm start` (Confirmed `package.json` has a real `start` script running `node index.js`, Render will not run nodemon in production).
    - Add every env var from Section 3 (Backend table).
+   - **Critical:** Set `GOOGLE_CALLBACK_URL` to `https://<your-vercel-app>.vercel.app/api/auth/google/callback` 
+     (the Vercel proxy URL, NOT the Render URL). This ensures the OAuth callback 
+     flows through the proxy and the session cookie is set on the correct domain.
    - Deploy, then check logs for successful boot (no MemoryStore warning, no Atlas 
      connection error — see §7 if either appears).
 
@@ -153,9 +170,14 @@ a `VITE_` prefix.
    - **Confirmed** Build command and output directory match Vite defaults 
      (`npm run build`, output `dist`) — confirm in Vercel project settings, don't 
      assume Vercel auto-detected correctly.
-   - Add `VITE_API_BASE_URL` for Production, Preview, and Development environments.
-   - Confirm `vercel.json` exists in `/client` with a SPA rewrite rule (see §7, 
-     "Vercel SPA routing 404") — without this, every direct-navigation route 404s.
+   - **Replace the placeholder** in `vercel.json`: change 
+     `REPLACE_WITH_YOUR_RENDER_BACKEND_URL.onrender.com` to your actual Render 
+     backend hostname (e.g. `takeuforward-api.onrender.com`).
+   - **Do NOT set `VITE_API_URL`** on Vercel — the reverse proxy handles API routing.
+   - Only set `VITE_VAPID_PUBLIC_KEY` if Web Push is configured.
+   - Confirm `vercel.json` exists in `/client` with both the API proxy rewrite and 
+     the SPA catch-all rewrite — without the API rewrite, auth will fail; without 
+     the SPA rewrite, direct navigation 404s.
    - Deploy, then copy the production URL back into Render's `CLIENT_URL`.
 
 5. **CORS loop-back step**
@@ -409,8 +431,9 @@ an Atlas backup (if enabled on your tier) or manually reverse the change.
 
 - [ ] `SESSION_SECRET` is a genuinely long random value, not a placeholder or 
   reused dev value.
-- [ ] Session cookies use `secure: true` and `sameSite: 'none'` in production, 
-  conditional on `NODE_ENV`.
+- [ ] Session cookies use `secure: true` and `sameSite: 'lax'` in production. 
+  (Changed from `'none'` after migrating to the Vercel reverse proxy — the cookie 
+  is now first-party, so `'lax'` works in all browsers including Safari/iOS.)
 - [ ] CORS origin is restricted to specific allowed origins (production + preview 
   pattern) — never a wildcard `*` alongside `credentials: true`.
 - [ ] No `.env` file, real credential, or API key has ever been committed to git 

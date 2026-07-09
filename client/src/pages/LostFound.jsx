@@ -99,7 +99,7 @@ function LostFound() {
       });
       toast.success('Item posted successfully');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to post item');
+      toast.error(err.response?.data?.error || 'Failed to post item');
     } finally {
       setSubmitting(false);
     }

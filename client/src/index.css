@@ -555,6 +555,17 @@ code, .counter {
   }
 }
 
+@media (max-width: 768px) {
+  /* Notification dropdown: constrain to viewport on tablets */
+  .page-col-form { max-width: 100%; }
+  
+  /* Filter rows with flex wrapping */
+  [style*="flexWrap: 'wrap'"],
+  [style*="flex-wrap: wrap"] {
+    gap: 10px;
+  }
+}
+
 @media (max-width: 600px) {
   .page-col { 
     padding-inline: var(--space-4); 
@@ -572,6 +583,35 @@ code, .counter {
   .grid-2-col {
     grid-template-columns: 1fr !important;
   }
+
+  /* Buttons: ensure minimum touch target size (44x44px per Apple HIG) */
+  .btn, button[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Ensure all inputs and selects are full-width on mobile */
+  input, select, textarea {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* Prevent text overflow on small screens */
+  .page-col h1, .page-col h2, .page-col h3 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+}
+
+@media (max-width: 375px) {
+  /* Smallest phone — tighten padding further */
+  .page-col {
+    padding-inline: var(--space-3);
+  }
+  
+  h1 { font-size: var(--text-xl); }
+  h2 { font-size: var(--text-lg); }
 }
 
 /* ============================================================

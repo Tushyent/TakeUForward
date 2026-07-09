@@ -75,7 +75,7 @@ function Reviews() {
       toast.success('Review created successfully!');
       fetchReviews();
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to create review');
+      toast.error(err.response?.data?.error || 'Failed to create review');
     } finally {
       setIsSubmitting(false);
     }
@@ -88,7 +88,7 @@ function Reviews() {
       await axiosClient.post(`/reviews/${reviewId}/report`, { reason });
       toast.success('Review reported successfully');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to report review');
+      toast.error(err.response?.data?.error || 'Failed to report review');
     }
   };
 

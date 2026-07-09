@@ -50,7 +50,7 @@ function ClubPage() {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.error?.message || err.message);
+      setError(err.response?.data?.error || err.message);
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ function ClubPage() {
       setNewCategory('');
       toast.success('Announcement posted successfully!');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to post announcement');
+      toast.error(err.response?.data?.error || 'Failed to post announcement');
     } finally {
       setIsSubmitting(false);
     }

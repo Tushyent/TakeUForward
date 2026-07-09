@@ -97,7 +97,8 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
         <div style={{
           position: 'absolute',
           ...(placement === 'top-left' ? { bottom: 'calc(100% + 8px)', left: 0 } : { top: 'calc(100% + 8px)', right: 0 }),
-          width: 320,
+          width: 'min(320px, calc(100vw - 32px))',
+          maxWidth: 'calc(100vw - 32px)',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-strong)',
           borderRadius: 'var(--radius-md)',

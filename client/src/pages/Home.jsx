@@ -142,10 +142,6 @@ const InitialsAvatar = ({ name, size = 44 }) => {
 function Home() {
   const { user } = useAuth();
   const [communities, setCommunities] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
-
   // Alumni invite (admin only)
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLink, setInviteLink] = useState('');

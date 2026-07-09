@@ -68,7 +68,7 @@ function ChatThread() {
 
   return (
     <div className="page-transition">
-            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)', display: 'flex', flexDirection: 'column', height: '80vh' }}>
+            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)', display: 'flex', flexDirection: 'column', height: 'calc(100dvh - 80px)' }}>
         <Link to="/chats" style={{ marginBottom: '1rem', textDecoration: 'none', color: 'var(--text-secondary)', display: 'inline-block' }}>
           &larr; Back to Inbox
         </Link>

@@ -82,7 +82,7 @@ app.use(session({
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 1 day
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'lax', // Safe in all browsers — cookie is first-party via Vercel reverse proxy in production
     httpOnly: true,
   }
 }));

@@ -89,40 +89,16 @@ function Marketplace() {
       });
       toast.success('Item posted successfully');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to post item');
+      toast.error(err.response?.data?.error || 'Failed to post item');
     } finally {
       setSubmitting(false);
     }
   };
-
-  const handleMarkSold = async (id) => {
-    try {
-      const res = await axiosClient.patch(`/marketplace/${id}/sold`);
-      setItems(items.map(item => item._id === id ? res.data : item));
-      toast.success('Marked as sold');
-    } catch (err) {
-      toast.error('Failed to mark item as sold');
-    }
-  };
-
-  const handleMessageUser = async (userId) => {
-    try {
-      const res = await axiosClient.post(`/chats`, { participantId: userId });
-      // Redirect to chat
-      window.location.href = `/chat/${res.data._id}`;
-    } catch (err) {
-      toast.error('Failed to start chat');
-    }
-  };
-
-  const handleReport = async (id) => {
-    const reason = prompt('Why are you reporting this item?');
-    if (!reason) return;
     try {
       await axiosClient.post(`/marketplace/${id}/report`, { reason });
       toast.success('Item reported successfully');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to report item');
+      toast.error(err.response?.data?.error || 'Failed to report item');
     }
   };
 

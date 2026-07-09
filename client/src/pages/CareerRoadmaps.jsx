@@ -94,7 +94,7 @@ function CareerRoadmaps() {
       toast.success('Career roadmap posted successfully!');
       fetchRoadmaps();
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to post career roadmap');
+      toast.error(err.response?.data?.error || 'Failed to post career roadmap');
     } finally {
       setIsSubmitting(false);
     }
@@ -107,7 +107,7 @@ function CareerRoadmaps() {
       await axiosClient.post(`/career-roadmaps/${id}/report`, { reason });
       toast.success('Roadmap reported successfully');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to report roadmap');
+      toast.error(err.response?.data?.error || 'Failed to report roadmap');
     }
   };
 

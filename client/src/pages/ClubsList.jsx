@@ -20,7 +20,7 @@ function ClubsList() {
       const response = await axiosClient.get('/clubs');
       setClubs(response.data);
     } catch (err) {
-      setError(err.response?.data?.error?.message || err.message || 'Failed to load clubs');
+      setError(err.response?.data?.error || err.message || 'Failed to load clubs');
     } finally {
       setLoading(false);
     }

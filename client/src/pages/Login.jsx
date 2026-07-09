@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import axiosClient from '../api/axiosClient';
-import { AlertTriangle, Zap, ArrowRight, BookOpen, Users, Briefcase, Bug } from 'lucide-react';
+import { AlertTriangle, Zap, ArrowRight, BookOpen, Users, Briefcase } from 'lucide-react';
 
 /* ---------------------------------------------------------------
    GOOGLE SIGN-IN SVG LOGO
@@ -68,18 +68,8 @@ function Login() {
 
   const handleLogin = () => {
     setLoading(true);
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const apiUrl = import.meta.env.VITE_API_URL || '/api';
     window.location.href = `${apiUrl}/auth/google`;
-  };
-
-  const handleDevLogin = async (role) => {
-    try {
-      await axiosClient.post('/auth/dev-login', { role });
-      toast.success(`Logged in as Dev ${role}`);
-      window.location.href = '/home';
-    } catch (err) {
-      toast.error('Dev login failed');
-    }
   };
 
   return (
@@ -307,19 +297,6 @@ function Login() {
             <br />Alumni? You'll need an invite link to register.
           </p>
 
-          {/* Dev Mode Only Shortcuts */}
-          {import.meta.env.DEV && (
-            <div style={{ marginTop: 'var(--space-8)', padding: 'var(--space-4)', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border-strong)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-secondary)', fontSize: 'var(--text-xs)', marginBottom: 'var(--space-3)' }}>
-                <Bug size={14} /> Dev Mode Quick Login
-              </div>
-              <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                <button className="btn" onClick={() => handleDevLogin('student')} style={{ flex: 1, padding: '6px', fontSize: '11px', background: 'var(--bg-input)' }}>Student</button>
-                <button className="btn" onClick={() => handleDevLogin('alumni')} style={{ flex: 1, padding: '6px', fontSize: '11px', background: 'var(--bg-input)' }}>Alumni</button>
-                <button className="btn" onClick={() => handleDevLogin('club_admin')} style={{ flex: 1, padding: '6px', fontSize: '11px', background: 'var(--bg-input)' }}>Admin</button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

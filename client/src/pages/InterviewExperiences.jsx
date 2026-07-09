@@ -102,7 +102,7 @@ function InterviewExperiences() {
       toast.success('Interview experience shared successfully!');
       fetchExperiences();
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to share experience');
+      toast.error(err.response?.data?.error || 'Failed to share experience');
     } finally {
       setIsSubmitting(false);
     }
@@ -115,7 +115,7 @@ function InterviewExperiences() {
       await axiosClient.post(`/interview-experiences/${expId}/report`, { reason });
       toast.success('Experience reported successfully');
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to report experience');
+      toast.error(err.response?.data?.error || 'Failed to report experience');
     }
   };
 
