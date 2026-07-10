@@ -85,6 +85,7 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
       : { $addToSet: { upvotes: req.user._id } };
 
     const updatedExperience = await InterviewExperience.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!updatedExperience) return res.status(404).json({ error: { message: 'Experience not found' } });
     res.status(200).json({ upvoteCount: updatedExperience.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);

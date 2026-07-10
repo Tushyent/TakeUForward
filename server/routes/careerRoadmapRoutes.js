@@ -94,6 +94,7 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
       : { $addToSet: { upvotes: req.user._id } };
 
     const updatedRoadmap = await CareerRoadmap.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!updatedRoadmap) return res.status(404).json({ error: { message: 'Career roadmap not found' } });
     res.status(200).json({ upvotesCount: updatedRoadmap.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);

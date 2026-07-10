@@ -3,6 +3,7 @@ import passport from 'passport';
 import crypto from 'crypto';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -98,7 +99,7 @@ router.patch('/profile', async (req, res, next) => {
     await req.user.save();
     res.status(200).json({ message: 'Profile updated', user: req.user, profileComplete: true });
   } catch (err) {
-    console.error('Error updating profile:', err);
+    logger.error('Error updating profile:', err);
     next(err);
   }
 });
@@ -118,7 +119,7 @@ router.post('/alumni/invite', async (req, res, next) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Must be logged in to invite alumni' });
   }
-  if (req.user.role !== 'admin' && req.user.role !== 'alumni') {
+  if (!req.user.isPlatformAdmin && req.user.role !== 'alumni') {
     return res.status(403).json({ error: 'Only admins or verified alumni can generate invites' });
   }
 
@@ -167,7 +168,7 @@ router.get('/alumni/invite/:token', async (req, res, next) => {
 
     res.status(200).json({ message: 'Invite accepted, you can now log in with Google' });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     next(err);
   }
 });
@@ -232,7 +233,6 @@ router.post('/alumni/request', async (req, res, next) => {
 
     res.status(201).json({ message: 'Request submitted successfully. Admins will review your request.' });
   } catch (err) {
-    const { logger } = await import('../utils/logger.js');
     logger.error('Error submitting alumni request:', err);
     next(err);
   }

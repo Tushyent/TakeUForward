@@ -7,6 +7,9 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased]
 
+### Fixed
+- **[P0] OAuth login loop in production:** Fixed cross-origin session cookie mismatch. **Root cause:** `VITE_API_URL` was set to the Render URL on Vercel, causing all API calls to go directly to `onrender.com` (cross-origin) instead of through the Vercel proxy (same-origin). The session cookie (set with `SameSite=Lax` during OAuth callback) was never sent on cross-origin XHR requests, causing `/auth/me` to return 401 and routing back to `/login`. **Changes:** (1) `server/index.js` — restored `sameSite: 'none'` in production. (2) `axiosClient.js` and `Login.jsx` — ignore `VITE_API_URL` if it points to `onrender.com` in production, use `/api` instead. (3) `passport.js` — relative `callbackURL` so Passport resolves from request origin. (4) `index.js` — `trust proxy` bumped from `1` to `true`. (5) `postRoutes.js` — fixed `role !== 'platform_admin'` to `!isPlatformAdmin` (dead adminship check). (6) `authRoutes.js` — removed redundant dynamic `logger` import. (7) `DEPLOYMENT.md` — corrected env table. **Deployment action required:** (a) Add `https://takeuforward-ssn.vercel.app/api/auth/google/callback` to Google Cloud Console. (b) Remove `VITE_API_URL` from Vercel env vars. (c) Set `GOOGLE_CALLBACK_URL` on Render back to `https://takeuforward-ssn.onrender.com/api/auth/google/callback` for now.
+
 ### Added
 - **[Observability] Structured Logging with Pino:** Replaced all `console.*` calls with `pino`. Added `pino-http` to log incoming requests. Set dynamic log level via `LOG_LEVEL` env var.
 - **[Observability] Graceful Shutdown:** Implemented `SIGTERM`/`SIGINT` handlers in `server/index.js` to cleanly close HTTP connections and Mongoose before exiting.

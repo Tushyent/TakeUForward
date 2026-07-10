@@ -19,6 +19,7 @@ function ProfileSettings() {
   const [profile, setProfile] = useState({
     about: '',
     skills: '',
+    interests: '',
     experience: '',
     projects: '',
     whatsappNumber: '',
@@ -73,8 +74,8 @@ function ProfileSettings() {
       navigator.serviceWorker.ready.then(reg => {
         reg.pushManager.getSubscription().then(sub => {
           if (sub) setWebPushOptIn(true);
-        });
-      });
+        }).catch(() => {});
+      }).catch(() => {});
     }
 
     fetchMe();

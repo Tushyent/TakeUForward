@@ -18,7 +18,7 @@ router.get('/', async (req, res, next) => {
 
     if (company) {
       const safeCompany = company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      query.company = { $regex: new RegExp(safeCompany, 'i') };
+      query.targetCompany = { $regex: new RegExp(safeCompany, 'i') };
     }
 
     const requests = await ReferralRequest.find(query)

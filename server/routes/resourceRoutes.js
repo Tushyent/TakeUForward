@@ -4,6 +4,7 @@ import { generatePresignedUrl, validateObjectSize } from '../config/s3.js';
 import { summarizeResource } from '../services/geminiService.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
     const { uploadUrl, fileUrl } = await generatePresignedUrl(fileName, fileType);
     res.status(200).json({ uploadUrl, fileUrl });
   } catch (err) {
-    console.error('Error generating presigned URL:', err);
+    logger.error('Error generating presigned URL:', err);
     next(err);
   }
 });
@@ -66,13 +67,13 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
         await resource.save();
       }
     } catch (summaryErr) {
-      console.error('Failed to summarize resource (non-fatal):', summaryErr);
+      logger.error('Failed to summarize resource (non-fatal):', summaryErr);
       // We do not throw or fail the response here. The resource is still created.
     }
 
     res.status(201).json(resource);
   } catch (err) {
-    console.error('Error creating resource:', err);
+    logger.error('Error creating resource:', err);
     next(err);
   }
 });
@@ -104,7 +105,7 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(resources);
   } catch (err) {
-    console.error('Error fetching resources:', err);
+    logger.error('Error fetching resources:', err);
     next(err);
   }
 });
@@ -117,7 +118,7 @@ router.get('/:id', async (req, res, next) => {
 
     res.status(200).json(resource);
   } catch (err) {
-    console.error('Error fetching resource:', err);
+    logger.error('Error fetching resource:', err);
     if (err.name === 'CastError') {
       return res.status(404).json({ error: 'Resource not found' });
     }

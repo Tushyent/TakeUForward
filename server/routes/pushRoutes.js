@@ -15,6 +15,7 @@ router.post('/subscribe', async (req, res, next) => {
 
   try {
     const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: { message: 'User not found' } });
     
     // Check if subscription already exists to avoid duplicates
     const exists = user.pushSubscriptions.some(sub => sub.endpoint === subscription.endpoint);
@@ -41,6 +42,7 @@ router.post('/unsubscribe', async (req, res, next) => {
 
   try {
     const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ error: { message: 'User not found' } });
     
     user.pushSubscriptions = user.pushSubscriptions.filter(sub => sub.endpoint !== endpoint);
     await user.save();

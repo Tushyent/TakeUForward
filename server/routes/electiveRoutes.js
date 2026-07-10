@@ -96,6 +96,7 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
       : { $addToSet: { upvotes: req.user._id } };
 
     const updatedSuggestion = await ElectiveSuggestion.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!updatedSuggestion) return res.status(404).json({ error: { message: 'Suggestion not found' } });
     res.status(200).json({ upvotesCount: updatedSuggestion.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);

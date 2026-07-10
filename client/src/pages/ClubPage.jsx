@@ -31,16 +31,13 @@ function ClubPage() {
     try {
       setLoading(true);
       setError('');
-      
-
 
       const clubRes = await axiosClient.get(`/clubs/${id}`);
       setClub(clubRes.data.club);
       setAnnouncements(clubRes.data.announcements);
 
-      const fetchedUser = userRes.data.user;
-      const isClubAdmin = clubRes.data.club.adminIds.includes(fetchedUser?._id) || fetchedUser?.clubId === clubRes.data.club._id;
-      
+      const isClubAdmin = clubRes.data.club.adminIds.includes(user?._id) || user?.clubId === clubRes.data.club._id;
+
       if (isClubAdmin) {
         try {
           const analyticsRes = await axiosClient.get(`/clubs/${id}/analytics`);
@@ -54,7 +51,7 @@ function ClubPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, user]);
 
   useEffect(() => {
     fetchData();

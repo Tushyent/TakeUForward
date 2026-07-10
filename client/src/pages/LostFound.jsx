@@ -320,7 +320,7 @@ function LostFound() {
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '150px' }}>
-                    {currentUser && item.authorId && currentUser.id !== item.authorId._id && item.status === 'open' && (
+                    {currentUser && item.authorId && currentUser._id !== item.authorId._id && item.status === 'open' && (
                       <>
                         <Button variant="primary" onClick={() => handleMessageUser(item.authorId._id)} style={{ width: '100%' }}>
                           Message in App
@@ -337,7 +337,7 @@ function LostFound() {
                       </>
                     )}
                     
-                    {currentUser && item.authorId && currentUser.id === item.authorId._id && item.status === 'open' && (
+                    {currentUser && item.authorId && currentUser._id === item.authorId._id && item.status === 'open' && (
                       <Button variant="outline" onClick={() => handleResolve(item._id)} style={{ width: '100%' }}>
                         Mark as Resolved
                       </Button>

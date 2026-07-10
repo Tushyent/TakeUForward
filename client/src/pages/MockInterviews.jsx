@@ -217,8 +217,8 @@ function MockInterviews() {
                     <Badge variant="info" style={{ marginBottom: '10px' }}>{getRequestTypeLabel(req.requestType)}</Badge>
                     <p style={{ margin: '0 0 5px 0', fontSize: '0.9em', color: 'var(--text)' }}>Requested by:</p>
                     <strong style={{ display: 'flex', alignItems: 'center' }}>
-                      <Link to={`/profile/${req.requesterId.username}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                        {req.requesterId.name} (@{req.requesterId.handle})
+                      <Link to={`/profile/${req.requesterId?.username || ''}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                        {req.requesterId?.name || 'Unknown'} (@{req.requesterId?.handle || 'unknown'})
                       </Link>
                     </strong>
                     {req.requesterId?.dept && req.requesterId?.year && (

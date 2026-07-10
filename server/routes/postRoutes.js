@@ -263,6 +263,7 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
       : { $addToSet: { upvotes: req.user._id } };
 
     const updatedPost = await Post.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!updatedPost) return res.status(404).json({ error: { message: 'Post not found' } });
     res.status(200).json({ upvoteCount: updatedPost.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);
@@ -313,7 +314,7 @@ router.delete('/:id', async (req, res, next) => {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
 
-    if (post.authorId.toString() !== req.user._id.toString() && req.user.role !== 'platform_admin') {
+    if (post.authorId.toString() !== req.user._id.toString() && !req.user.isPlatformAdmin) {
       return res.status(403).json({ error: { message: 'Unauthorized to delete this post' } });
     }
 
@@ -336,7 +337,7 @@ router.delete('/:id/comments/:commentId', async (req, res, next) => {
     const comment = post.comments.id(req.params.commentId);
     if (!comment) return res.status(404).json({ error: { message: 'Comment not found' } });
 
-    if (comment.authorId.toString() !== req.user._id.toString() && req.user.role !== 'platform_admin') {
+    if (comment.authorId.toString() !== req.user._id.toString() && !req.user.isPlatformAdmin) {
       return res.status(403).json({ error: { message: 'Unauthorized to delete this comment' } });
     }
 

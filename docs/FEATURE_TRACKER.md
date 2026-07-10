@@ -8,11 +8,11 @@ Status values: Not Started / In Progress / Done / Blocked
 
 ## Phase 1: MVP & Core Systems
 **Status: ✅ COMPLETED, AUDITED, AND POLISHED**
-*(Note: As of July 2026, all Phase 1 features have been built, rigorously audited, and received a full UI/UX deployment polish pass. Systemic bugs identified in the pre-deployment audit (error handling middleware violation, missing rate limiters) have been resolved globally. As of 2026-07-10: Jest ESM config fixed (tests now run), unverified-alumni server-side gate added (closing client-side-only protection gap), 3 P0 bugs fixed. 11 tests pass across 3 suites.)*
+*(Note: As of July 2026, all Phase 1 features have been built, rigorously audited, and received a full UI/UX deployment polish pass. Systemic bugs identified in the pre-deployment audit (error handling middleware violation, missing rate limiters) have been resolved globally. As of 2026-07-10: Jest ESM config fixed (tests now run), unverified-alumni server-side gate added (closing client-side-only protection gap), 3 P0 bugs fixed. 11 tests pass across 3 suites. As of 2026-07-11: OAuth production login loop fixed — session cookie cross-origin mismatch resolved. 49 tests pass across 7 suites.)*
 
 | Feature | Phase | Status | Owner | Files | Last Updated |
 |---|---|---|---|---|---|
-| Google OAuth (SSN-restricted + alumni whitelist) | 1 | Done | | server/config/passport.js, server/routes/authRoutes.js, server/middleware/requireApprovedUser.js, server/models/ApprovedAlumniEmail.js | 2026-07-10 |
+| Google OAuth (SSN-restricted + alumni whitelist) | 1 | Done | | server/config/passport.js, server/routes/authRoutes.js, server/middleware/requireApprovedUser.js, server/models/ApprovedAlumniEmail.js | 2026-07-11 |
 | Alumni Registration Request Flow | 1 | Done | | server/routes/authRoutes.js, server/routes/moderationRoutes.js, client/src/pages/Login.jsx, client/src/pages/ModerationQueue.jsx | 2026-07-10 |
 | Role & Profile System | 1 | Done | | server/models/User.js, client/src/pages/CompleteProfile.jsx | 2026-07-05 |
 | Sub-Community Feed Structure | 1 | Done | | server/models/Community.js, server/routes/communityRoutes.js, client/src/pages/CommunityPosts.jsx | 2026-07-05 |

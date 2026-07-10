@@ -1,9 +1,15 @@
 import axios from 'axios';
 
-const axiosClient = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, ''),
-  withCredentials: true,
-});
+const isDeployed = window.location.hostname !== 'localhost';
+const rawUrl = import.meta.env.VITE_API_URL;
+const baseURL = (
+  // In production, force proxied path instead of a hardcoded Render URL
+  isDeployed && rawUrl && rawUrl.includes('.onrender.com')
+    ? '/api'
+    : (rawUrl || '/api')
+).replace(/\/+$/, '');
+
+const axiosClient = axios.create({ baseURL, withCredentials: true });
 
 axiosClient.interceptors.response.use(
   (response) => response,

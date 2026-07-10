@@ -64,7 +64,7 @@ app.use(pinoHttp({
   }
 }));
 // Trust proxy is required for secure cookies behind Render's load balancer
-app.set('trust proxy', 1);
+app.set('trust proxy', true);
 
 const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/+$/, '') : 'http://localhost:5173';
 
@@ -109,7 +109,7 @@ app.use(session({
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 1 day
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax', // Safe in all browsers — cookie is first-party via Vercel reverse proxy in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' until VITE_API_URL is removed from Vercel and all API calls go through the proxy; then switch to 'lax'
     httpOnly: true,
   }
 }));

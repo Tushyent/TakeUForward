@@ -95,7 +95,7 @@ across the project so far.
 | `SESSION_SECRET` | Yes | long random string | Sessions can be forged/decoded if weak; missing may crash session middleware |
 | `GOOGLE_CLIENT_ID` | Yes | from Google Cloud Console | OAuth login fails entirely |
 | `GOOGLE_CLIENT_SECRET` | Yes | from Google Cloud Console | OAuth callback fails |
-| `GOOGLE_CALLBACK_URL` | Yes | `https://<render-backend>.onrender.com/api/auth/google/callback` | `redirect_uri_mismatch` error from Google if wrong/missing |
+| `GOOGLE_CALLBACK_URL` | Yes | Relative path — see §4 step 2 | `redirect_uri_mismatch` error from Google if wrong/missing — must match a URI registered in Google Cloud Console; always use the Vercel-proxied URL (see §4) |
 | `CLIENT_URL` | Yes | `https://takeuforward-ssn.vercel.app` (**no trailing slash** — see §7) | CORS rejects all frontend requests |
 | `NODE_ENV` | Yes | `production` | Controls cookie `secure`/`sameSite` flags, error stack-trace leakage, CORS localhost fallback |
 | `LOG_LEVEL` | No | `info` | Determines structured Pino logging output verbosity (`debug`, `info`, `warn`, `error`) |
@@ -369,6 +369,13 @@ the recommendation.
 - **Root cause:** Vite automatically binds to the next available port (e.g., `5174`), but `server/index.js` CORS was strictly hardcoded to allow `http://localhost:5173`.
 - **Fix:** Changed the localhost CORS allow-list to use a dynamic regex `^http:\/\/(localhost|127\.0\.0\.1):517\d$` to safely allow Vite dev server port jumping.
 - **Prevention:** Use bounded regexes for localhost port allowances during development instead of hardcoding a single strict port.
+
+### 7.11 OAuth Cross-Origin Sign-In Loop (VITE_API_URL set to Render)
+- **Symptom:** User clicks "Sign in with Google", OAuth succeeds, but the browser loops back to `/login`. No error toast shown.
+- **Root cause:** `VITE_API_URL` was set to the Render URL (`https://takeuforward-ssn.onrender.com/api`) on Vercel, bypassing the proxy. All API calls (including `/auth/me` after login) went directly to `onrender.com` (cross-origin). The session cookie was set with `SameSite=Lax` during the OAuth callback, which blocks cross-origin XHR/fetch requests. `/auth/me` always returned 401 despite a valid session on the Render domain, sending the user back to `/login`.
+- **Fix (code):** (1) `client/src/api/axiosClient.js` now ignores `VITE_API_URL` if it contains `.onrender.com` in production, falling back to `/api` (proxy path). (2) `client/src/pages/Login.jsx` applies the same guard to the OAuth redirect URL. (3) `server/config/passport.js` uses a relative `callbackURL` (`/api/auth/google/callback`) so Passport resolves the redirect URI from the request origin via the Vercel proxy headers. (4) `server/index.js` `trust proxy` bumped from `1` to `true` to handle the Vercel → Cloudflare → Render proxy chain.
+- **Deployment action required:** (a) Add `https://takeuforward-ssn.vercel.app/api/auth/google/callback` to Google Cloud Console authorized redirect URIs. (b) Remove `VITE_API_URL` from Vercel environment variables (it should be absent in production). (c) Update `GOOGLE_CALLBACK_URL` in Render env vars to `https://takeuforward-ssn.vercel.app/api/auth/google/callback` (the Vercel-proxied URL).
+- **Prevention:** Never set `VITE_API_URL` to a Render URL on Vercel. The proxy path `/api` is the only correct production value. See §4 step 2 for the correct OAuth callback URL configuration.
 
 ---
 

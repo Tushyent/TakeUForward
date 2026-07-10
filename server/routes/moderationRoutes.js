@@ -4,7 +4,9 @@ import Review from '../models/Review.js';
 import InterviewExperience from '../models/InterviewExperience.js';
 import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
 import CareerRoadmap from '../models/CareerRoadmap.js';
+import crypto from 'crypto';
 import { applyAnonymity } from '../utils/anonymity.js';
+import { sendEmail } from '../config/mailer.js';
 
 const router = express.Router();
 
@@ -32,7 +34,7 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
     })
       .populate('authorId', 'name handle role')
       .populate('reports.userId', 'name handle')
-      .sort({ 'reports.length': -1, createdAt: -1 });
+      .sort({ createdAt: -1 });
 
     const flaggedReviews = await Review.find({
       $or: [
@@ -42,7 +44,7 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
     })
       .populate('authorId', 'name handle role')
       .populate('reports.userId', 'name handle')
-      .sort({ 'reports.length': -1, createdAt: -1 });
+      .sort({ createdAt: -1 });
 
     const flaggedExperiences = await InterviewExperience.find({
       $or: [
@@ -52,7 +54,7 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
     })
       .populate('authorId', 'name handle role')
       .populate('reports.userId', 'name handle')
-      .sort({ 'reports.length': -1, createdAt: -1 });
+      .sort({ createdAt: -1 });
 
     const flaggedElectives = await ElectiveSuggestion.find({
       $or: [
@@ -62,7 +64,7 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
     })
       .populate('authorId', 'name handle role')
       .populate('reports.userId', 'name handle')
-      .sort({ 'reports.length': -1, createdAt: -1 });
+      .sort({ createdAt: -1 });
 
     const flaggedRoadmaps = await CareerRoadmap.find({
       $or: [
@@ -72,7 +74,7 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
     })
       .populate('authorId', 'name handle role')
       .populate('reports.userId', 'name handle')
-      .sort({ 'reports.length': -1, createdAt: -1 });
+      .sort({ createdAt: -1 });
 
     const safePosts = flaggedPosts.map(post => ({ type: 'post', ...applyAnonymity(post) }));
     const safeReviews = flaggedReviews.map(review => ({ type: 'review', ...applyAnonymity(review) }));
@@ -153,9 +155,6 @@ router.post('/alumni-requests/:id/approve', requirePlatformAdmin, async (req, re
   try {
     const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
     const ApprovedAlumniEmail = (await import('../models/ApprovedAlumniEmail.js')).default;
-    const crypto = (await import('crypto')).default;
-    const { sendEmail } = await import('../config/mailer.js');
-    const { logger } = await import('../utils/logger.js');
 
     const request = await AlumniRegistrationRequest.findById(req.params.id);
     if (!request || request.status !== 'pending') {
@@ -167,18 +166,18 @@ router.post('/alumni-requests/:id/approve', requirePlatformAdmin, async (req, re
     await request.save();
 
     // 2. Generate invite token
-    const token = crypto.randomBytes(32).toString('hex');
+    const inviteToken = crypto.randomBytes(32).toString('hex');
     
     // 3. Add to approved emails
     await ApprovedAlumniEmail.findOneAndUpdate(
       { email: request.email },
-      { email: request.email, token, used: false },
+      { email: request.email, inviteToken },
       { upsert: true, returnDocument: 'after' }
     );
 
     // 4. Send email
-    const loginLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?token=${token}`;
-    await sendEmail(request.email, 'Your Alumni Request is Approved', `Click here to login: ${loginLink}`);
+    const loginLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?token=${inviteToken}`;
+    await sendEmail({ to: request.email, subject: 'Your Alumni Request is Approved', html: `<p>Click here to login: <a href="${loginLink}">${loginLink}</a></p>` });
 
     res.json({ message: 'Request approved and invite sent' });
   } catch (err) {

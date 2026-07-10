@@ -89,7 +89,13 @@ function Login() {
 
   const handleLogin = () => {
     setLoading(true);
-    const apiUrl = import.meta.env.VITE_API_URL || '/api';
+    const isDeployed = window.location.hostname !== 'localhost';
+    const rawUrl = import.meta.env.VITE_API_URL;
+    const apiUrl = (
+      isDeployed && rawUrl && rawUrl.includes('.onrender.com')
+        ? '/api'
+        : (rawUrl || '/api')
+    ).replace(/\/+$/, '');
     window.location.href = `${apiUrl}/auth/google`;
   };
 

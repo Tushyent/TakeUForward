@@ -104,7 +104,7 @@ router.post('/:id/apply', applyTeamLimiter, async (req, res, next) => {
       return res.status(400).json({ error: { message: 'You cannot apply to your own request' } });
     }
 
-    const hasApplied = teamRequest.applicants.some(a => a.userId.toString() === req.user._id.toString());
+    const hasApplied = teamRequest.applicants.some(a => a.userId && a.userId.toString() === req.user._id.toString());
     if (hasApplied) {
       return res.status(400).json({ error: { message: 'You have already applied to this request' } });
     }

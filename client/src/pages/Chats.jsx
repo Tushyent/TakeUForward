@@ -51,7 +51,7 @@ function Chats() {
 
               return (
                 <Link key={chat._id} to={`/chat/${otherUser?._id}`} style={{ textDecoration: 'none' }}>
-                  <Card style={{ marginBottom: 0, padding: '1rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s', ':hover': { transform: 'translateY(-2px)' } }}>
+                  <Card style={{ marginBottom: 0, padding: '1rem', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}>
                     <strong style={{ color: 'var(--primary)', fontSize: '1.1em', display: 'flex', alignItems: 'center' }}>
                       {displayName}
                       {otherUser?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={otherUser.isVerifiedAlumni} />}

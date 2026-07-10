@@ -244,19 +244,19 @@ function Marketplace() {
                 </p>
                 
                 <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
-                  {currentUser && item.sellerId && currentUser.id !== item.sellerId._id && item.status === 'available' && (
+                  {currentUser && item.sellerId && currentUser._id !== item.sellerId._id && item.status === 'available' && (
                     <Link to={`/chat/${item.sellerId._id}`} style={{ flex: 1, textDecoration: 'none' }}>
                       <Button style={{ width: '100%' }}>Message Seller</Button>
                     </Link>
                   )}
                   
-                  {currentUser && item.sellerId && currentUser.id === item.sellerId._id && item.status === 'available' && (
+                  {currentUser && item.sellerId && currentUser._id === item.sellerId._id && item.status === 'available' && (
                     <Button variant="success" onClick={() => handleMarkSold(item._id)} style={{ flex: 1 }}>
                       Mark as Sold
                     </Button>
                   )}
 
-                  {currentUser && item.sellerId && currentUser.id !== item.sellerId._id && (
+                  {currentUser && item.sellerId && currentUser._id !== item.sellerId._id && (
                     <Button variant="secondary" onClick={() => handleReport(item._id)}>
                       ⚑
                     </Button>
