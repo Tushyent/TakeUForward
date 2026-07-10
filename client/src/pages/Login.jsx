@@ -56,8 +56,6 @@ function Login() {
   const queryParams = new URLSearchParams(location.search);
   const errorParam = queryParams.get('error');
   const [loading, setLoading] = useState(false);
-  const [hovered, setHovered] = useState(false);
-
   const navigate = useNavigate();
 
   const [showAlumniForm, setShowAlumniForm] = useState(false);
@@ -277,35 +275,15 @@ function Login() {
 
 
           {/* Google sign-in button */}
-          <button
+          <Button
             onClick={handleLogin}
             disabled={loading}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
             style={{
               width: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 'var(--space-3)',
-              padding: '14px 20px',
-              borderRadius: 'var(--radius-sm)',
-              border: '1.5px solid ' + (hovered ? 'var(--primary)' : 'var(--border-strong)'),
-              background: loading
-                ? 'var(--bg-elevated)'
-                : hovered
-                  ? 'rgba(124,106,247,0.08)'
-                  : 'var(--bg-elevated)',
-              color: 'var(--text-primary)',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 600,
-              fontFamily: 'inherit',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-              transition: 'background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast)',
-              boxShadow: hovered && !loading ? 'var(--shadow-glow)' : 'none',
-              transform: hovered && !loading ? 'translateY(-1px)' : 'none',
-              letterSpacing: '-0.01em',
             }}
           >
             {loading ? (
@@ -328,7 +306,7 @@ function Login() {
                 <ArrowRight size={14} color="var(--text-muted)" style={{ marginLeft: 'auto' }} />
               </>
             )}
-          </button>
+          </Button>
 
           {/* Domain restriction note */}
           <p style={{

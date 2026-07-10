@@ -88,39 +88,39 @@ function CompleteProfile() {
             <>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Graduation Year</label>
-                <Select value={graduationYear} onChange={(e) => setGraduationYear(e.target.value)} style={{ width: '100%' }}>
+                <Select value={graduationYear} onChange={(e) => setGraduationYear(e.target.value)} style={{ width: '100%' }} aria-label="Graduation Year">
                   {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                 </Select>
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Current Company</label>
-                <Input type="text" required value={currentCompany} onChange={e => setCurrentCompany(e.target.value)} placeholder="Where are you working?" style={{ width: '100%' }} />
+                <Input type="text" required value={currentCompany} onChange={e => setCurrentCompany(e.target.value)} placeholder="Where are you working?" style={{ width: '100%' }} aria-label="Current Company" />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Previous Company (Optional)</label>
-                <Input type="text" value={previousCompany} onChange={e => setPreviousCompany(e.target.value)} placeholder="Where else have you worked?" style={{ width: '100%' }} />
+                <Input type="text" value={previousCompany} onChange={e => setPreviousCompany(e.target.value)} placeholder="Where else have you worked?" style={{ width: '100%' }} aria-label="Previous Company" />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Higher Education (Optional)</label>
-                <Input type="text" value={higherEducation} onChange={e => setHigherEducation(e.target.value)} placeholder="E.g., MS at Stanford" style={{ width: '100%' }} />
+                <Input type="text" value={higherEducation} onChange={e => setHigherEducation(e.target.value)} placeholder="E.g., MS at Stanford" style={{ width: '100%' }} aria-label="Higher Education" />
               </div>
             </>
           ) : role === 'club_admin' ? (
             <>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Club Name</label>
-                <Input type="text" required value={clubName} onChange={e => setClubName(e.target.value)} placeholder="e.g., Coding Club" style={{ width: '100%' }} />
+                <Input type="text" required value={clubName} onChange={e => setClubName(e.target.value)} placeholder="e.g., Coding Club" style={{ width: '100%' }} aria-label="Club Name" />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Club Description</label>
-                <Input type="text" required value={clubDescription} onChange={e => setClubDescription(e.target.value)} placeholder="What does this club do?" style={{ width: '100%' }} />
+                <Input type="text" required value={clubDescription} onChange={e => setClubDescription(e.target.value)} placeholder="What does this club do?" style={{ width: '100%' }} aria-label="Club Description" />
               </div>
             </>
           ) : (
             <>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Department</label>
-                <Select value={dept} onChange={(e) => setDept(e.target.value)} style={{ width: '100%' }}>
+                <Select value={dept} onChange={(e) => setDept(e.target.value)} style={{ width: '100%' }} aria-label="Department">
                   <option value="EEE">Electrical & Electronics (EEE)</option>
                   <option value="ECE">Electronics & Communication (ECE)</option>
                   <option value="CSE">Computer Science & Engineering (CSE)</option>
@@ -134,7 +134,7 @@ function CompleteProfile() {
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Batch Year (Expected Graduation)</label>
-                <Select value={year} onChange={(e) => setYear(e.target.value)} style={{ width: '100%' }}>
+                <Select value={year} onChange={(e) => setYear(e.target.value)} style={{ width: '100%' }} aria-label="Batch Year">
                   {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
                 </Select>
               </div>

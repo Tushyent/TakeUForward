@@ -173,7 +173,7 @@ function Resources() {
                   <Badge variant="primary">{res.courseCode}</Badge>
                   <Badge variant="secondary">Semester {res.semester}</Badge>
                   {res.tags?.map((tag, idx) => (
-                    <Badge key={idx} variant="info">{tag}</Badge>
+                    <Badge key={`${tag}-${idx}`} variant="info">{tag}</Badge>
                   ))}
                 </div>
                 

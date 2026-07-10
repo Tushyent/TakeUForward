@@ -24,6 +24,17 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **[Testing] Jest coverage reporting:** Configured `--coverage` in `jest.config.js` to collect metrics across all routes, middleware, services, and utils (excluding scripts/test files). Current coverage stands at 21.5% globally (focused strictly on core critical paths, not chasing 100%).
 - **[Testing] Playwright Critical-Path E2E:** Built `critical-path.spec.js` mapping to MASTER_PLAN.md §17 (login → anonymous post → comment → resource search). Used a secure, test-only `POST /api/auth/test-session` backend endpoint (active *only* when `PLAYWRIGHT_TEST=true`) to bypass Google OAuth headless automation blocks.
 
+### Fixed
+- **[P0] `year: 3` crash in test-session route:** Changed hardcoded `year: 3` to `year: 2025` in `authRoutes.js:192` to prevent student profile creation from crashing with invalid year value.
+- **[P1] Missing MongoDB indexes:** Added `index: true` to `Notification.userId`, `Resource.courseCode`+`uploaderId`, and `LostFoundItem.status`+`type`+`authorId` fields to prevent full-collection scans on filtered queries.
+- **[P1] Array-index React keys:** Replaced 11 instances of array-index keys across 7 files (CareerRoadmaps, ChatThread, InterviewExperiences, PublicProfile, Resources, TeamFinder) with stable identifiers (`msg._id`, `step.order`, `round._id`, string-composite keys).
+- **[P1] `hoverable` non-boolean attribute:** Destructured `hoverable` out of `Card.jsx` props spread and removed `hoverable` prop from Home.jsx Card usage to eliminate React DOM attribute warning.
+- **[P2] Raw `<button>` in Login.jsx:** Replaced hand-rolled `<button>` with the shared `<Button>` component for design-system consistency.
+- **[P2] Missing 404 page:** Added `NotFound.jsx` page component and wired it into App.jsx routing (replacing silent redirect to `/home`).
+- **[P2] About.jsx behind ProtectedRoute:** Moved `/about` route outside `ProtectedRoute` so the static info page is accessible without login.
+- **[P2] Missing `<h1>` headings:** Added proper `<h1>` to Home.jsx greeting and ChatThread.jsx heading for document structure compliance.
+- **[P3] Unlabeled inputs:** Added `aria-label` attributes to 9 inputs in ProfileSettings.jsx and 8 inputs/selects in CompleteProfile.jsx for screen-reader accessibility.
+
 ### Added
 - **[P1] MongoDB indexes for query performance:** Added `Post.communityId` index (queries at postRoutes, announcementRoutes, communityRoutes), `User.dept` and `User.currentCompany` indexes (alumni directory queries). 
 - **[P1] Rate limiters for upvote and report endpoints:** Added `upvoteLimiter` (30req/min) and `reportLimiter` (5req/10min) to rateLimiter.js. Applied to all upvote (postRoutes, interviewExperienceRoutes, electiveRoutes, careerRoadmapRoutes) and report endpoints (postRoutes, reviewRoutes, electiveRoutes, careerRoadmapRoutes, marketplaceRoutes).

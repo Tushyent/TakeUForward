@@ -64,7 +64,8 @@ Status values: Not Started / In Progress / Done / Blocked
 | Sidebar Migration & AppLayout | 4 | Done | | client/src/components/Sidebar.jsx, client/src/components/AppLayout.jsx, client/src/App.jsx | 2026-07-09 |
 | Dashboard Redesign (Home.jsx) | 4 | Done | | client/src/pages/Home.jsx | 2026-07-09 |
 | Progressive Web App (PWA) | 4 | Done | | client/vite.config.js, client/src/sw.js | 2026-07-09 |
-| Pre-Deployment Audit & Security | 4 | Done | | AGENTS.md, docs/DEPLOYMENT.md, docs/CHANGELOG.md, server/middleware/requireApprovedUser.js | 2026-07-10 |
+| Pre-Deployment Audit & Security | 4 | Done | | AGENTS.md, docs/DEPLOYMENT.md, docs/CHANGELOG.md, server/middleware/requireApprovedUser.js, server/models/Notification.js, server/models/Resource.js, server/models/LostFoundItem.js | 2026-07-10 |
 | Production Readiness — Part 3 | 4 | Done | | server/models/Post.js, server/models/User.js, server/routes/referralRoutes.js, server/routes/mockInterviewRoutes.js, server/routes/bookmarkRoutes.js, server/middleware/rateLimiter.js, server/services/digestService.js, all server routes, client/src/api/axiosClient.js, client/src/pages/Marketplace.jsx | 2026-07-10 |
 | Jest ESM Configuration | 1 | Done (Tested) | | server/jest.config.js, server/tests/anonymity.test.js, server/tests/chat.test.js, server/tests/alumniGate.test.js | 2026-07-10 |
 | Playwright Critical-Path E2E | 4 | Done (Tested) | | playwright.config.js, e2e/critical-path.spec.js | 2026-07-10 |
+| Production Readiness — Part 4 (A/A2-7/B/C/D/E) | 4 | Done | | 15 files, see CHANGELOG | 2026-07-10 |

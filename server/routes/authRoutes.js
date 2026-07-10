@@ -189,7 +189,7 @@ if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_SESSION === 
           name: 'Playwright Test User',
           role: 'student',
           dept: 'CSE',
-          year: 3
+          year: 2025
         });
       }
       req.login(user, (err) => {

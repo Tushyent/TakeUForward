@@ -181,7 +181,7 @@ function InterviewExperiences() {
             
             <h4 style={{ marginBottom: '10px' }}>Interview Rounds</h4>
             {rounds.map((round, index) => (
-              <div key={index} style={{ marginBottom: '15px', padding: '15px', border: '1px dashed var(--border)', borderRadius: '6px' }}>
+              <div key={`round-${index}`} style={{ marginBottom: '15px', padding: '15px', border: '1px dashed var(--border)', borderRadius: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <strong>Round {index + 1}</strong>
                   {rounds.length > 1 && (
@@ -262,7 +262,7 @@ function InterviewExperiences() {
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px' }}>
                   {exp.rounds?.map((round, idx) => (
-                    <div key={idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px' }}>
+                    <div key={round._id || idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                         <strong style={{ color: 'var(--text-primary)' }}>Round {idx + 1}: {round.roundName}</strong>
                         <Badge variant="secondary">Difficulty: {round.difficulty}/5</Badge>

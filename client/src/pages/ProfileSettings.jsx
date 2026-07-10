@@ -205,47 +205,48 @@ function ProfileSettings() {
                 onChange={e => handleChange(e)}
                 style={{ width: '100%', minHeight: '100px' }}
                 placeholder="Write a little about yourself..."
+                aria-label="About Me"
               />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Skills (comma separated)</label>
-              <Input name="skills" value={profile.skills} onChange={e => handleChange(e)} placeholder="React, Node.js, Python..." style={{ width: '100%' }} />
+              <Input name="skills" value={profile.skills} onChange={e => handleChange(e)} placeholder="React, Node.js, Python..." style={{ width: '100%' }} aria-label="Skills" />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Interests (comma separated)</label>
-              <Input name="interests" value={profile.interests} onChange={e => handleChange(e)} placeholder="Machine Learning, Web Dev, Photography..." style={{ width: '100%' }} />
+              <Input name="interests" value={profile.interests} onChange={e => handleChange(e)} placeholder="Machine Learning, Web Dev, Photography..." style={{ width: '100%' }} aria-label="Interests" />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Experience (comma separated)</label>
-              <Input name="experience" value={profile.experience} onChange={e => handleChange(e)} placeholder="SWE Intern at Google, GDSC Lead..." style={{ width: '100%' }} />
+              <Input name="experience" value={profile.experience} onChange={e => handleChange(e)} placeholder="SWE Intern at Google, GDSC Lead..." style={{ width: '100%' }} aria-label="Experience" />
             </div>
 
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Projects (comma separated)</label>
-              <Input name="projects" value={profile.projects} onChange={e => handleChange(e)} placeholder="TakeUForward, React Native App..." style={{ width: '100%' }} />
+              <Input name="projects" value={profile.projects} onChange={e => handleChange(e)} placeholder="TakeUForward, React Native App..." style={{ width: '100%' }} aria-label="Projects" />
             </div>
 
             <h3 style={{ marginTop: '25px', marginBottom: '15px' }}>Contact Links</h3>
             <div style={{ marginBottom: '15px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>WhatsApp Number (for wa.me click-to-chat)</label>
-              <Input name="whatsappNumber" type="tel" value={profile.whatsappNumber} onChange={e => handleChange(e)} placeholder="e.g. 9876543210" style={{ width: '100%' }} />
+              <Input name="whatsappNumber" type="tel" value={profile.whatsappNumber} onChange={e => handleChange(e)} placeholder="e.g. 9876543210" style={{ width: '100%' }} aria-label="WhatsApp Number" />
             </div>
 
             <div className="grid-2-col" style={{ gap: '15px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>LinkedIn URL</label>
-                <Input value={profile.socialLinks.linkedin} onChange={e => handleChange(e, 'socialLinks', 'linkedin')} placeholder="https://linkedin.com/in/..." style={{ width: '100%' }} />
+                <Input value={profile.socialLinks.linkedin} onChange={e => handleChange(e, 'socialLinks', 'linkedin')} placeholder="https://linkedin.com/in/..." style={{ width: '100%' }} aria-label="LinkedIn URL" />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>GitHub URL</label>
-                <Input value={profile.socialLinks.github} onChange={e => handleChange(e, 'socialLinks', 'github')} placeholder="https://github.com/..." style={{ width: '100%' }} />
+                <Input value={profile.socialLinks.github} onChange={e => handleChange(e, 'socialLinks', 'github')} placeholder="https://github.com/..." style={{ width: '100%' }} aria-label="GitHub URL" />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Instagram URL</label>
-                <Input value={profile.socialLinks.instagram} onChange={e => handleChange(e, 'socialLinks', 'instagram')} placeholder="https://instagram.com/..." style={{ width: '100%' }} />
+                <Input value={profile.socialLinks.instagram} onChange={e => handleChange(e, 'socialLinks', 'instagram')} placeholder="https://instagram.com/..." style={{ width: '100%' }} aria-label="Instagram URL" />
               </div>
             </div>
           </Card>

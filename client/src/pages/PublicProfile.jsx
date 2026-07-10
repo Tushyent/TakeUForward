@@ -97,7 +97,7 @@ function PublicProfile() {
                 <h3 style={{ margin: '0 0 10px 0' }}>Skills</h3>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {profile.skills.map((skill, i) => (
-                    <Badge key={i} variant="secondary">{skill}</Badge>
+                    <Badge key={`skill-${i}-${skill}`} variant="secondary">{skill}</Badge>
                   ))}
                 </div>
               </div>
@@ -108,7 +108,7 @@ function PublicProfile() {
                 <h3 style={{ margin: '0 0 10px 0' }}>Interests</h3>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   {profile.interests.map((interest, i) => (
-                    <Badge key={i} variant="primary">{interest}</Badge>
+                    <Badge key={`interest-${i}-${interest}`} variant="primary">{interest}</Badge>
                   ))}
                 </div>
               </div>
@@ -121,7 +121,7 @@ function PublicProfile() {
                 <h3 style={{ margin: '0 0 10px 0' }}>Experience</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {profile.experience.map((exp, i) => (
-                    <div key={i} style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                    <div key={`exp-${i}`} style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{exp}</span>
                     </div>
                   ))}
@@ -134,7 +134,7 @@ function PublicProfile() {
                 <h3 style={{ margin: '0 0 10px 0' }}>Projects</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {profile.projects.map((proj, i) => (
-                    <div key={i} style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                    <div key={`proj-${i}`} style={{ padding: '10px', background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                       <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{proj}</span>
                     </div>
                   ))}

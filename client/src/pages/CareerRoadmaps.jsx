@@ -170,7 +170,7 @@ function CareerRoadmaps() {
 
               <h4 style={{ marginBottom: '10px' }}>Steps</h4>
               {steps.map((step, idx) => (
-                <div key={idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', marginBottom: '10px' }}>
+                <div key={`step-${idx}`} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <strong style={{ color: 'var(--text)' }}>Step {idx + 1}</strong>
                     {steps.length > 1 && (
@@ -241,7 +241,7 @@ function CareerRoadmaps() {
                 
                 <div style={{ padding: '15px 0', borderTop: '1px solid var(--border)' }}>
                   {roadmap.steps.map((step, idx) => (
-                    <div key={idx} style={{ marginBottom: idx === roadmap.steps.length - 1 ? 0 : '15px', display: 'flex', gap: '15px' }}>
+                    <div key={step.order || idx} style={{ marginBottom: idx === roadmap.steps.length - 1 ? 0 : '15px', display: 'flex', gap: '15px' }}>
                       <div style={{ background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 'bold' }}>
                         {step.order}
                       </div>

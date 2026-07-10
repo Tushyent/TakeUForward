@@ -72,19 +72,19 @@ function ChatThread() {
           &larr; Back to Inbox
         </Link>
         
-        <h2 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center' }}>
+        <h1 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', fontSize: 'var(--text-2xl)' }}>
           Chat with {otherUser?.name}
           {otherUser?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={otherUser.isVerifiedAlumni} style={{ marginLeft: '10px' }} />}
-        </h2>
+        </h1>
 
         <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-base)' }}>
           {chat.messages.length === 0 ? (
             <p style={{ textAlign: 'center', color: 'var(--text)', marginTop: '2rem' }}>No messages yet. Say hi!</p>
           ) : (
-            chat.messages.map((msg, idx) => {
+            chat.messages.map((msg) => {
               const isMine = msg.senderId._id === myUserId;
               return (
-                <div key={idx} style={{ alignSelf: isMine ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
+                <div key={msg._id} style={{ alignSelf: isMine ? 'flex-end' : 'flex-start', maxWidth: '75%' }}>
                   <div style={{ 
                     background: isMine ? 'var(--primary)' : 'var(--bg-surface)', 
                     color: isMine ? 'white' : 'var(--text-primary)', 

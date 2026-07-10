@@ -30,6 +30,7 @@ import LostFound from './pages/LostFound';
 import Marketplace from './pages/Marketplace';
 import PersonalDrive from './pages/PersonalDrive';
 import About from './pages/About';
+import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 
@@ -44,6 +45,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/pending-approval" element={<PendingApproval />} />
           <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
+          <Route path="/about" element={<About />} />
           
           {/* Protected Routes inside AppLayout */}
           <Route path="/*" element={
@@ -66,7 +68,6 @@ function App() {
                   <Route path="/lost-found" element={<LostFound />} />
                   <Route path="/marketplace" element={<Marketplace />} />
                   <Route path="/drive" element={<PersonalDrive />} />
-                  <Route path="/about" element={<About />} />
                   <Route path="/reviews" element={<Reviews />} />
                   <Route path="/bookmarks" element={<Bookmarks />} />
                   <Route path="/moderation" element={<ModerationQueue />} />
@@ -76,7 +77,7 @@ function App() {
                   <Route path="/settings/profile" element={<ProfileSettings />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/" element={<Navigate to="/home" replace />} />
-                  <Route path="*" element={<Navigate to="/home" replace />} />
+                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </AppLayout>
             </ProtectedRoute>

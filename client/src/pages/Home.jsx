@@ -52,7 +52,6 @@ const renderGrid = (title, items, icon) => (
       {items.map(({ to, icon: Icon, label, desc, color, glow }) => (
         <Link to={to} key={label} style={{ textDecoration: 'none' }}>
           <Card
-            hoverable
             style={{
               height: '100%',
               display: 'flex',
@@ -246,9 +245,9 @@ function Home() {
               )}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                  <h2 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>
+                    <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>
                     Hey, {user?.name?.split(' ')[0] || 'there'} 👋
-                  </h2>
+                  </h1>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)', flexWrap: 'wrap' }}>
                   <Badge variant={user?.role === 'alumni' ? 'accent' : user?.role === 'platform_admin' ? 'danger' : 'primary'}>

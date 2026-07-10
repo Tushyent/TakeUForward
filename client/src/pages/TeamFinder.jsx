@@ -219,7 +219,7 @@ function TeamFinder() {
                   <div style={{ marginBottom: '15px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <strong style={{ alignSelf: 'center', color: 'var(--text)' }}>Skills:</strong>
                     {req.skillsNeeded.map((skill, idx) => (
-                      <Badge key={idx} variant="secondary">{skill}</Badge>
+                      <Badge key={`skill-${idx}`} variant="secondary">{skill}</Badge>
                     ))}
                   </div>
                 )}
@@ -279,7 +279,7 @@ function TeamFinder() {
                     <h4 style={{ margin: '0 0 15px 0' }}>Applicants ({req.applicants.length})</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                       {req.applicants.map((applicant, idx) => (
-                        <div key={idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                        <div key={applicant.userId?._id || idx} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
                           <div>
                             <div style={{ fontWeight: 500, marginBottom: '5px' }}>
                               <Link to={`/profile/${applicant.userId?.username}`} style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>
