@@ -2,6 +2,8 @@ import express from 'express';
 import Bookmark from '../models/Bookmark.js';
 import { bookmarkLimiter } from '../middleware/rateLimiter.js';
 import { applyAnonymity } from '../utils/anonymity.js';
+import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -9,10 +11,11 @@ const router = express.Router();
 // @desc    Get user's bookmarks
 // @access  Private
 router.get('/', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
-    const { type } = req.query; // 'post' or 'resource'
+    const { type, page: pageQuery, limit: limitQuery } = req.query; // 'post' or 'resource'
+    const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
     const query = { userId: req.user._id };
     if (type) query.itemType = type;
 
@@ -24,7 +27,9 @@ router.get('/', async (req, res, next) => {
           { path: 'clubId', select: 'name' }
         ]
       })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     // Filter out bookmarks where the itemId was deleted from the database
     const validBookmarks = bookmarks.filter(b => b.itemId);
@@ -40,7 +45,7 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(safeBookmarks);
   } catch (err) {
-    console.error('Error fetching bookmarks:', err);
+    logger.error('Error fetching bookmarks:', err);
     next(err);
   }
 });
@@ -49,14 +54,14 @@ router.get('/', async (req, res, next) => {
 // @desc    Toggle a bookmark (add if not exists, remove if exists)
 // @access  Private
 router.post('/', bookmarkLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   const { itemType, itemId } = req.body;
   if (!itemType || !itemId) {
-    return res.status(400).json({ error: 'itemType and itemId are required' });
+    return res.status(400).json({ error: { message: 'itemType and itemId are required' } });
   }
   if (!['post', 'resource'].includes(itemType)) {
-    return res.status(400).json({ error: 'Invalid itemType' });
+    return res.status(400).json({ error: { message: 'Invalid itemType' } });
   }
 
   try {
@@ -81,7 +86,7 @@ router.post('/', bookmarkLimiter, async (req, res, next) => {
       }
     }
   } catch (err) {
-    console.error('Error toggling bookmark:', err);
+    logger.error('Error toggling bookmark:', err);
     next(err);
   }
 });

@@ -1,13 +1,14 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import Review from '../models/Review.js';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
 const run = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward');
-    console.log('Connected to MongoDB');
+    logger.info('Connected to MongoDB');
 
     const duplicates = await Review.aggregate([
       {
@@ -27,17 +28,17 @@ const run = async () => {
 
     let deletedCount = 0;
     for (const dup of duplicates) {
-      console.log(`Found duplicate for author ${dup._id.authorId}, course ${dup._id.courseCode}`);
+      logger.info(`Found duplicate for author ${dup._id.authorId}, course ${dup._id.courseCode}`);
       // Keep the latest one, delete the rest
       const idsToDelete = dup.reviews.filter(id => id.toString() !== dup.latestReviewId.toString());
       await Review.deleteMany({ _id: { $in: idsToDelete } });
       deletedCount += idsToDelete.length;
     }
 
-    console.log(`Cleanup complete. Deleted ${deletedCount} duplicate reviews.`);
+    logger.info(`Cleanup complete. Deleted ${deletedCount} duplicate reviews.`);
     process.exit(0);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     process.exit(1);
   }
 };

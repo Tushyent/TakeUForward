@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
@@ -94,6 +95,10 @@ function Marketplace() {
       setSubmitting(false);
     }
   };
+
+  const handleReport = async (id) => {
+    const reason = window.prompt('Please describe why you are reporting this item:');
+    if (!reason || !reason.trim()) return;
     try {
       await axiosClient.post(`/marketplace/${id}/report`, { reason });
       toast.success('Item reported successfully');
@@ -101,6 +106,19 @@ function Marketplace() {
       toast.error(err.response?.data?.error || 'Failed to report item');
     }
   };
+
+  const handleMarkSold = async (id) => {
+    if (!window.confirm('Mark this item as sold?')) return;
+    try {
+      const res = await axiosClient.patch(`/marketplace/${id}/sold`);
+      setItems(prev => prev.map(item => item._id === id ? res.data : item));
+      toast.success('Item marked as sold');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to mark item as sold');
+    }
+  };
+
+  // Message navigation uses <Link to={`/chat/${userId}`}> inline below
 
   return (
     <div className="page-transition">
@@ -227,9 +245,9 @@ function Marketplace() {
                 
                 <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
                   {currentUser && item.sellerId && currentUser.id !== item.sellerId._id && item.status === 'available' && (
-                    <Button onClick={() => handleMessageUser(item.sellerId._id)} style={{ flex: 1 }}>
-                      Message Seller
-                    </Button>
+                    <Link to={`/chat/${item.sellerId._id}`} style={{ flex: 1, textDecoration: 'none' }}>
+                      <Button style={{ width: '100%' }}>Message Seller</Button>
+                    </Link>
                   )}
                   
                   {currentUser && item.sellerId && currentUser.id === item.sellerId._id && item.status === 'available' && (

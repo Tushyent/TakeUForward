@@ -3,6 +3,7 @@ import LostFoundItem from '../models/LostFoundItem.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { generatePresignedUrl } from '../config/s3.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(items);
   } catch (err) {
-    console.error('Error fetching lost/found items:', err);
+    logger.error('Error fetching lost/found items:', err);
     next(err);
   }
 });
@@ -45,7 +46,7 @@ router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
     const { uploadUrl, fileUrl } = await generatePresignedUrl(fileName, fileType);
     res.status(200).json({ uploadUrl, fileUrl });
   } catch (err) {
-    console.error('Error generating upload url for lost-found:', err);
+    logger.error('Error generating upload url for lost-found:', err);
     next(err);
   }
 });
@@ -79,7 +80,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 
     res.status(201).json(populatedItem);
   } catch (err) {
-    console.error('Error creating lost/found item:', err);
+    logger.error('Error creating lost/found item:', err);
     next(err);
   }
 });
@@ -104,7 +105,7 @@ router.post('/:id/resolve', async (req, res, next) => {
 
     res.status(200).json(updatedItem);
   } catch (err) {
-    console.error('Error resolving lost/found item:', err);
+    logger.error('Error resolving lost/found item:', err);
     next(err);
   }
 });

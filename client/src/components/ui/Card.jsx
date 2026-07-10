@@ -18,13 +18,18 @@ const Card = ({ children, style, variant = 'default', lift = false, className = 
 
   const variants = {
     default: {
-      background: 'var(--bg-surface)',
+      background: 'var(--glass-surface)',
+      backdropFilter: 'blur(var(--glass-surface-blur))',
+      WebkitBackdropFilter: 'blur(var(--glass-surface-blur))',
       boxShadow: 'var(--shadow-sm)',
+      borderColor: 'var(--glass-border)',
     },
     elevated: {
-      background: 'var(--bg-elevated)',
+      background: 'var(--glass-surface-hover)',
+      backdropFilter: 'blur(var(--glass-surface-blur))',
+      WebkitBackdropFilter: 'blur(var(--glass-surface-blur))',
       boxShadow: 'var(--shadow-md)',
-      borderColor: 'var(--border-strong)',
+      borderColor: 'var(--glass-border-strong)',
     },
     glass: {
       background: 'var(--glass-bg)',

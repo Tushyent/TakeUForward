@@ -1,7 +1,8 @@
 import express from 'express';
 import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(suggestions);
   } catch (err) {
-    console.error('Error fetching elective suggestions:', err);
+    logger.error('Error fetching elective suggestions:', err);
     next(err);
   }
 });
@@ -74,13 +75,13 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 
     res.status(201).json(responseData);
   } catch (err) {
-    console.error('Error creating elective suggestion:', err);
+    logger.error('Error creating elective suggestion:', err);
     next(err);
   }
 });
 
 // POST /api/elective-suggestions/:id/upvote
-router.post('/:id/upvote', async (req, res, next) => {
+router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -97,13 +98,13 @@ router.post('/:id/upvote', async (req, res, next) => {
     const updatedSuggestion = await ElectiveSuggestion.findByIdAndUpdate(req.params.id, update, { new: true });
     res.status(200).json({ upvotesCount: updatedSuggestion.upvotes.length });
   } catch (err) {
-    console.error('Error toggling upvote:', err);
+    logger.error('Error toggling upvote:', err);
     next(err);
   }
 });
 
 // POST /api/elective-suggestions/:id/report
-router.post('/:id/report', async (req, res, next) => {
+router.post('/:id/report', reportLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -132,7 +133,7 @@ router.post('/:id/report', async (req, res, next) => {
     await suggestion.save();
     res.status(200).json({ message: 'Suggestion reported successfully', isHidden: suggestion.isHidden });
   } catch (err) {
-    console.error('Error reporting suggestion:', err);
+    logger.error('Error reporting suggestion:', err);
     next(err);
   }
 });

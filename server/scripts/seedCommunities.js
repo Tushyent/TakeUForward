@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Community from '../models/Community.js';
+import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +12,7 @@ dotenv.config({ path: path.join(__dirname, '../.env') });
 const seedCommunities = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev');
-    console.log('Connected to MongoDB for seeding communities...');
+    logger.info('Connected to MongoDB for seeding communities...');
 
     const communitiesToSeed = [
       {
@@ -35,16 +36,16 @@ const seedCommunities = async () => {
       const exists = await Community.findOne({ name: comm.name });
       if (!exists) {
         await Community.create(comm);
-        console.log(`Created community: ${comm.name}`);
+        logger.info(`Created community: ${comm.name}`);
       } else {
-        console.log(`Community ${comm.name} already exists. Skipping.`);
+        logger.info(`Community ${comm.name} already exists. Skipping.`);
       }
     }
 
-    console.log('Seeding complete!');
+    logger.info('Seeding complete!');
     process.exit(0);
   } catch (err) {
-    console.error('Error seeding communities:', err);
+    logger.error('Error seeding communities:', err);
     process.exit(1);
   }
 };

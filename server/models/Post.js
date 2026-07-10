@@ -33,5 +33,7 @@ const postSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+postSchema.index({ communityId: 1 });
+
 const Post = mongoose.model('Post', postSchema);
 export default Post;

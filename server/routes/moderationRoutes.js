@@ -126,4 +126,84 @@ router.post('/:itemId/resolve', requirePlatformAdmin, async (req, res, next) => 
   }
 });
 
+// @route   GET /api/moderation/alumni-requests
+// @desc    Get all pending alumni registration requests
+// @access  Private (Platform Admin)
+router.get('/alumni-requests', requirePlatformAdmin, async (req, res, next) => {
+  try {
+    const { getPaginationParams } = await import('../utils/paginationUtils.js');
+    const { limit, skip } = getPaginationParams(req.query.page, req.query.limit);
+
+    const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
+    const requests = await AlumniRegistrationRequest.find({ status: 'pending' })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+      
+    res.json(requests);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// @route   POST /api/moderation/alumni-requests/:id/approve
+// @desc    Approve an alumni request and send invite
+// @access  Private (Platform Admin)
+router.post('/alumni-requests/:id/approve', requirePlatformAdmin, async (req, res, next) => {
+  try {
+    const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
+    const ApprovedAlumniEmail = (await import('../models/ApprovedAlumniEmail.js')).default;
+    const crypto = (await import('crypto')).default;
+    const { sendEmail } = await import('../config/mailer.js');
+    const { logger } = await import('../utils/logger.js');
+
+    const request = await AlumniRegistrationRequest.findById(req.params.id);
+    if (!request || request.status !== 'pending') {
+      return res.status(404).json({ error: { message: 'Pending request not found' } });
+    }
+
+    // 1. Mark request as approved
+    request.status = 'approved';
+    await request.save();
+
+    // 2. Generate invite token
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // 3. Add to approved emails
+    await ApprovedAlumniEmail.findOneAndUpdate(
+      { email: request.email },
+      { email: request.email, token, used: false },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    // 4. Send email
+    const loginLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?token=${token}`;
+    await sendEmail(request.email, 'Your Alumni Request is Approved', `Click here to login: ${loginLink}`);
+
+    res.json({ message: 'Request approved and invite sent' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// @route   POST /api/moderation/alumni-requests/:id/reject
+// @desc    Reject an alumni request
+// @access  Private (Platform Admin)
+router.post('/alumni-requests/:id/reject', requirePlatformAdmin, async (req, res, next) => {
+  try {
+    const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
+    const request = await AlumniRegistrationRequest.findById(req.params.id);
+    if (!request || request.status !== 'pending') {
+      return res.status(404).json({ error: { message: 'Pending request not found' } });
+    }
+
+    request.status = 'rejected';
+    await request.save();
+
+    res.json({ message: 'Request rejected' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

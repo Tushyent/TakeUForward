@@ -22,6 +22,10 @@
   "homepage": "https://github.com/Tushyent/TakeUForward#readme",
   "description": "",
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "concurrently": "^10.0.3"
+  },
+  "dependencies": {
+    "axios": "^1.18.1"
   }
 }

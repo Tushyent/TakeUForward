@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
@@ -18,24 +18,24 @@ import {
    DASHBOARD CATEGORIES
    --------------------------------------------------------------- */
 const ACADEMIC_LINKS = [
-  { to: '/resources', icon: BookOpen, label: 'Resources', desc: 'Notes & materials', color: '#60A5FA', glow: 'rgba(96,165,250,0.2)' },
-  { to: '/electives', icon: Lightbulb, label: 'Electives', desc: 'Course insights', color: '#FBBF24', glow: 'rgba(251,191,36,0.2)' },
-  { to: '/reviews', icon: Star, label: 'Reviews', desc: 'Professors & courses', color: '#34D399', glow: 'rgba(52,211,153,0.2)' },
+  { to: '/resources', icon: BookOpen, label: 'Resources', desc: 'Notes & materials', color: 'var(--info)', glow: 'var(--info-bg)' },
+  { to: '/electives', icon: Lightbulb, label: 'Electives', desc: 'Course insights', color: 'var(--warning)', glow: 'var(--warning-bg)' },
+  { to: '/reviews', icon: Star, label: 'Reviews', desc: 'Professors & courses', color: 'var(--success)', glow: 'var(--success-bg)' },
 ];
 
 const CAREER_LINKS = [
-  { to: '/mock-interviews', icon: MessageSquare, label: 'Mock Interviews', desc: 'Practice with peers', color: '#7C6AF7', glow: 'rgba(124,106,247,0.2)' },
-  { to: '/referrals', icon: Briefcase, label: 'Referrals', desc: 'Get referred', color: '#F97316', glow: 'rgba(249,115,22,0.2)' },
-  { to: '/alumni', icon: GraduationCap, label: 'Alumni', desc: 'Network & connect', color: '#60A5FA', glow: 'rgba(96,165,250,0.2)' },
-  { to: '/interview-experiences', icon: FileText, label: 'Experiences', desc: 'Read past stories', color: '#FBBF24', glow: 'rgba(251,191,36,0.2)' },
-  { to: '/career-roadmaps', icon: Map, label: 'Roadmaps', desc: 'Guided paths', color: '#34D399', glow: 'rgba(52,211,153,0.2)' },
+  { to: '/mock-interviews', icon: MessageSquare, label: 'Mock Interviews', desc: 'Practice with peers', color: 'var(--primary)', glow: 'var(--primary-glow)' },
+  { to: '/referrals', icon: Briefcase, label: 'Referrals', desc: 'Get referred', color: 'var(--accent)', glow: 'var(--accent-bg)' },
+  { to: '/alumni', icon: GraduationCap, label: 'Alumni', desc: 'Network & connect', color: 'var(--info)', glow: 'var(--info-bg)' },
+  { to: '/interview-experiences', icon: FileText, label: 'Experiences', desc: 'Read past stories', color: 'var(--warning)', glow: 'var(--warning-bg)' },
+  { to: '/career-roadmaps', icon: Map, label: 'Roadmaps', desc: 'Guided paths', color: 'var(--success)', glow: 'var(--success-bg)' },
 ];
 
 const CAMPUS_LINKS = [
-  { to: '/clubs', icon: Users, label: 'Clubs', desc: 'Join communities', color: '#F97316', glow: 'rgba(249,115,22,0.2)' },
-  { to: '/team-finder', icon: UserCheck, label: 'Team Finder', desc: 'Find hackathon mates', color: '#34D399', glow: 'rgba(52,211,153,0.2)' },
-  { to: '/lost-found', icon: Package, label: 'Lost & Found', desc: 'Report & find', color: '#60A5FA', glow: 'rgba(96,165,250,0.2)' },
-  { to: '/marketplace', icon: ShoppingBag, label: 'Marketplace', desc: 'Buy & sell', color: '#7C6AF7', glow: 'rgba(124,106,247,0.2)' },
+  { to: '/clubs', icon: Users, label: 'Clubs', desc: 'Join communities', color: 'var(--accent)', glow: 'var(--accent-bg)' },
+  { to: '/team-finder', icon: UserCheck, label: 'Team Finder', desc: 'Find hackathon mates', color: 'var(--success)', glow: 'var(--success-bg)' },
+  { to: '/lost-found', icon: Package, label: 'Lost & Found', desc: 'Report & find', color: 'var(--info)', glow: 'var(--info-bg)' },
+  { to: '/marketplace', icon: ShoppingBag, label: 'Marketplace', desc: 'Buy & sell', color: 'var(--primary)', glow: 'var(--primary-glow)' },
 ];
 
 const renderGrid = (title, items, icon) => (
@@ -50,16 +50,15 @@ const renderGrid = (title, items, icon) => (
       gap: 'var(--space-4)',
     }}>
       {items.map(({ to, icon: Icon, label, desc, color, glow }) => (
-        <Link key={to} to={to} style={{ textDecoration: 'none' }}>
-          <div
+        <Link to={to} key={label} style={{ textDecoration: 'none' }}>
+          <Card
+            hoverable
             style={{
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
               padding: 'var(--space-4)',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
-              transition: 'box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base)',
-              cursor: 'pointer',
-              height: '100%'
+              borderTop: `2px solid ${color}`, // Keep the brand color accent
             }}
             onMouseEnter={e => {
               e.currentTarget.style.boxShadow = `0 0 0 1px ${glow}, 0 8px 24px rgba(0,0,0,0.4)`;
@@ -91,7 +90,7 @@ const renderGrid = (title, items, icon) => (
             <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>
               {desc}
             </p>
-          </div>
+          </Card>
         </Link>
       ))}
     </div>
@@ -121,7 +120,7 @@ const InitialsAvatar = ({ name, size = 44 }) => {
       width: size,
       height: size,
       borderRadius: 'var(--radius-full)',
-      background: 'linear-gradient(135deg, var(--primary) 0%, #a78bfa 100%)',
+      background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -142,6 +141,7 @@ const InitialsAvatar = ({ name, size = 44 }) => {
 function Home() {
   const { user } = useAuth();
   const [communities, setCommunities] = useState([]);
+  const [loading, setLoading] = useState(true);
   // Alumni invite (admin only)
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLink, setInviteLink] = useState('');
@@ -154,6 +154,8 @@ function Home() {
         setCommunities(response.data);
       } catch {
         // silently fail — communities are supplementary on home
+      } finally {
+        setLoading(false);
       }
     };
     fetchCommunities();
@@ -202,7 +204,7 @@ function Home() {
           borderRadius: 'var(--radius-xl)',
           padding: 'var(--space-8)',
           marginBottom: 'var(--space-6)',
-          background: 'linear-gradient(135deg, #1a1536 0%, #161720 60%, #0f1420 100%)',
+          background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
           border: '1px solid rgba(124,106,247,0.25)',
           boxShadow: '0 0 40px rgba(124,106,247,0.10)',
           overflow: 'hidden',
@@ -267,12 +269,6 @@ function Home() {
             }}>
               Welcome back to <strong style={{ color: 'var(--text-primary)' }}>TakeUForward</strong> — your campus community for academics, placements, and everything in between.
             </p>
-
-            {error && (
-              <p style={{ color: 'var(--danger)', fontSize: 'var(--text-sm)', marginTop: 'var(--space-3)' }}>
-                ⚠ {error}
-              </p>
-            )}
           </div>
         </div>
 

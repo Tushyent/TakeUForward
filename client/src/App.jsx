@@ -76,6 +76,7 @@ function App() {
                   <Route path="/settings/profile" element={<ProfileSettings />} />
                   <Route path="/home" element={<Home />} />
                   <Route path="/" element={<Navigate to="/home" replace />} />
+                  <Route path="*" element={<Navigate to="/home" replace />} />
                 </Routes>
               </AppLayout>
             </ProtectedRoute>

@@ -1,9 +1,26 @@
+# Dependencies
 node_modules/
+.npm/
+
+# Environment Variables (CRITICAL)
+# Ignore all .env files EXCEPT .env.example
 .env
+.env.*
+!.env.example
+
+# Build Artifacts
 dist/
 build/
-.DS_Store
-.npm
 coverage/
+
+# Testing Artifacts (Playwright/Jest)
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
 *.log
-docs/
+
+# OS & Editor
+.DS_Store
+.vscode/
+.idea/

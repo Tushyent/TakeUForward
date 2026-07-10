@@ -1,6 +1,7 @@
 import { getGeminiModel } from '../config/gemini.js';
 import axios from 'axios';
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import { logger } from '../utils/logger.js';
 
 /**
  * Summarizes an academic resource using Google Gemini API.
@@ -24,7 +25,7 @@ export const summarizeResource = async (title, courseCode, tags, fileUrl) => {
         extractedText = pdfData.text || '';
         extractedText = extractedText.trim();
       } catch (pdfErr) {
-        console.warn('PDF extraction failed, falling back to metadata:', pdfErr.message);
+        logger.warn('PDF extraction failed, falling back to metadata:', pdfErr.message);
       }
     }
 
@@ -34,7 +35,7 @@ export const summarizeResource = async (title, courseCode, tags, fileUrl) => {
       prompt = `Here is the extracted content from a student's study resource titled "${title}" for course "${courseCode}". Summarize in 2-3 sentences what topics/concepts this material actually covers, based on the content below, not just the title:\n\n${truncatedText}`;
     } else {
       // Graceful fallback for non-PDFs or scanned PDFs with no text layer
-      console.warn(`Falling back to metadata-only summary for: ${title}`);
+      logger.warn(`Falling back to metadata-only summary for: ${title}`);
       prompt = `You are an academic assistant. Please write a 2-3 sentence summary explaining what a student can expect from a study resource with the following details. Keep it professional, concise, and helpful. Note: This summary is based only on metadata, not file content.
       
       Title: ${title}
@@ -54,14 +55,14 @@ export const summarizeResource = async (title, courseCode, tags, fileUrl) => {
 
     return summaryText;
   } catch (err) {
-    console.error('Error generating AI summary:', err.message);
+    logger.warn('Error generating AI summary:', err.message);
     
     if (err.message.includes('GEMINI_API_KEY is missing')) {
-      console.warn('Gemini summarization skipped: API Key is not configured.');
+      logger.warn('Gemini summarization skipped: API Key is not configured.');
     } else if (err.status === 429) {
-      console.warn('Gemini summarization skipped: Rate limit / Quota exceeded.');
+      logger.warn('Gemini summarization skipped: Rate limit / Quota exceeded.');
     } else if (err.name === 'FetchError' || err.code === 'ETIMEDOUT') {
-      console.warn('Gemini summarization skipped: Network timeout.');
+      logger.warn('Gemini summarization skipped: Network timeout.');
     }
     
     return ''; // Graceful fallback

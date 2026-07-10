@@ -41,11 +41,11 @@ router.get('/search', async (req, res, next) => {
 // @desc    Get public profile
 // @access  Public (or Private depending on if we want guests to see it, I'll make it authenticated for now)
 router.get('/:username', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const user = await User.findOne({ username: req.params.username }).lean();
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(404).json({ error: { message: 'User not found' } });
 
     // Strip fields based on profileVisibility
     const vis = user.profileVisibility || {};
@@ -90,7 +90,7 @@ router.get('/:username', async (req, res, next) => {
 // @desc    Update user profile and visibility
 // @access  Private
 router.patch('/me/profile', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { about, interests, skills, experience, projects, whatsappNumber, socialLinks, profileVisibility, weeklyDigestOptIn } = req.body;

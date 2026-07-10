@@ -172,4 +172,70 @@ router.get('/alumni/invite/:token', async (req, res, next) => {
   }
 });
 
+// TEST-ONLY SESSION SEEDING
+// This endpoint seeds a real Passport session from a DB user
+// so E2E tests can bypass Google OAuth, which is not automatable in CI.
+if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_SESSION === 'true') {
+  router.post('/test-session', async (req, res, next) => {
+    try {
+      const User = (await import('../models/User.js')).default;
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: 'email required' });
+      let user = await User.findOne({ email });
+      if (!user) {
+        user = await User.create({
+          googleId: `playwright_${email.replace(/[@.]/g, '_')}`,
+          email,
+          name: 'Playwright Test User',
+          role: 'student',
+          dept: 'CSE',
+          year: 3
+        });
+      }
+      req.login(user, (err) => {
+        if (err) return next(err);
+        res.status(200).json({ message: 'Test session seeded', user });
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+}
+
+// POST /api/auth/alumni/request
+// Public route for alumni to request access without a pre-approved email
+router.post('/alumni/request', async (req, res, next) => {
+  try {
+    const { name, email, dept, graduationYear, currentCompany, proofLink, message } = req.body;
+    
+    if (!name || !email || !dept || !graduationYear || !proofLink) {
+      return res.status(400).json({ error: { message: 'Missing required fields' } });
+    }
+
+    const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
+    
+    // Check if there is already a pending request for this email
+    const existing = await AlumniRegistrationRequest.findOne({ email, status: 'pending' });
+    if (existing) {
+      return res.status(400).json({ error: { message: 'A pending request for this email already exists' } });
+    }
+
+    await AlumniRegistrationRequest.create({
+      name,
+      email,
+      dept,
+      graduationYear,
+      currentCompany,
+      proofLink,
+      message,
+    });
+
+    res.status(201).json({ message: 'Request submitted successfully. Admins will review your request.' });
+  } catch (err) {
+    const { logger } = await import('../utils/logger.js');
+    logger.error('Error submitting alumni request:', err);
+    next(err);
+  }
+});
+
 export default router;

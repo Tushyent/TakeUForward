@@ -32,7 +32,7 @@ function ClubPage() {
       setLoading(true);
       setError('');
       
-      setUser(userRes.data.user);
+
 
       const clubRes = await axiosClient.get(`/clubs/${id}`);
       setClub(clubRes.data.club);

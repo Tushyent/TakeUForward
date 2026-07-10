@@ -1,15 +1,16 @@
 import express from 'express';
 import User from '../models/User.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
 // POST /api/push/subscribe
 router.post('/subscribe', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   const subscription = req.body;
   if (!subscription || !subscription.endpoint || !subscription.keys) {
-    return res.status(400).json({ error: 'Invalid subscription object' });
+    return res.status(400).json({ error: { message: 'Invalid subscription object' } });
   }
 
   try {
@@ -24,18 +25,18 @@ router.post('/subscribe', async (req, res, next) => {
     
     res.status(200).json({ message: 'Push subscription saved' });
   } catch (err) {
-    console.error('Error saving push subscription:', err);
+    logger.error('Error saving push subscription:', err);
     next(err);
   }
 });
 
 // POST /api/push/unsubscribe
 router.post('/unsubscribe', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   const { endpoint } = req.body;
   if (!endpoint) {
-    return res.status(400).json({ error: 'Endpoint is required to unsubscribe' });
+    return res.status(400).json({ error: { message: 'Endpoint is required to unsubscribe' } });
   }
 
   try {
@@ -46,7 +47,7 @@ router.post('/unsubscribe', async (req, res, next) => {
     
     res.status(200).json({ message: 'Push subscription removed' });
   } catch (err) {
-    console.error('Error removing push subscription:', err);
+    logger.error('Error removing push subscription:', err);
     next(err);
   }
 });

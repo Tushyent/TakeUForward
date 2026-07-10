@@ -2,6 +2,7 @@ import express from 'express';
 import TeamRequest from '../models/TeamRequest.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, applyTeamLimiter } from '../middleware/rateLimiter.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -50,7 +51,7 @@ router.get('/', async (req, res, next) => {
     const maskedRequests = requests.map(r => maskContactInfo(r, req.user ? req.user._id : null));
     res.status(200).json(maskedRequests);
   } catch (err) {
-    console.error('Error fetching team requests:', err);
+    logger.error('Error fetching team requests:', err);
     next(err);
   }
 });
@@ -80,7 +81,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 
     res.status(201).json(maskContactInfo(populatedRequest, req.user._id));
   } catch (err) {
-    console.error('Error creating team request:', err);
+    logger.error('Error creating team request:', err);
     next(err);
   }
 });
@@ -121,7 +122,7 @@ router.post('/:id/apply', applyTeamLimiter, async (req, res, next) => {
 
     res.status(200).json(maskContactInfo(updatedRequest, req.user._id));
   } catch (err) {
-    console.error('Error applying to team request:', err);
+    logger.error('Error applying to team request:', err);
     next(err);
   }
 });
@@ -147,7 +148,7 @@ router.post('/:id/close', async (req, res, next) => {
 
     res.status(200).json(maskContactInfo(updatedRequest, req.user._id));
   } catch (err) {
-    console.error('Error closing team request:', err);
+    logger.error('Error closing team request:', err);
     next(err);
   }
 });

@@ -1,8 +1,9 @@
 import express from 'express';
 import InterviewExperience from '../models/InterviewExperience.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -34,20 +35,20 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(safeExperiences);
   } catch (err) {
-    console.error('Error fetching interview experiences:', err);
+    logger.error('Error fetching interview experiences:', err);
     next(err);
   }
 });
 
 // POST /api/interview-experiences
 router.post('/', postCreationLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { isAnonymous, company, role, batchYear, rounds, overallOutcome, tags } = req.body;
 
     if (!company || !role || !batchYear || !rounds || !overallOutcome) {
-      return res.status(400).json({ error: 'Required fields missing' });
+      return res.status(400).json({ error: { message: 'Required fields missing' } });
     }
 
     const experience = await InterviewExperience.create({
@@ -63,18 +64,18 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 
     res.status(201).json(applyAnonymity(experience));
   } catch (err) {
-    console.error('Error creating interview experience:', err);
+    logger.error('Error creating interview experience:', err);
     next(err);
   }
 });
 
 // POST /api/interview-experiences/:id/upvote
-router.post('/:id/upvote', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const experience = await InterviewExperience.findById(req.params.id);
-    if (!experience) return res.status(404).json({ error: 'Experience not found' });
+    if (!experience) return res.status(404).json({ error: { message: 'Experience not found' } });
 
     const userIdStr = req.user._id.toString();
     const hasUpvoted = experience.upvotes.some(id => id.toString() === userIdStr);
@@ -86,27 +87,27 @@ router.post('/:id/upvote', async (req, res, next) => {
     const updatedExperience = await InterviewExperience.findByIdAndUpdate(req.params.id, update, { new: true });
     res.status(200).json({ upvoteCount: updatedExperience.upvotes.length });
   } catch (err) {
-    console.error('Error toggling upvote:', err);
+    logger.error('Error toggling upvote:', err);
     next(err);
   }
 });
 
 // POST /api/interview-experiences/:id/report
-router.post('/:id/report', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+router.post('/:id/report', reportLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { reason } = req.body;
-    if (!reason) return res.status(400).json({ error: 'Report reason is required' });
+    if (!reason) return res.status(400).json({ error: { message: 'Report reason is required' } });
 
     const experience = await InterviewExperience.findById(req.params.id);
-    if (!experience) return res.status(404).json({ error: 'Experience not found' });
+    if (!experience) return res.status(404).json({ error: { message: 'Experience not found' } });
 
     const userIdStr = req.user._id.toString();
     const alreadyReported = experience.reports.some(r => r.userId.toString() === userIdStr);
 
     if (alreadyReported) {
-      return res.status(400).json({ error: 'You have already reported this experience' });
+      return res.status(400).json({ error: { message: 'You have already reported this experience' } });
     }
 
     experience.reports.push({
@@ -121,7 +122,7 @@ router.post('/:id/report', async (req, res, next) => {
     await experience.save();
     res.status(200).json({ message: 'Experience reported successfully', isHidden: experience.isHidden });
   } catch (err) {
-    console.error('Error reporting experience:', err);
+    logger.error('Error reporting experience:', err);
     next(err);
   }
 });

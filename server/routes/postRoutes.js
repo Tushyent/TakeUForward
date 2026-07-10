@@ -4,28 +4,29 @@ import User from '../models/User.js';
 import Community from '../models/Community.js';
 import '../models/Club.js'; // Required for mongoose populate
 import { createNotification } from '../services/notificationService.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
 // POST /api/posts
 router.post('/', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ error: { message: 'Not authenticated' } });
   }
 
   try {
     const { communityId, isAnonymous, content, tags } = req.body;
     
     if (!communityId || !content || !content.trim()) {
-      return res.status(400).json({ error: 'communityId and content are required' });
+      return res.status(400).json({ error: { message: 'communityId and content are required' } });
     }
 
     const communityExists = await Community.findById(communityId);
     if (!communityExists) {
-      return res.status(400).json({ error: 'Invalid communityId' });
+      return res.status(400).json({ error: { message: 'Invalid communityId' } });
     }
 
     // Basic tags validation
@@ -72,7 +73,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 
     res.status(201).json(applyAnonymity(post));
   } catch (err) {
-    console.error('Error creating post:', err);
+    logger.error('Error creating post:', err);
     next(err);
   }
 });
@@ -144,7 +145,7 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(safePosts);
   } catch (err) {
-    console.error('Error fetching posts:', err);
+    logger.error('Error fetching posts:', err);
     next(err);
   }
 });
@@ -158,14 +159,14 @@ router.get('/:id', async (req, res, next) => {
       .populate('clubId', 'name');
     
     if (!post) {
-      return res.status(404).json({ error: 'Post not found' });
+      return res.status(404).json({ error: { message: 'Post not found' } });
     }
 
     res.status(200).json(applyAnonymity(post));
   } catch (err) {
-    console.error('Error fetching post:', err);
+    logger.error('Error fetching post:', err);
     if (err.name === 'CastError') {
-      return res.status(404).json({ error: 'Post not found' });
+      return res.status(404).json({ error: { message: 'Post not found' } });
     }
     next(err);
   }
@@ -173,14 +174,14 @@ router.get('/:id', async (req, res, next) => {
 
 // POST /api/posts/:id/comment
 router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { text, isAnonymous } = req.body;
-    if (!text || !text.trim()) return res.status(400).json({ error: 'Comment text is required' });
+    if (!text || !text.trim()) return res.status(400).json({ error: { message: 'Comment text is required' } });
 
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ error: 'Post not found' });
+    if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
 
     const newComment = {
       authorId: req.user._id,
@@ -241,18 +242,18 @@ router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
     // Find the newly added comment to apply anonymity just to it, or return the whole post
     res.status(201).json(applyAnonymity(post));
   } catch (err) {
-    console.error('Error adding comment:', err);
+    logger.error('Error adding comment:', err);
     next(err);
   }
 });
 
 // POST /api/posts/:id/upvote
-router.post('/:id/upvote', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ error: 'Post not found' });
+    if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
 
     const userIdStr = req.user._id.toString();
     const hasUpvoted = post.upvotes.some(id => id.toString() === userIdStr);
@@ -264,27 +265,27 @@ router.post('/:id/upvote', async (req, res, next) => {
     const updatedPost = await Post.findByIdAndUpdate(req.params.id, update, { new: true });
     res.status(200).json({ upvoteCount: updatedPost.upvotes.length });
   } catch (err) {
-    console.error('Error toggling upvote:', err);
+    logger.error('Error toggling upvote:', err);
     next(err);
   }
 });
 
 // POST /api/posts/:id/report
-router.post('/:id/report', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+router.post('/:id/report', reportLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { reason } = req.body;
-    if (!reason) return res.status(400).json({ error: 'Report reason is required' });
+    if (!reason) return res.status(400).json({ error: { message: 'Report reason is required' } });
 
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ error: 'Post not found' });
+    if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
 
     const userIdStr = req.user._id.toString();
     const alreadyReported = post.reports.some(r => r.userId.toString() === userIdStr);
 
     if (alreadyReported) {
-      return res.status(400).json({ error: 'You have already reported this post' });
+      return res.status(400).json({ error: { message: 'You have already reported this post' } });
     }
 
     post.reports.push({
@@ -299,44 +300,44 @@ router.post('/:id/report', async (req, res, next) => {
     await post.save();
     res.status(200).json({ message: 'Post reported successfully', isHidden: post.isHidden });
   } catch (err) {
-    console.error('Error reporting post:', err);
+    logger.error('Error reporting post:', err);
     next(err);
   }
 });
 
 // DELETE /api/posts/:id
 router.delete('/:id', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ error: 'Post not found' });
+    if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
 
     if (post.authorId.toString() !== req.user._id.toString() && req.user.role !== 'platform_admin') {
-      return res.status(403).json({ error: 'Unauthorized to delete this post' });
+      return res.status(403).json({ error: { message: 'Unauthorized to delete this post' } });
     }
 
     await Post.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (err) {
-    console.error('Error deleting post:', err);
+    logger.error('Error deleting post:', err);
     next(err);
   }
 });
 
 // DELETE /api/posts/:id/comments/:commentId
 router.delete('/:id/comments/:commentId', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ error: 'Post not found' });
+    if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
 
     const comment = post.comments.id(req.params.commentId);
-    if (!comment) return res.status(404).json({ error: 'Comment not found' });
+    if (!comment) return res.status(404).json({ error: { message: 'Comment not found' } });
 
     if (comment.authorId.toString() !== req.user._id.toString() && req.user.role !== 'platform_admin') {
-      return res.status(403).json({ error: 'Unauthorized to delete this comment' });
+      return res.status(403).json({ error: { message: 'Unauthorized to delete this comment' } });
     }
 
     post.comments.pull({ _id: req.params.commentId });
@@ -344,7 +345,7 @@ router.delete('/:id/comments/:commentId', async (req, res, next) => {
     
     res.status(200).json({ message: 'Comment deleted successfully' });
   } catch (err) {
-    console.error('Error deleting comment:', err);
+    logger.error('Error deleting comment:', err);
     next(err);
   }
 });

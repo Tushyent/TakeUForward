@@ -27,7 +27,7 @@ function ReferralBoard() {
     setLoading(true);
     try {
       
-      setUser(userRes.data.user);
+
 
       const queryParams = new URLSearchParams();
       if (companyFilter) queryParams.append('company', companyFilter);

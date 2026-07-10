@@ -20,7 +20,7 @@ const s3Client = new S3Client({
 // GET /api/drive
 // Get all private files for the user
 router.get('/', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const files = await PrivateFile.find({ ownerId: req.user._id }).sort({ createdAt: -1 });
@@ -32,11 +32,11 @@ router.get('/', async (req, res, next) => {
 
 // POST /api/drive/upload-url
 router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { fileName, fileType } = req.body;
-    if (!fileName || !fileType) return res.status(400).json({ error: 'Missing file details' });
+    if (!fileName || !fileType) return res.status(400).json({ error: { message: 'Missing file details' } });
 
     const { uploadUrl, key } = await generatePrivateUploadUrl(fileName, fileType, req.user._id.toString());
     res.status(200).json({ uploadUrl, key });
@@ -47,16 +47,16 @@ router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
 
 // POST /api/drive/confirm
 router.post('/confirm', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { key, fileName, fileType, size } = req.body;
-    if (!key || !fileName || !fileType) return res.status(400).json({ error: 'Missing metadata' });
+    if (!key || !fileName || !fileType) return res.status(400).json({ error: { message: 'Missing metadata' } });
 
     // Enforce 20MB limit for personal drive
     const validation = await validateObjectSize(key, 20 * 1024 * 1024);
     if (!validation.valid) {
-      return res.status(400).json({ error: validation.error || 'File size exceeds 20MB limit. The uploaded file has been discarded.' });
+      return res.status(400).json({ error: { message: validation.error || 'File size exceeds 20MB limit. The uploaded file has been discarded.' } });
     }
 
     const newFile = await PrivateFile.create({
@@ -75,13 +75,13 @@ router.post('/confirm', async (req, res, next) => {
 
 // GET /api/drive/:id/download
 router.get('/:id/download', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const file = await PrivateFile.findById(req.params.id);
-    if (!file) return res.status(404).json({ error: 'File not found' });
+    if (!file) return res.status(404).json({ error: { message: 'File not found' } });
     if (file.ownerId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.status(403).json({ error: { message: 'Unauthorized' } });
     }
 
     const downloadUrl = await generatePrivateDownloadUrl(file.s3Key);
@@ -93,13 +93,13 @@ router.get('/:id/download', async (req, res, next) => {
 
 // DELETE /api/drive/:id
 router.delete('/:id', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const file = await PrivateFile.findById(req.params.id);
-    if (!file) return res.status(404).json({ error: 'File not found' });
+    if (!file) return res.status(404).json({ error: { message: 'File not found' } });
     if (file.ownerId.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ error: 'Unauthorized' });
+      return res.status(403).json({ error: { message: 'Unauthorized' } });
     }
 
     const bucketName = process.env.AWS_BUCKET_NAME;

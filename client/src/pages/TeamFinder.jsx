@@ -36,7 +36,7 @@ function TeamFinder() {
     setLoading(true);
     try {
       
-      setUser(userRes.data.user);
+
 
       const queryParams = new URLSearchParams(filters).toString();
       const response = await axiosClient.get(`/team-requests?${queryParams}`);

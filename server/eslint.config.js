@@ -1,6 +1,6 @@
 export default [
   {
-    ignores: ["node_modules/**"]
+    ignores: ["node_modules/**", "coverage/**"]
   },
   {
     languageOptions: {

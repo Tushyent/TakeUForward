@@ -4,6 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import User from '../models/User.js';
 import Club from '../models/Club.js';
+import { logger } from '../utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,7 +15,7 @@ const assignClubAdmin = async () => {
   const clubName = process.argv[3];
 
   if (!email || !clubName) {
-    console.error('Usage: node assignClubAdmin.js <email> "<club name>"');
+    logger.error('Usage: node assignClubAdmin.js <email> "<club name>"');
     process.exit(1);
   }
 
@@ -23,13 +24,13 @@ const assignClubAdmin = async () => {
     
     const user = await User.findOne({ email });
     if (!user) {
-      console.error(`User not found with email: ${email}`);
+      logger.error(`User not found with email: ${email}`);
       process.exit(1);
     }
 
     const club = await Club.findOne({ name: clubName });
     if (!club) {
-      console.error(`Club not found with name: ${clubName}`);
+      logger.error(`Club not found with name: ${clubName}`);
       process.exit(1);
     }
 
@@ -44,10 +45,10 @@ const assignClubAdmin = async () => {
     user.clubId = club._id;
     await user.save();
 
-    console.log(`Successfully assigned ${email} as admin for ${clubName}`);
+    logger.info(`Successfully assigned ${email} as admin for ${clubName}`);
     process.exit(0);
   } catch (err) {
-    console.error('Error assigning club admin:', err);
+    logger.error('Error assigning club admin:', err);
     process.exit(1);
   }
 };

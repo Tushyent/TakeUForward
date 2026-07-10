@@ -8,6 +8,40 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Added
+- **[Observability] Structured Logging with Pino:** Replaced all `console.*` calls with `pino`. Added `pino-http` to log incoming requests. Set dynamic log level via `LOG_LEVEL` env var.
+- **[Observability] Graceful Shutdown:** Implemented `SIGTERM`/`SIGINT` handlers in `server/index.js` to cleanly close HTTP connections and Mongoose before exiting.
+- **[Feature] Alumni Registration Request Flow:** Unverified alumni without an invite link can now request access via a new form on the `/login` page. Admins have a new "Alumni Requests" tab in the Moderation Queue (`/moderation`) to approve or reject these requests. Approval automatically generates an invite token and dispatches an email via NodeMailer.
+- **[Security] `.gitignore` strictness:** Fortified root and client `.gitignore` files to aggressively block all `.env*` files (except `.env.example`) and all Playwright testing artifacts (`test-results`, `playwright-report`, `blob-report`) to prevent accidental secret and artifact leaks.
+
+### Fixed
+- **[Deployment] Consolidated Health Check:** `GET /health` and `GET /api/health` now share identical logic, returning a `503 Service Unavailable` if MongoDB is disconnected (instead of incorrectly returning `200 OK`).
+- **[Security] Test-Session route strictly gated:** The `POST /api/auth/test-session` route is now structurally wrapped in `if (process.env.NODE_ENV !== 'production')` at the route registration level. It does not exist on the router in production, preventing any runtime bypass. Verified by `prodSafety.test.js`.
+- **[Deployment] PaaS Healthcheck 404s:** Duplicated the health endpoint mount to `app.use('/health', healthRoutes)` in `server/index.js` to ensure external PaaS uptime monitors (Render, UptimeRobot) receive 200 OKs instead of 404s.
+- **[Deployment] Vite Dev Server Port Jumping:** Relaxed the `server/index.js` CORS `localhost` policy to dynamic regex (`^http:\/\/(localhost|127\.0\.0\.1):517\d$`) to allow the Vite dev server to jump ports (e.g. `5174`) without breaking API connectivity.
+- **[Testing] Extended Anonymity Engine tests:** Proved `Review` responses and the Moderation Queue admin view actively strip `authorId` for anonymous content. Confirmed that `Bookmark`, `LostFoundItem`, and `MarketplaceItem` do not have intrinsic `isAnonymous` fields by design.
+- **[Testing] Full Authorization coverage:** Covered all 8 mutating areas (Posts/Comments delete, ReferralRequest/MockInterview/TeamRequest close, Club Analytics access, Marketplace mark-sold, Lost & Found/Moderation resolve). Tested 401 (unauthenticated), 403 (unauthorized/not owner), and 200 (success) branches for each.
+- **[Testing] Rate limiter validation:** Proved `upvoteLimiter` (30/min) and `reportLimiter` (5/10min) actively block requests with `429 Too Many Requests` when thresholds are crossed, using fresh in-memory rate limiters per test.
+- **[Testing] Jest coverage reporting:** Configured `--coverage` in `jest.config.js` to collect metrics across all routes, middleware, services, and utils (excluding scripts/test files). Current coverage stands at 21.5% globally (focused strictly on core critical paths, not chasing 100%).
+- **[Testing] Playwright Critical-Path E2E:** Built `critical-path.spec.js` mapping to MASTER_PLAN.md §17 (login → anonymous post → comment → resource search). Used a secure, test-only `POST /api/auth/test-session` backend endpoint (active *only* when `PLAYWRIGHT_TEST=true`) to bypass Google OAuth headless automation blocks.
+
+### Added
+- **[P1] MongoDB indexes for query performance:** Added `Post.communityId` index (queries at postRoutes, announcementRoutes, communityRoutes), `User.dept` and `User.currentCompany` indexes (alumni directory queries). 
+- **[P1] Rate limiters for upvote and report endpoints:** Added `upvoteLimiter` (30req/min) and `reportLimiter` (5req/10min) to rateLimiter.js. Applied to all upvote (postRoutes, interviewExperienceRoutes, electiveRoutes, careerRoadmapRoutes) and report endpoints (postRoutes, reviewRoutes, electiveRoutes, careerRoadmapRoutes, marketplaceRoutes).
+- **[P1] Pagination for referral, mock-interview, bookmark list endpoints:** Added `getPaginationParams` + `skip`/`limit` to `referralRoutes.js GET /`, `mockInterviewRoutes.js GET /`, and `bookmarkRoutes.js GET /`.
+
+### Changed
+- **[P1] Error format standardized to `{ error: { message } }`:** Standardized all 25 server route files and middleware to use the extensible error format. Simplified `axiosClient.js` normalization (removed mixed-format fallback, removed unused `toast` import).
+- **[P1] Weekly digest N+1 elimination:** Refactored `digestService.js` to compute shared content pools (top posts, new resources, upcoming events) ONCE per run and filter in-memory per user instead of running 3 queries per user in a loop.
+- **[P1] Marketplace consistency:** Replaced `window.location.href` with React Router `<Link>` for chat navigation (matching the 8-page dominant pattern).
+
+### Fixed
+- **[P1] 8 unused imports removed across client code:** Removed unused `useAuth`, `useNavigate`, `axiosClient`, `AlertTriangle`, `NavigationRoute` imports from Chats.jsx, Login.jsx, PersonalDrive.jsx, Home.jsx, ChatThread.jsx, PublicProfile.jsx, sw.js. Renamed unused `error` parameter in ErrorBoundary.jsx.
+- **[Testing] Jest Configuration for ESM:** Added `jest.config.js` with `transform: {}` to fix ESM module parsing, enabling Jest to run the existing test suites. Updated `npm test` script with `--no-cache`. Tests were non-functional since their creation due to missing ESM configuration — the `--experimental-vm-modules` Node flag alone was insufficient without the `transform: {}` config. All 6 existing tests now pass.
+- **[P0] Crash on missing CRON_SECRET:** Fixed `server/routes/jobRoutes.js:13` where `next(err)` referenced an undefined `err` variable when `CRON_SECRET` env var was unset. Now returns a clear 500 error message instead of crashing with `ReferenceError`.
+- **[P0] Marketplace.jsx crash on report:** Fixed orphaned `try/await` block at `client/src/pages/Marketplace.jsx:97-103` by reconstructing the missing `handleReport`, `handleMarkSold`, and `handleMessageUser` function wrappers. The report/chat/sold buttons on the Marketplace page previously threw runtime errors when clicked.
+- **[P0] Server-side unverified-alumni gate:** Added `server/middleware/requireApprovedUser.js` — a server-side middleware that blocks users with `role: 'alumni'` and `isVerifiedAlumni: false` from accessing any non-auth API route. Previously, the only protection was the frontend `PendingApproval` page, meaning unverified alumni could access all API features via direct calls. Mounted in `server/index.js` after auth routes. Added 5 tests covering all three cases (unverified blocked, verified allowed, student allowed, club_admin allowed).
+
+### Added
 - **[Phase 4] Global Error Boundary:** Added a top-level `ErrorBoundary` component to catch unexpected React rendering errors. Instead of a white screen of death, users now see a friendly fallback UI with a button to reload the page, containing the specific error trace for developers.
 - **[Phase 4] PWA Offline Support:** Upgraded the Service Worker with Workbox caching strategies. API requests now use a Network-First strategy, Google Fonts use Cache-First, and navigating to un-cached pages while offline shows a custom offline fallback HTML page instead of the browser's dinosaur screen.
 

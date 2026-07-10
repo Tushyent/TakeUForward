@@ -1,7 +1,8 @@
 import express from 'express';
 import CareerRoadmap from '../models/CareerRoadmap.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(roadmaps);
   } catch (err) {
-    console.error('Error fetching career roadmaps:', err);
+    logger.error('Error fetching career roadmaps:', err);
     next(err);
   }
 });
@@ -72,13 +73,13 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 
     res.status(201).json(responseData);
   } catch (err) {
-    console.error('Error creating career roadmap:', err);
+    logger.error('Error creating career roadmap:', err);
     next(err);
   }
 });
 
 // POST /api/career-roadmaps/:id/upvote
-router.post('/:id/upvote', async (req, res, next) => {
+router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -95,13 +96,13 @@ router.post('/:id/upvote', async (req, res, next) => {
     const updatedRoadmap = await CareerRoadmap.findByIdAndUpdate(req.params.id, update, { new: true });
     res.status(200).json({ upvotesCount: updatedRoadmap.upvotes.length });
   } catch (err) {
-    console.error('Error toggling upvote:', err);
+    logger.error('Error toggling upvote:', err);
     next(err);
   }
 });
 
 // POST /api/career-roadmaps/:id/report
-router.post('/:id/report', async (req, res, next) => {
+router.post('/:id/report', reportLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
@@ -130,7 +131,7 @@ router.post('/:id/report', async (req, res, next) => {
     await roadmap.save();
     res.status(200).json({ message: 'Roadmap reported successfully', isHidden: roadmap.isHidden });
   } catch (err) {
-    console.error('Error reporting roadmap:', err);
+    logger.error('Error reporting roadmap:', err);
     next(err);
   }
 });

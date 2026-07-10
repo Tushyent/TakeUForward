@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
@@ -16,7 +17,7 @@ const transporter = nodemailer.createTransport({
 export const sendNotificationEmail = async (user, type, refId, isAnonymousSender, content = '') => {
   // Graceful fallback if SMTP isn't configured
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('SMTP variables not configured. Skipping email notification.');
+    logger.warn('SMTP variables not configured. Skipping email notification.');
     return;
   }
 
@@ -52,7 +53,7 @@ export const sendNotificationEmail = async (user, type, refId, isAnonymousSender
       html,
     });
   } catch (err) {
-    console.error('Error sending email:', err);
+    logger.error('Error sending email:', err);
   }
 };
 
@@ -69,6 +70,24 @@ export const sendDigestEmail = async (user, htmlContent) => {
       html: htmlContent
     });
   } catch (err) {
-    console.error(`Error sending digest to ${user.email}:`, err);
+    logger.error(`Error sending digest to ${user.email}:`, err);
+  }
+};
+
+export const sendEmail = async ({ to, subject, html }) => {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    logger.warn('SMTP variables not configured. Skipping email send.', { to, subject });
+    return;
+  }
+  
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || '"TakeUForward" <noreply@takeuforward.com>',
+      to,
+      subject,
+      html
+    });
+  } catch (err) {
+    logger.error(`Error sending email to ${to}:`, err);
   }
 };

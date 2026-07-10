@@ -1,6 +1,7 @@
 import express from 'express';
 import Post from '../models/Post.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -24,7 +25,7 @@ router.get('/', async (req, res, next) => {
 
     res.status(200).json(announcements);
   } catch (err) {
-    console.error('Error fetching announcements:', err);
+    logger.error('Error fetching announcements:', err);
     next(err);
   }
 });

@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import Chat from '../models/Chat.js';
 import User from '../models/User.js';
 import { createNotification } from '../services/notificationService.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -10,12 +11,12 @@ const router = express.Router();
 export const chatCreationLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 30,
-  message: { error: 'Too many messages sent. Please wait 10 minutes.' }
+  message: { error: { message: 'Too many messages sent. Please wait 10 minutes.' } }
 });
 
 // GET /api/chats - List all chats for logged in user
 router.get('/', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const chats = await Chat.find({ participants: req.user._id })
@@ -24,24 +25,24 @@ router.get('/', async (req, res, next) => {
     
     res.status(200).json(chats);
   } catch (err) {
-    console.error('Error fetching chats:', err);
+    logger.error('Error fetching chats:', err);
     next(err);
   }
 });
 
 // GET /api/chats/:userId - Get or create a 1:1 chat
 router.get('/:userId', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const targetUserId = req.params.userId;
     if (targetUserId === req.user._id.toString()) {
-      return res.status(400).json({ error: 'Cannot chat with yourself' });
+      return res.status(400).json({ error: { message: 'Cannot chat with yourself' } });
     }
 
     // Check if user exists
     const targetUser = await User.findById(targetUserId);
-    if (!targetUser) return res.status(404).json({ error: 'User not found' });
+    if (!targetUser) return res.status(404).json({ error: { message: 'User not found' } });
 
     let chat = await Chat.findOne({
       participants: { $all: [req.user._id, targetUserId] }
@@ -72,22 +73,22 @@ router.get('/:userId', async (req, res, next) => {
 
     res.status(200).json(chat);
   } catch (err) {
-    console.error('Error fetching chat:', err);
+    logger.error('Error fetching chat:', err);
     next(err);
   }
 });
 
 // POST /api/chats/:userId/message - Send a message
 router.post('/:userId/message', chatCreationLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { text } = req.body;
-    if (!text || !text.trim()) return res.status(400).json({ error: 'Message text is required' });
+    if (!text || !text.trim()) return res.status(400).json({ error: { message: 'Message text is required' } });
 
     const targetUserId = req.params.userId;
     if (targetUserId === req.user._id.toString()) {
-      return res.status(400).json({ error: 'Cannot chat with yourself' });
+      return res.status(400).json({ error: { message: 'Cannot chat with yourself' } });
     }
 
     let chat = await Chat.findOne({
@@ -122,7 +123,7 @@ router.post('/:userId/message', chatCreationLimiter, async (req, res, next) => {
 
     res.status(201).json(chat);
   } catch (err) {
-    console.error('Error sending message:', err);
+    logger.error('Error sending message:', err);
     next(err);
   }
 });

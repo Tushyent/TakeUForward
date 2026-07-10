@@ -1,5 +1,6 @@
 import express from 'express';
 import Community from '../models/Community.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -9,7 +10,7 @@ router.get('/', async (req, res, next) => {
     const communities = await Community.find({}).sort({ createdAt: -1 });
     res.status(200).json(communities);
   } catch (err) {
-    console.error('Error fetching communities:', err);
+    logger.error('Error fetching communities:', err);
     next(err);
   }
 });
@@ -19,14 +20,14 @@ router.get('/:id', async (req, res, next) => {
   try {
     const community = await Community.findById(req.params.id);
     if (!community) {
-      return res.status(404).json({ error: 'Community not found' });
+      return res.status(404).json({ error: { message: 'Community not found' } });
     }
     res.status(200).json(community);
   } catch (err) {
-    console.error('Error fetching community by ID:', err);
+    logger.error('Error fetching community by ID:', err);
     // If id is not a valid ObjectId, Mongoose will throw a CastError
     if (err.name === 'CastError') {
-      return res.status(404).json({ error: 'Community not found' });
+      return res.status(404).json({ error: { message: 'Community not found' } });
     }
     next(err);
   }

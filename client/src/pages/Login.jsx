@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Zap, ArrowRight, BookOpen, Users, Briefcase } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
-import { AlertTriangle, Zap, ArrowRight, BookOpen, Users, Briefcase } from 'lucide-react';
+import Button from '../components/ui/Button';
+import { Input, Textarea } from '../components/ui/Input';
 
 /* ---------------------------------------------------------------
    GOOGLE SIGN-IN SVG LOGO
@@ -58,6 +60,13 @@ function Login() {
 
   const navigate = useNavigate();
 
+  const [showAlumniForm, setShowAlumniForm] = useState(false);
+  const [alumniFormData, setAlumniFormData] = useState({
+    name: '', email: '', dept: '', graduationYear: '',
+    currentCompany: '', proofLink: '', message: ''
+  });
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+
   useEffect(() => {
     if (errorParam) {
       toast.error(`Login failed: ${decodeURIComponent(errorParam)}`);
@@ -65,6 +74,20 @@ function Login() {
       navigate('/login', { replace: true });
     }
   }, [errorParam, navigate]);
+
+  const handleAlumniSubmit = async (e) => {
+    e.preventDefault();
+    setSubmittingRequest(true);
+    try {
+      await axiosClient.post('/auth/alumni/request', alumniFormData);
+      toast.success('Request submitted successfully! Admins will review it soon.');
+      setShowAlumniForm(false);
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to submit request');
+    } finally {
+      setSubmittingRequest(false);
+    }
+  };
 
   const handleLogin = () => {
     setLoading(true);
@@ -218,7 +241,7 @@ function Login() {
             letterSpacing: '-0.03em',
             marginBottom: 'var(--space-2)',
           }}>
-            Welcome back
+            {showAlumniForm ? 'Alumni Request' : 'Welcome back'}
           </h2>
           <p style={{
             fontSize: 'var(--text-sm)',
@@ -226,8 +249,30 @@ function Login() {
             marginBottom: 'var(--space-8)',
             lineHeight: 1.6,
           }}>
-            Sign in with your official SSN College email to continue.
+            {showAlumniForm 
+              ? 'Submit your details to get an invite link.' 
+              : 'Sign in with your official SSN College email to continue.'}
           </p>
+
+          {showAlumniForm ? (
+            <form onSubmit={handleAlumniSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+              <Input placeholder="Full Name" required value={alumniFormData.name} onChange={e => setAlumniFormData({...alumniFormData, name: e.target.value})} />
+              <Input type="email" placeholder="Email Address" required value={alumniFormData.email} onChange={e => setAlumniFormData({...alumniFormData, email: e.target.value})} />
+              <Input placeholder="Department (e.g. CSE)" required value={alumniFormData.dept} onChange={e => setAlumniFormData({...alumniFormData, dept: e.target.value})} />
+              <Input type="number" placeholder="Graduation Year (e.g. 2020)" required value={alumniFormData.graduationYear} onChange={e => setAlumniFormData({...alumniFormData, graduationYear: e.target.value})} />
+              <Input placeholder="Current Company / Masters Uni" value={alumniFormData.currentCompany} onChange={e => setAlumniFormData({...alumniFormData, currentCompany: e.target.value})} />
+              <Input placeholder="Proof Link (LinkedIn/Drive)" required value={alumniFormData.proofLink} onChange={e => setAlumniFormData({...alumniFormData, proofLink: e.target.value})} />
+              <Textarea placeholder="Optional message to admins..." value={alumniFormData.message} onChange={e => setAlumniFormData({...alumniFormData, message: e.target.value})} />
+              
+              <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-4)' }}>
+                <Button type="button" variant="ghost" style={{ flex: 1 }} onClick={() => setShowAlumniForm(false)}>Cancel</Button>
+                <Button type="submit" variant="primary" style={{ flex: 1 }} disabled={submittingRequest}>
+                  {submittingRequest ? 'Submitting...' : 'Submit Request'}
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <>
 
 
 
@@ -294,8 +339,17 @@ function Login() {
             lineHeight: 1.6,
           }}>
             Only <strong style={{ color: 'var(--text-secondary)' }}>@ssn.edu.in</strong> email addresses are accepted.
-            <br />Alumni? You'll need an invite link to register.
+            <br />Alumni without an invite?{' '}
+            <button 
+              type="button"
+              onClick={() => setShowAlumniForm(true)} 
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: 0, fontWeight: 600, fontFamily: 'inherit' }}
+            >
+              Request Access
+            </button>
           </p>
+          </>
+          )}
 
         </div>
       </div>

@@ -1,12 +1,13 @@
 import express from 'express';
 import User from '../models/User.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
 // GET /api/alumni
 router.get('/', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { company, dept, page: pageQuery, limit: limitQuery } = req.query;
@@ -33,7 +34,7 @@ router.get('/', async (req, res, next) => {
       total
     });
   } catch (err) {
-    console.error('Error fetching alumni directory:', err);
+    logger.error('Error fetching alumni directory:', err);
     next(err);
   }
 });

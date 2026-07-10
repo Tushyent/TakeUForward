@@ -1,16 +1,17 @@
 import express from 'express';
 import { generateAndSendWeeklyDigests } from '../services/digestService.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
 // POST /api/jobs/weekly-digest
 // Secured webhook for external cron services (e.g. cron-job.org)
-router.post('/weekly-digest', async (req, res, next) => {
+router.post('/weekly-digest', async (req, res) => {
   const cronSecret = process.env.CRON_SECRET;
   
   if (!cronSecret) {
-    console.error('CRON_SECRET is not configured in environment variables');
-    return next(err);
+    logger.error('CRON_SECRET is not configured in environment variables');
+    return res.status(500).json({ error: { message: 'Server misconfiguration: CRON_SECRET is not set.' } });
   }
 
   // Check shared secret in header
@@ -23,8 +24,8 @@ router.post('/weekly-digest', async (req, res, next) => {
   }
 
   if (providedSecret !== cronSecret) {
-    console.warn(`Unauthorized cron attempt with IP: ${req.ip}`);
-    return res.status(401).json({ error: 'Unauthorized' });
+    logger.warn(`Unauthorized cron attempt with IP: ${req.ip}`);
+    return res.status(401).json({ error: { message: 'Unauthorized' } });
   }
 
   // Acknowledge quickly (so external cron doesn't timeout) and run async
@@ -35,7 +36,7 @@ router.post('/weekly-digest', async (req, res, next) => {
   try {
     await generateAndSendWeeklyDigests();
   } catch (err) {
-    console.error('Error during weekly digest background job:', err);
+    logger.error('Error during weekly digest background job:', err);
   }
 });
 

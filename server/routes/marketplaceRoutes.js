@@ -1,13 +1,13 @@
 import express from 'express';
 import MarketplaceItem from '../models/MarketplaceItem.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
 // GET /api/marketplace - List items
 router.get('/', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
   try {
     const { category, status, page: pageQuery, limit: limitQuery } = req.query;
     const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
@@ -30,7 +30,7 @@ router.get('/', async (req, res, next) => {
 
 // POST /api/marketplace - Create item
 router.post('/', postCreationLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
   try {
     const { title, description, category, price, condition } = req.body;
     
@@ -60,7 +60,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 
 // PATCH /api/marketplace/:id/sold - Mark as sold
 router.patch('/:id/sold', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
   try {
     const item = await MarketplaceItem.findById(req.params.id);
     if (!item) {
@@ -84,8 +84,8 @@ router.patch('/:id/sold', async (req, res, next) => {
 });
 
 // POST /api/marketplace/:id/report - Report item
-router.post('/:id/report', async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+router.post('/:id/report', reportLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
   try {
     const { reason } = req.body;
     if (!reason) {

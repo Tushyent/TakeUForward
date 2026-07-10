@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import { sendNotificationEmail } from '../config/mailer.js';
 import webpush from 'web-push';
 import dotenv from 'dotenv';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env
     process.env.VAPID_PRIVATE_KEY
   );
 } else {
-  console.warn('VAPID keys not fully configured. Web push notifications will not work.');
+  logger.warn('VAPID keys not fully configured. Web push notifications will not work.');
 }
 
 export const createNotification = async ({ userId, type, refId, isAnonymousSender, content }) => {
@@ -50,7 +51,7 @@ export const createNotification = async ({ userId, type, refId, isAnonymousSende
               if (err.statusCode === 404 || err.statusCode === 410) {
                 // Subscription expired, do nothing so it's removed
               } else {
-                console.error('Error sending push notification:', err);
+                logger.warn('Error sending push notification:', err);
                 validSubscriptions.push(sub); // Keep if it was a temporary error
               }
             }
@@ -66,6 +67,6 @@ export const createNotification = async ({ userId, type, refId, isAnonymousSende
 
     return notification;
   } catch (err) {
-    console.error('Error creating notification:', err);
+    logger.error('Error creating notification:', err);
   }
 };

@@ -2,7 +2,7 @@ import express from 'express';
 import Review from '../models/Review.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { applyAnonymity } from '../utils/anonymity.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
@@ -106,7 +106,7 @@ router.get('/', async (req, res, next) => {
       ? { averageRating: Number(stats[0].averageRating.toFixed(1)), totalReviews: stats[0].totalReviews }
       : { averageRating: 0, totalReviews: 0 };
 
-    res.json({ reviews: safeReviews, summary, page: parseInt(page, 10), limit: parseInt(limit, 10) });
+    res.json({ reviews: safeReviews, summary, page: parseInt(pageQuery, 10) || 1, limit });
   } catch (err) {
     next(err);
   }
@@ -115,7 +115,7 @@ router.get('/', async (req, res, next) => {
 // @route   POST /api/reviews/:id/report
 // @desc    Report a review
 // @access  Private
-router.post('/:id/report', requireAuth, async (req, res, next) => {
+router.post('/:id/report', requireAuth, reportLimiter, async (req, res, next) => {
   try {
     const { reason } = req.body;
     const review = await Review.findById(req.params.id);

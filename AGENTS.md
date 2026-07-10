@@ -3,6 +3,8 @@
 ## Project
 Full-stack campus mentorship platform. See /docs/MASTER_PLAN.md or the /docs/TakeUForward_MasterPlan file for full product spec —
 read it before implementing any feature not yet scaffolded.
+/docs/FRONTEND.md is the file you should refer to for frontend related tasks.
+/docs/BACKEND.md is the file you should refer to for backend related tasks.
 
 ## Stack (do not substitute without asking)
 - Frontend: React + Vite, JavaScript, React Router, Axios — in /client

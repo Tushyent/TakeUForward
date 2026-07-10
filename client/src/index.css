@@ -56,10 +56,17 @@
   --border-strong: #363751;
   --border-light:  #252636;
 
-  /* --- GLASS (Navbar, modals only) --- */
+  /* --- GLASS (Navbar, modals only - Legacy) --- */
   --glass-bg:      rgba(22, 23, 32, 0.82);
   --glass-blur:    14px;
 
+  /* --- GLASSMORPHISM EXTENSION (Cards & Surfaces) --- */
+  --glass-surface: rgba(22, 23, 32, 0.45); /* Highly translucent for cards */
+  --glass-surface-hover: rgba(30, 31, 46, 0.6);
+  --glass-border:  rgba(255, 255, 255, 0.08); /* Subtle white shine */
+  --glass-border-strong: rgba(255, 255, 255, 0.15);
+  --glass-surface-blur: 12px;
+  
   /* --- SHADOWS / ELEVATION --- */
   --shadow-sm:     0 1px 3px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.30);
   --shadow-md:     0 4px 12px rgba(0,0,0,0.55), 0 2px 4px rgba(0,0,0,0.30);

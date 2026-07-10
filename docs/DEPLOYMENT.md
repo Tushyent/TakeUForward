@@ -98,6 +98,7 @@ across the project so far.
 | `GOOGLE_CALLBACK_URL` | Yes | `https://<render-backend>.onrender.com/api/auth/google/callback` | `redirect_uri_mismatch` error from Google if wrong/missing |
 | `CLIENT_URL` | Yes | `https://takeuforward-ssn.vercel.app` (**no trailing slash** — see §7) | CORS rejects all frontend requests |
 | `NODE_ENV` | Yes | `production` | Controls cookie `secure`/`sameSite` flags, error stack-trace leakage, CORS localhost fallback |
+| `LOG_LEVEL` | No | `info` | Determines structured Pino logging output verbosity (`debug`, `info`, `warn`, `error`) |
 | `AWS_ACCESS_KEY_ID` | Yes (or Supabase equivalent) | AWS IAM key | Resource upload presigned URL generation fails |
 | `AWS_SECRET_ACCESS_KEY` | Yes (or Supabase equivalent) | AWS IAM secret | Same as above |
 | `AWS_S3_BUCKET` | Yes | bucket name | Uploads fail / 404 on file access |
@@ -346,11 +347,28 @@ the recommendation.
 - **Mitigation:** We've implemented a defensive `HeadObject` check on the backend `POST /api/resources` endpoint (which creates the metadata *after* upload). If the uploaded object is >10MB, the backend deletes it from S3 and rejects the request.
 - **Prevention (Future Fix):** Migrate to `createPresignedPost` and update the frontend `axios.put` to a `FormData` POST submission to enforce strict size boundaries natively at the S3 bucket level.
 
-### 7.8 [Add new incidents here as they happen]
-- **Symptom:**
-- **Root cause:**
-- **Fix:**
-- **Prevention:**
+## 7. Known Issues & Operational Runbook
+
+1. **Vite Dev Server Port Jumping (CORS):** If `npm run dev` in `/client` detects port 5173 is in use, it will silently jump to 5174, 5175, etc. The backend CORS policy has been updated with a regex (`^http:\/\/(localhost|127\.0\.0\.1):517\d$`) to permit this natively, eliminating the "CORS error on login" issue for local development.
+
+2. **Database Outage & Health Check Tradeoff:** The `/health` endpoint strictly verifies MongoDB connectivity.
+   - *Previously:* It returned `200 OK` even if MongoDB was disconnected, leading to silent outages where UptimeRobot thought the site was healthy.
+   - *Now:* It returns `503 Service Unavailable` if MongoDB disconnects. 
+   - *Tradeoff:* Render's health checks do *not* currently auto-restart the Node process on runtime failure, but they *will* fail a new deployment if the DB is down during the deploy step. Uptime monitors will now correctly alert you to DB blips.
+
+3. **Vercel Reverse Proxy & Session Loss:** Apple's ITP (Intelligent Tracking Prevention) and Chrome's third-party cookie phase-out aggressively block the `connect.sid` cookie if the frontend (Vercel) and backend (Render) do not share a domain. This was fixed by using a `vercel.json` rewrite (`/api/* -> Render`), making the cookie first-party. Do *not* revert the frontend to fetch directly from Render.
+
+### 7.9 Render /health 404 Monitoring Failures
+- **Symptom:** UptimeRobot or Render health checks hitting `https://takeuforward-ssn.onrender.com/health` return a 404 Not Found error.
+- **Root cause:** The health route was previously mounted strictly under `/api/health`, so external pingers strictly checking the root `/health` failed.
+- **Fix:** Duplicated the route mount in `server/index.js`: `app.use('/health', healthRoutes)`.
+- **Prevention:** Ensure health endpoints are exposed unauthenticated at standard root paths expected by PaaS providers.
+
+### 7.10 Vite Dev Server Port-Jumping CORS Rejection
+- **Symptom:** `Network Error` in the browser when starting `npm run dev` if port 5173 is already in use by a zombie process.
+- **Root cause:** Vite automatically binds to the next available port (e.g., `5174`), but `server/index.js` CORS was strictly hardcoded to allow `http://localhost:5173`.
+- **Fix:** Changed the localhost CORS allow-list to use a dynamic regex `^http:\/\/(localhost|127\.0\.0\.1):517\d$` to safely allow Vite dev server port jumping.
+- **Prevention:** Use bounded regexes for localhost port allowances during development instead of hardcoding a single strict port.
 
 ---
 
@@ -496,3 +514,14 @@ Run this every time, not just when something breaks:
 - [ ] `GET /api/health` returns healthy status
 - [ ] If any seed/migration script was added this cycle, confirm it was run against 
   production Atlas, not just locally
+
+## 8. End-to-End Testing (Playwright)
+
+The Playwright E2E suite requires the backend to mint valid session cookies via a dedicated backdoor route (POST /api/auth/test-session) to bypass Google OAuth which cannot be automated in CI.
+
+To ensure production safety, this route is strictly dual-gated. It requires BOTH:
+1. process.env.NODE_ENV !== 'production'
+2. process.env.ALLOW_TEST_SESSION === 'true'
+
+Neither condition alone is sufficient. When running tests, you must explicitly pass ALLOW_TEST_SESSION=true to the backend process.
+

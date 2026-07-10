@@ -31,7 +31,7 @@ function CareerRoadmaps() {
     setLoading(true);
     try {
       
-      setUser(userRes.data.user);
+
 
       const queryParams = new URLSearchParams();
       if (careerPathFilter) queryParams.append('careerPath', careerPathFilter);
