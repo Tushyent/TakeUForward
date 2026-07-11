@@ -1,21 +1,9 @@
 import express from 'express';
 import PrivateFile from '../models/PrivateFile.js';
-import { generatePrivateUploadUrl, generatePrivateDownloadUrl, validateObjectSize } from '../config/s3.js';
+import { generatePrivateUploadUrl, generatePrivateDownloadUrl, validateObjectSize, deleteObjectByKey } from '../config/s3.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
-import { DeleteObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const router = express.Router();
-
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
-  }
-});
 
 // GET /api/drive
 // Get all private files for the user
@@ -102,10 +90,7 @@ router.delete('/:id', async (req, res, next) => {
       return res.status(403).json({ error: { message: 'Unauthorized' } });
     }
 
-    const bucketName = process.env.AWS_BUCKET_NAME;
-    if (bucketName) {
-      await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: file.s3Key }));
-    }
+    await deleteObjectByKey(file.s3Key);
 
     await PrivateFile.findByIdAndDelete(file._id);
     res.json({ message: 'File deleted' });
