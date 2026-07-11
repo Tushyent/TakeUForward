@@ -1,10 +1,12 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
 import { isSystemAdminEmail, syncUserIdentity } from '../utils/userIdentity.js';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
@@ -70,6 +72,16 @@ passport.use(
           });
           const changed = await syncUserIdentity(User, user);
           if (changed) await user.save();
+
+          if (isApproved) {
+            try {
+              const { sendWelcomeEmail } = await import('../config/mailer.js');
+              const memberCount = await mongoose.model('User').countDocuments({ isApproved: true });
+              sendWelcomeEmail(user, memberCount).catch(err => logger.error('Welcome email failed:', err));
+            } catch (err) {
+              logger.error('Failed to send welcome email on registration:', err);
+            }
+          }
         } else {
           if (user.googleId !== profile.id) {
             user.googleId = profile.id;

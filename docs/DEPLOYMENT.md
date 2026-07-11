@@ -355,6 +355,12 @@ the recommendation.
 - **Mitigation:** We've implemented a defensive `HeadObject` check on the backend `POST /api/resources` endpoint (which creates the metadata *after* upload). If the uploaded object is >10MB, the backend deletes it from S3 and rejects the request.
 - **Prevention (Future Fix):** Migrate to `createPresignedPost` and update the frontend `axios.put` to a `FormData` POST submission to enforce strict size boundaries natively at the S3 bucket level.
 
+### 7.9 Welcome email silently skipped when SMTP unconfigured
+- **Symptom:** New users register via Google OAuth but never receive a welcome email ("Welcome to TakeUForward — You're member #X!"). No error returned to the user — the email is simply not sent.
+- **Root cause:** `sendEmail()` in `server/config/mailer.js` checks `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS` — if any is missing/falsy, it logs a `warn` and returns without sending.
+- **Fix:** Set the three SMTP vars in the Render dashboard (values depend on email provider — Gmail SMTP, Resend, SendGrid, etc.).
+- **Prevention:** Server now logs a clear `SMTP not configured — welcome emails and notifications will be silently skipped` at startup if any SMTP var is missing, making the gap immediately visible in Render logs after deploy.
+
 ## 7. Known Issues & Operational Runbook
 
 1. **Vite Dev Server Port Jumping (CORS):** If `npm run dev` in `/client` detects port 5173 is in use, it will silently jump to 5174, 5175, etc. The backend CORS policy has been updated with a regex (`^http:\/\/(localhost|127\.0\.0\.1):517\d$`) to permit this natively, eliminating the "CORS error on login" issue for local development.

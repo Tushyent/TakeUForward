@@ -146,35 +146,8 @@ router.patch('/profile', async (req, res, next) => {
     const totalUsers = await mongoose.model('User').countDocuments({ isApproved: true });
 
     if (isFirstCompletion) {
-      const { sendEmail } = await import('../config/mailer.js');
-      const name = req.user.name || req.user.email || 'there';
-      const welcomeHtml = [
-        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;">`,
-        `<h1 style="color:#7C6AF7;">Welcome to TakeUForward!</h1>`,
-        `<p>Hi ${name},</p>`,
-        `<p>Welcome to <strong>TakeUForward</strong> — the single place a student needs to survive and thrive in college. We built this platform right here at SSN to connect juniors with seniors and alumni for mentorship, centralize academic and placement knowledge that would otherwise be lost year after year, and create an anonymous-safe space for honest questions.</p>`,
-        `<p>It means no more fragmented WhatsApp groups, no more losing senior knowledge the day they graduate, and no more having to rely on being in the 'right' group to get ahead.</p>`,
-        `<p><strong>Here is what you can do here:</strong></p>`,
-        `<ul>`,
-        `<li>Ask questions anonymously — no fear of judgment</li>`,
-        `<li>Share notes, PYQs, and resources with your batch and department</li>`,
-        `<li>Find seniors and alumni for referrals and company-specific guidance</li>`,
-        `<li>Discover club events, hackathons, and workshops in one feed</li>`,
-        `<li>Join your batch and department communities</li>`,
-        `</ul>`,
-        `<p>Everything is organized by community — your batch, your department, or topic-based spaces. You can also find clubs and teams looking for members.</p>`,
-        `<p>Your journey starts here:</p>`,
-        `<a href="${process.env.CLIENT_URL || 'https://takeuforward-ssn.vercel.app'}/home" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Go to Your Dashboard</a>`,
-        `<p style="margin-top:24px;color:#777;font-size:12px;">Have questions? Drop them in the General community or any batch community. Your seniors and alumni are here to help.</p>`,
-        `<p style="color:#777;font-size:12px;">— The TakeUForward Team</p>`,
-        `</div>`
-      ].join('\n');
-
-      sendEmail({
-        to: req.user.email,
-        subject: 'Welcome to TakeUForward — Your Campus Community Awaits!',
-        html: welcomeHtml,
-      }).catch(err => logger.error('Failed to send welcome email:', err));
+      const { sendWelcomeEmail } = await import('../config/mailer.js');
+      sendWelcomeEmail(req.user, totalUsers).catch(err => logger.error('Failed to send welcome email on profile completion:', err));
     }
 
     res.status(200).json({ message: 'Profile updated', user: req.user, profileComplete: true, totalUsers });

@@ -169,6 +169,12 @@ let server;
 
 // Connect to DB and start server
 connectDB().then(() => {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    logger.warn('SMTP not configured — welcome emails and notifications will be silently skipped. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in environment.');
+  } else {
+    logger.info('SMTP configured — email sending is active.');
+  }
+
   server = app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT}`);
   });
