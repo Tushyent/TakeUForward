@@ -172,11 +172,11 @@ let server;
 connectDB().then(async () => {
   const smtpStatus = await verifyTransporter();
   if (!smtpStatus.configured) {
-    logger.warn('SMTP not configured — welcome emails and notifications will be silently skipped. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in environment.');
+    logger.warn('Resend API not configured — welcome emails and notifications will be silently skipped. Set RESEND_API_KEY in environment.');
   } else if (!smtpStatus.verified) {
-    logger.error(`SMTP verification FAILED: ${smtpStatus.message}. Welcome emails and notifications will NOT be sent.`);
+    logger.error(`Resend verification FAILED: ${smtpStatus.message}. Welcome emails and notifications will NOT be sent.`);
   } else {
-    logger.info('SMTP configured and connected — email sending is active.');
+    logger.info('Resend configured and verified — email sending is active.');
   }
 
   server = app.listen(PORT, () => {

@@ -30,7 +30,6 @@ describe('notification email rendering', () => {
     );
 
     expect(email.subject).toBe('You were mentioned on TakeUForward');
-    expect(email.text).toContain('https://takeuforward.vercel.app/community/abc123?post=post123&comment=comment123');
     expect(email.html).toContain('href="https://takeuforward.vercel.app/community/abc123?post=post123&comment=comment123"');
     expect(email.html).toContain('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt; @recipient');
     expect(email.html).not.toContain('<script>');
@@ -51,7 +50,6 @@ describe('notification email rendering', () => {
     );
 
     expect(email.subject).toBe('New message on TakeUForward');
-    expect(email.text).toContain('Open the chat: https://takeuforward.vercel.app/chat/user123');
     expect(email.html).toContain('Open the chat');
   });
 });

@@ -1,21 +1,10 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import dotenv from 'dotenv';
 import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: process.env.SMTP_PORT === '465',
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  connectionTimeout: 10000,    // 10s to establish TCP connection
-  greetingTimeout: 10000,      // 10s to receive SMTP greeting
-  socketTimeout: 15000,        // 15s for send/receive
-});
+const resend = new Resend(process.env.RESEND_API_KEY || 're_missing');
 
 const escapeHtml = (value = '') => String(value)
   .replace(/&/g, '&amp;')
@@ -45,21 +34,16 @@ export const buildNotificationEmail = (user, type, isAnonymousSender, content = 
   const escapedContextType = escapeHtml(contextType || (type === 'message' ? 'chat message' : 'post'));
   const escapedContextTitle = contextTitle ? escapeHtml(contextTitle) : '';
   const escapedContent = content ? escapeHtml(content) : '';
-  const textContent = content ? `\n\n"${content}"\n\n` : '\n\n';
   const htmlContent = escapedContent
     ? `<blockquote style="border-left:4px solid #7C6AF7;padding:10px 12px;color:#333;background:#f7f5ff;margin:12px 0;">${escapedContent}</blockquote>`
     : '';
   const contextLine = escapedContextTitle
     ? `<p style="margin:0 0 12px;color:#555;">Context: ${escapedContextType} in ${escapedContextTitle}</p>`
     : `<p style="margin:0 0 12px;color:#555;">Context: ${escapedContextType}</p>`;
-  const textContextLine = contextTitle
-    ? `Context: ${contextType || 'post'} in ${contextTitle}\n`
-    : `Context: ${contextType || (type === 'message' ? 'chat message' : 'post')}\n`;
 
   if (type === 'mention') {
     return {
       subject: 'You were mentioned on TakeUForward',
-      text: `Hi ${user.name || user.email || 'there'},\n\n${senderLabel} mentioned you on TakeUForward.\n${textContextLine}${textContent}View it here: ${targetUrl}`,
       html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} mentioned you on TakeUForward.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">View it here</a></p><p style="color:#777;font-size:12px;">If the content was posted anonymously, TakeUForward does not reveal the author's identity.</p>`
     };
   }
@@ -67,7 +51,6 @@ export const buildNotificationEmail = (user, type, isAnonymousSender, content = 
   if (type === 'reply' || type === 'comment') {
     return {
       subject: 'New reply on TakeUForward',
-      text: `Hi ${user.name || user.email || 'there'},\n\n${senderLabel} replied to your post.\n${textContextLine}${textContent}View it here: ${targetUrl}`,
       html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} replied to your post.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">View it here</a></p><p style="color:#777;font-size:12px;">Replies from anonymous users stay anonymous in this email and in the app.</p>`
     };
   }
@@ -75,7 +58,6 @@ export const buildNotificationEmail = (user, type, isAnonymousSender, content = 
   if (type === 'message') {
     return {
       subject: 'New message on TakeUForward',
-      text: `Hi ${user.name || user.email || 'there'},\n\n${senderLabel} sent you a message.\n${textContextLine}${textContent}Open the chat: ${targetUrl}`,
       html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} sent you a message.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">Open the chat</a></p>`
     };
   }
@@ -84,64 +66,63 @@ export const buildNotificationEmail = (user, type, isAnonymousSender, content = 
 };
 
 export const sendNotificationEmail = async (user, type, isAnonymousSender, content = '', options = {}) => {
-  // Graceful fallback if SMTP isn't configured
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    logger.warn('SMTP variables not configured. Skipping email notification.');
+  if (!process.env.RESEND_API_KEY) {
+    logger.warn('RESEND_API_KEY not configured. Skipping email notification.');
     return;
   }
 
   const email = buildNotificationEmail(user, type, isAnonymousSender, content, options);
   if (!email) {
-    // We explicitly do not send emails for other types.
     return;
   }
 
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"TakeUForward SSN" <takeuforwardssn@gmail.com>',
-      replyTo: process.env.REPLY_TO_EMAIL || 'takeuforwardssn@gmail.com',
+    const fromAddr = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+    await resend.emails.send({
+      from: fromAddr,
       to: user.email,
       subject: email.subject,
-      text: email.text,
       html: email.html,
     });
   } catch (err) {
-    logger.error({ to: user.email, errMsg: err.message, errCode: err.code }, 'Error sending notification email');
+    logger.error({ to: user.email, errMsg: err.message }, 'Error sending notification email');
   }
 };
 
 export const sendDigestEmail = async (user, htmlContent) => {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  if (!process.env.RESEND_API_KEY) {
     return;
   }
-  
+
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"TakeUForward SSN" <takeuforwardssn@gmail.com>',
+    const fromAddr = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+    await resend.emails.send({
+      from: fromAddr,
       to: user.email,
       subject: 'Your Weekly TakeUForward Digest',
-      html: htmlContent
+      html: htmlContent,
     });
   } catch (err) {
-    logger.error({ to: user.email, errMsg: err.message, errCode: err.code }, 'Error sending digest email');
+    logger.error({ to: user.email, errMsg: err.message }, 'Error sending digest email');
   }
 };
 
 export const sendEmail = async ({ to, subject, html }) => {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    logger.warn('SMTP variables not configured. Skipping email send.', { to, subject });
+  if (!process.env.RESEND_API_KEY) {
+    logger.warn('RESEND_API_KEY not configured. Skipping email send.', { to, subject });
     return;
   }
-  
+
   try {
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"TakeUForward SSN" <takeuforwardssn@gmail.com>',
+    const fromAddr = process.env.EMAIL_FROM || 'onboarding@resend.dev';
+    await resend.emails.send({
+      from: fromAddr,
       to,
       subject,
-      html
+      html,
     });
   } catch (err) {
-    logger.error({ to, subject, errMsg: err.message, errCode: err.code, errCommand: err.command }, 'Error sending email');
+    logger.error({ to, subject, errMsg: err.message }, 'Error sending email');
   }
 };
 
@@ -185,11 +166,16 @@ export const sendWelcomeEmail = async (user, memberCount) => {
 };
 
 export const verifyTransporter = async () => {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    return { configured: false, message: 'SMTP env vars not set' };
+  if (!process.env.RESEND_API_KEY) {
+    return { configured: false, message: 'RESEND_API_KEY not set' };
   }
   try {
-    await transporter.verify();
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
+      to: 'test@resend.dev',
+      subject: 'TakeUForward SMTP Health Check',
+      html: '<p>Do not reply. This is an automated health check from the TakeUForward server.</p>'
+    });
     return { configured: true, verified: true };
   } catch (err) {
     return { configured: true, verified: false, message: err.message };

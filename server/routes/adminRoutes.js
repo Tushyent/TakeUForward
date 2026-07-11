@@ -466,10 +466,10 @@ router.get('/activity', requireSystemAdmin, async (req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// SMTP Status — check if transporter is connected
+// Email Status — check if Resend is connected
 // ──────────────────────────────────────────────
 
-router.get('/smtp-status', requireSystemAdmin, async (req, res, next) => {
+router.get('/email-status', requireSystemAdmin, async (req, res, next) => {
   try {
     const status = await verifyTransporter();
     res.json(status);
@@ -479,7 +479,7 @@ router.get('/smtp-status', requireSystemAdmin, async (req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// SMTP Test — send a test email to yourself
+// Email Test — send a test email to yourself
 // ──────────────────────────────────────────────
 
 router.post('/test-email', requireSystemAdmin, async (req, res, next) => {
@@ -488,8 +488,8 @@ router.post('/test-email', requireSystemAdmin, async (req, res, next) => {
   try {
     await sendEmail({
       to,
-      subject: 'TakeUForward SMTP Test',
-      html: `<p>This is a test email from TakeUForward. If you received this, SMTP is working correctly.</p>`
+      subject: 'TakeUForward Resend Test',
+      html: `<p>This is a test email from TakeUForward via Resend. If you received this, email is working correctly.</p>`
     });
     res.json({ message: `Test email sent to ${to}. Check inbox and spam folder.` });
   } catch (err) {

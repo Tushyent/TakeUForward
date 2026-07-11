@@ -7,6 +7,9 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased]
 
+### Changed
+- **[Email] Switched from Nodemailer/SMTP to Resend API:** Replaced `nodemailer` (SMTP) with `resend` SDK (`server/config/mailer.js`) because Render blocks outbound SMTP connections to Gmail (`ENETUNREACH`/`ETIMEDOUT`). Removed `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `REPLY_TO_EMAIL` env vars. Now requires only `RESEND_API_KEY` and `EMAIL_FROM`. Updated `.env.example`, `DEPLOYMENT.md`, and admin diagnostic endpoints (`/admin/email-status` instead of `/admin/smtp-status`). Updated notification email tests to match Resend's API (HTML-only, no `text` field).
+
 ### Added
 - **[Admin] Recent signups feed:** Added `GET /admin/signups` endpoint returning recent user registrations. Displayed as a scrollable "Recent Signups" card on the admin dashboard overview tab with avatar, name, email, dept, year, and date. (PART 12)
 - **[Seed] Welcome announcement:** `seedAnnouncement.js` creates a pinned announcement post in the General community authored by the system admin with the TakeUForward vision and an overview of platform features. (PART 4)

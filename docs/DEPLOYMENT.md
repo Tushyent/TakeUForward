@@ -105,12 +105,8 @@ across the project so far.
 | `AWS_BUCKET_NAME` | Yes | bucket name | Uploads fail / 404 on file access |
 | `AWS_REGION` | Yes | e.g. `ap-south-1` | Presigned URL generation fails or points to wrong region |
 | `GEMINI_API_KEY` | Yes | from Google AI Studio | Resource summarization silently falls back (should degrade gracefully — see §8) |
-| `SMTP_HOST` | Yes | e.g. `smtp.gmail.com` | Email notifications silently fail (should log warning, not crash — see §6/§11) |
-| `SMTP_PORT` | Yes | `587` | Same as above |
-| `SMTP_USER` | Yes | sender email | Same as above |
-| `SMTP_PASS` | Yes | app password / API key | Same as above |
-| `EMAIL_FROM` | Yes | display sender address | Emails may be rejected by provider if malformed |
-| `REPLY_TO_EMAIL` | No | `takeuforwardssn@gmail.com` | Reply-to header on outgoing emails; falls back to `takeuforwardssn@gmail.com` |
+| `RESEND_API_KEY` | Yes | `re_...` from Resend dashboard | All transactional email (welcome, notifications, digest) uses Resend. No email sent if missing. |
+| `EMAIL_FROM` | Yes | `onboarding@resend.dev` (sandbox) or verified domain | Sender address. With sandbox, can only send to your own verified email. Verify a domain in Resend for production. |
 | `CRON_SECRET` | Yes (for Weekly Digest) | long random string | Weekly Digest endpoint `/api/jobs/weekly-digest` will reject external triggers |
 | `VAPID_PUBLIC_KEY` | Yes (for Web Push) | Web Push public key | Generated via `npx web-push generate-vapid-keys` |
 | `VAPID_PRIVATE_KEY`| Yes (for Web Push) | Web Push private key | Generated via `npx web-push generate-vapid-keys` |
@@ -357,9 +353,14 @@ the recommendation.
 
 ### 7.9 Welcome email silently skipped when SMTP unconfigured
 - **Symptom:** New users register via Google OAuth but never receive a welcome email ("Welcome to TakeUForward — You're member #X!"). No error returned to the user — the email is simply not sent.
-- **Root cause:** `sendEmail()` in `server/config/mailer.js` checks `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS` — if any is missing/falsy, it logs a `warn` and returns without sending.
-- **Fix:** Set the three SMTP vars in the Render dashboard (values depend on email provider — Gmail SMTP, Resend, SendGrid, etc.).
-- **Prevention:** Server now logs a clear `SMTP not configured — welcome emails and notifications will be silently skipped` at startup if any SMTP var is missing, making the gap immediately visible in Render logs after deploy.
+- **Root cause (original):** `sendEmail()` in `server/config/mailer.js` checked `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS` — if any was missing/falsy, it logged a `warn` and returned without sending. Additionally, Render blocks outbound TCP connections to `smtp.gmail.com` entirely (`ENETUNREACH`/`ETIMEDOUT`), making SMTP unusable in the Render environment regardless of correct credentials.
+- **Fix:** Switched from nodemailer/SMTP to Resend API (`server/config/mailer.js`). Removed `SMTP_HOST/USER/PASS` vars — now requires only `RESEND_API_KEY` in environment.
+- **Prevention:** Server now calls `verifyTransporter()` at startup and logs either `Resend configured and verified — email sending is active.` or `Resend verification FAILED: <error>` depending on whether the API key is valid.
+
+### 7.10 Resend sandbox domain — only sends to verified emails
+- **Symptom:** `verifyTransporter()` passes at startup and `POST /api/admin/test-email` returns success for the admin's email, but notification emails (mentions, replies, comments) to other users never arrive.
+- **Root cause:** Resend's default `onboarding@resend.dev` sandbox sender can only deliver to the email address that created the Resend account. Sending to any other address succeeds (no API error) but the email is silently dropped.
+- **Fix:** Verify a domain in Resend dashboard (Settings → Domains → Add Domain), update DNS TXT records, then set `EMAIL_FROM="TakeUForward SSN" <notifications@yourdomain.com>` and `RESEND_API_KEY=re_...` in Render env vars.
 
 ## 7. Known Issues & Operational Runbook
 
