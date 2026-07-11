@@ -3,6 +3,7 @@ import CareerRoadmap from '../models/CareerRoadmap.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { logger } from '../utils/logger.js';
+import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
 
@@ -125,7 +126,7 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
       reason
     });
 
-    if (roadmap.reports.length >= 3) {
+    if (roadmap.reports.length >= REPORT_THRESHOLD) {
       roadmap.isHidden = true;
     }
 

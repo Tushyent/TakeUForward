@@ -4,6 +4,7 @@ import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { logger } from '../utils/logger.js';
+import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
 
@@ -51,13 +52,36 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       return res.status(400).json({ error: { message: 'Required fields missing' } });
     }
 
+    const validOutcomes = ['selected', 'rejected', 'withdrawn'];
+    if (!validOutcomes.includes(overallOutcome)) {
+      return res.status(400).json({ error: { message: 'Invalid overall outcome' } });
+    }
+
+    if (!Array.isArray(rounds) || rounds.length === 0) {
+      return res.status(400).json({ error: { message: 'At least one interview round is required' } });
+    }
+
+    const formattedRounds = [];
+    for (const round of rounds) {
+      const difficulty = Number(round?.difficulty);
+      if (!round?.roundName || !round?.description || !Number.isInteger(difficulty) || difficulty < 1 || difficulty > 5) {
+        return res.status(400).json({ error: { message: 'Each round requires a name, description, and difficulty from 1 to 5' } });
+      }
+
+      formattedRounds.push({
+        roundName: round.roundName,
+        description: round.description,
+        difficulty,
+      });
+    }
+
     const experience = await InterviewExperience.create({
       authorId: req.user._id,
       isAnonymous: Boolean(isAnonymous),
       company,
       role,
       batchYear,
-      rounds,
+      rounds: formattedRounds,
       overallOutcome,
       tags: tags || []
     });
@@ -116,7 +140,7 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
       reason
     });
 
-    if (experience.reports.length >= 3) {
+    if (experience.reports.length >= REPORT_THRESHOLD) {
       experience.isHidden = true;
     }
 

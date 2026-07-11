@@ -8,6 +8,7 @@ import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { logger } from '../utils/logger.js';
+import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
 
@@ -49,7 +50,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
     const mentionRegex = /@([\w.-]+)/g;
     const matches = [...content.matchAll(mentionRegex)].map(m => m[1]);
     if (matches.length > 0) {
-      const mentionedUsers = await User.find({ handle: { $in: matches } });
+      const mentionedUsers = await User.find({ $or: [{ handle: { $in: matches } }, { username: { $in: matches } }] });
       const mentionedIds = mentionedUsers.map(u => u._id);
 
       if (mentionedIds.length > 0) {
@@ -64,7 +65,11 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
               type: 'mention',
               refId: post._id,
               isAnonymousSender: Boolean(isAnonymous),
-              content
+              content,
+              targetPath: `/community/${communityId}?post=${post._id}`,
+              actorName: req.user.handle ? `@${req.user.handle}` : req.user.name,
+              contextTitle: communityExists.name,
+              contextType: post.type === 'announcement' ? 'club announcement' : 'post'
             });
           }
         }
@@ -190,13 +195,15 @@ router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
     };
 
     post.comments.push(newComment);
+    const createdComment = post.comments[post.comments.length - 1];
+    const commentTargetPath = `/community/${post.communityId}?post=${post._id}&comment=${createdComment._id}`;
     
     // Parse @mentions in comment
     const mentionRegex = /@([\w.-]+)/g;
     const matches = [...text.matchAll(mentionRegex)].map(m => m[1]);
     let mentionedIds = [];
     if (matches.length > 0) {
-      const mentionedUsers = await User.find({ handle: { $in: matches } });
+      const mentionedUsers = await User.find({ $or: [{ handle: { $in: matches } }, { username: { $in: matches } }] });
       mentionedIds = mentionedUsers.map(u => u._id);
 
       // We just append new mentions to the post's mentions array, keeping unique
@@ -220,7 +227,11 @@ router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
           type: 'mention',
           refId: post._id,
           isAnonymousSender: Boolean(isAnonymous),
-          content: text
+          content: text,
+          targetPath: commentTargetPath,
+          actorName: req.user.handle ? `@${req.user.handle}` : req.user.name,
+          contextTitle: 'a post you can access',
+          contextType: 'comment'
         });
       }
     }
@@ -232,7 +243,11 @@ router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
         type: 'comment', // Treat this as a reply to the post
         refId: post._id,
         isAnonymousSender: Boolean(isAnonymous),
-        content: text
+        content: text,
+        targetPath: commentTargetPath,
+        actorName: req.user.handle ? `@${req.user.handle}` : req.user.name,
+        contextTitle: 'your post',
+        contextType: 'comment'
       });
     }
 
@@ -294,7 +309,7 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
       reason
     });
 
-    if (post.reports.length >= 3) {
+    if (post.reports.length >= REPORT_THRESHOLD) {
       post.isHidden = true;
     }
 

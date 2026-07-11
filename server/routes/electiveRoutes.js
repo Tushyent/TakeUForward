@@ -3,6 +3,7 @@ import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { logger } from '../utils/logger.js';
+import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
 
@@ -55,6 +56,21 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       return res.status(400).json({ error: { message: 'Required fields missing' } });
     }
 
+    const validPlatforms = ['nptel', 'college_elective', 'other'];
+    if (!validPlatforms.includes(platform)) {
+      return res.status(400).json({ error: { message: 'Invalid platform' } });
+    }
+
+    const validRecommendations = ['recommend', 'neutral', 'avoid'];
+    if (!validRecommendations.includes(recommendation)) {
+      return res.status(400).json({ error: { message: 'Invalid recommendation' } });
+    }
+
+    const numericWorkloadRating = Number(workloadRating);
+    if (!Number.isInteger(numericWorkloadRating) || numericWorkloadRating < 1 || numericWorkloadRating > 5) {
+      return res.status(400).json({ error: { message: 'Workload rating must be a number from 1 to 5' } });
+    }
+
     const suggestion = await ElectiveSuggestion.create({
       authorId: req.user._id,
       courseCode,
@@ -62,7 +78,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       platform,
       semester,
       recommendation,
-      workloadRating: Number(workloadRating),
+      workloadRating: numericWorkloadRating,
       comment
     });
 
@@ -127,7 +143,7 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
       reason
     });
 
-    if (suggestion.reports.length >= 3) {
+    if (suggestion.reports.length >= REPORT_THRESHOLD) {
       suggestion.isHidden = true;
     }
 
