@@ -7,6 +7,7 @@ import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
 import { logger } from '../utils/logger.js';
 import { logActivity } from '../services/activityLogger.js';
 import { isSystemAdminEmail, isSystemAdminUser, syncUserIdentity } from '../utils/userIdentity.js';
+import { sendWelcomeEmail } from '../config/mailer.js';
 
 const router = express.Router();
 
@@ -146,7 +147,6 @@ router.patch('/profile', async (req, res, next) => {
     const totalUsers = await mongoose.model('User').countDocuments({ isApproved: true });
 
     if (isFirstCompletion) {
-      const { sendWelcomeEmail } = await import('../config/mailer.js');
       sendWelcomeEmail(req.user, totalUsers).catch(err => logger.error('Failed to send welcome email on profile completion:', err));
     }
 
