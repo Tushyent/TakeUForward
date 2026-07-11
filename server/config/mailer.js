@@ -7,11 +7,14 @@ dotenv.config();
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: process.env.SMTP_PORT === '465', // true for 465, false for other ports
+  secure: process.env.SMTP_PORT === '465',
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  connectionTimeout: 10000,    // 10s to establish TCP connection
+  greetingTimeout: 10000,      // 10s to receive SMTP greeting
+  socketTimeout: 15000,        // 15s for send/receive
 });
 
 const escapeHtml = (value = '') => String(value)
@@ -103,7 +106,7 @@ export const sendNotificationEmail = async (user, type, isAnonymousSender, conte
       html: email.html,
     });
   } catch (err) {
-    logger.error('Error sending email:', err);
+    logger.error({ to: user.email, errMsg: err.message, errCode: err.code }, 'Error sending notification email');
   }
 };
 
@@ -120,7 +123,7 @@ export const sendDigestEmail = async (user, htmlContent) => {
       html: htmlContent
     });
   } catch (err) {
-    logger.error(`Error sending digest to ${user.email}:`, err);
+    logger.error({ to: user.email, errMsg: err.message, errCode: err.code }, 'Error sending digest email');
   }
 };
 
@@ -138,7 +141,7 @@ export const sendEmail = async ({ to, subject, html }) => {
       html
     });
   } catch (err) {
-    logger.error(`Error sending email to ${to}:`, err);
+    logger.error({ to, subject, errMsg: err.message, errCode: err.code, errCommand: err.command }, 'Error sending email');
   }
 };
 
@@ -179,4 +182,16 @@ export const sendWelcomeEmail = async (user, memberCount) => {
       : 'Welcome to TakeUForward — Your Campus Community Awaits!',
     html,
   });
+};
+
+export const verifyTransporter = async () => {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    return { configured: false, message: 'SMTP env vars not set' };
+  }
+  try {
+    await transporter.verify();
+    return { configured: true, verified: true };
+  } catch (err) {
+    return { configured: true, verified: false, message: err.message };
+  }
 };

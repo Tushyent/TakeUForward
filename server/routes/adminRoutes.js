@@ -25,7 +25,7 @@ import { getPaginationParams } from '../utils/paginationUtils.js';
 import { isSystemAdminUser } from '../utils/userIdentity.js';
 import { logActivity } from '../services/activityLogger.js';
 import ActivityLog from '../models/ActivityLog.js';
-import { sendEmail } from '../config/mailer.js';
+import { sendEmail, verifyTransporter } from '../config/mailer.js';
 
 const router = express.Router();
 
@@ -460,6 +460,19 @@ router.get('/activity', requireSystemAdmin, async (req, res, next) => {
     ]);
 
     res.json({ logs, totalCount, hasMore: skip + logs.length < totalCount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ──────────────────────────────────────────────
+// SMTP Status — check if transporter is connected
+// ──────────────────────────────────────────────
+
+router.get('/smtp-status', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const status = await verifyTransporter();
+    res.json(status);
   } catch (err) {
     next(err);
   }

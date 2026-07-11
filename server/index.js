@@ -5,6 +5,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import passport from 'passport';
 import { connectDB } from './config/db.js';
+import { verifyTransporter } from './config/mailer.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import pinoHttp from 'pino-http';
@@ -168,11 +169,14 @@ const PORT = process.env.PORT || 5000;
 let server;
 
 // Connect to DB and start server
-connectDB().then(() => {
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+connectDB().then(async () => {
+  const smtpStatus = await verifyTransporter();
+  if (!smtpStatus.configured) {
     logger.warn('SMTP not configured — welcome emails and notifications will be silently skipped. Set SMTP_HOST, SMTP_USER, and SMTP_PASS in environment.');
+  } else if (!smtpStatus.verified) {
+    logger.error(`SMTP verification FAILED: ${smtpStatus.message}. Welcome emails and notifications will NOT be sent.`);
   } else {
-    logger.info('SMTP configured — email sending is active.');
+    logger.info('SMTP configured and connected — email sending is active.');
   }
 
   server = app.listen(PORT, () => {
