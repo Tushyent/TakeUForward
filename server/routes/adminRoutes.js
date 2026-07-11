@@ -25,6 +25,7 @@ import { getPaginationParams } from '../utils/paginationUtils.js';
 import { isSystemAdminUser } from '../utils/userIdentity.js';
 import { logActivity } from '../services/activityLogger.js';
 import ActivityLog from '../models/ActivityLog.js';
+import { sendEmail } from '../config/mailer.js';
 
 const router = express.Router();
 
@@ -459,6 +460,25 @@ router.get('/activity', requireSystemAdmin, async (req, res, next) => {
     ]);
 
     res.json({ logs, totalCount, hasMore: skip + logs.length < totalCount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ──────────────────────────────────────────────
+// SMTP Test — send a test email to yourself
+// ──────────────────────────────────────────────
+
+router.post('/test-email', requireSystemAdmin, async (req, res, next) => {
+  const { to } = req.body;
+  if (!to) return res.status(400).json({ error: { message: 'Recipient email (to) is required' } });
+  try {
+    await sendEmail({
+      to,
+      subject: 'TakeUForward SMTP Test',
+      html: `<p>This is a test email from TakeUForward. If you received this, SMTP is working correctly.</p>`
+    });
+    res.json({ message: `Test email sent to ${to}. Check inbox and spam folder.` });
   } catch (err) {
     next(err);
   }
