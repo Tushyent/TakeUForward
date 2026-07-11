@@ -55,7 +55,7 @@ passport.use(
           let defaultCommunityId = await assignDefaultCommunity(dept, year);
 
           // Non-SSN users must be approved by an admin before they can access the platform
-          const isApproved = isSsnDomain || isSystemAdmin;
+          const isApproved = isSsnDomain || isSystemAdmin || isVerifiedAlumni;
 
           user = await User.create({
             googleId: profile.id,
@@ -89,8 +89,12 @@ passport.use(
           // If the user already exists but just became a verified alumni, update them
           if (isVerifiedAlumni && !user.isVerifiedAlumni) {
             user.isVerifiedAlumni = true;
+            user.isApproved = true;
             user.role = 'alumni';
             if (currentCompany) user.currentCompany = currentCompany;
+            await user.save();
+          } else if (isVerifiedAlumni && !user.isApproved) {
+            user.isApproved = true;
             await user.save();
           }
           const changed = await syncUserIdentity(User, user);
