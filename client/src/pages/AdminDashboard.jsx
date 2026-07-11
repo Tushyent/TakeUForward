@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import {
   ShieldAlert, Users, BookOpen, MessageSquareWarning, UserCheck,
   RefreshCcw, Trash2, Plus, Pencil, Building2, Users2, Layers,
-  FileText, UserPlus, CheckCircle, History
+  FileText, UserPlus, CheckCircle
 } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import useDebounce from '../hooks/useDebounce';
@@ -15,7 +15,7 @@ import { Input } from '../components/ui/Input';
 import Spinner from '../components/ui/Spinner';
 import Modal from '../components/ui/Modal';
 
-const TABS = ['overview', 'clubs', 'communities', 'resources', 'posts', 'users', 'activity'];
+const TABS = ['overview', 'clubs', 'communities', 'resources', 'posts', 'users', ''];
 
 const TabButton = ({ active, label, icon: Icon, onClick }) => (
   <button
@@ -98,12 +98,6 @@ const AdminDashboard = () => {
   const [userQuery, setUserQuery] = useState('');
   const debouncedUserQuery = useDebounce(userQuery, 300);
   const [usersLoading, setUsersLoading] = useState(false);
-
-  // Activity log state
-  const [activityLogs, setActivityLogs] = useState([]);
-  const [activityQuery, setActivityQuery] = useState('');
-  const debouncedActivityQuery = useDebounce(activityQuery, 300);
-  const [activityLoading, setActivityLoading] = useState(false);
 
   const loadAdminData = useCallback(async () => {
     setLoading(true);
@@ -310,20 +304,6 @@ const AdminDashboard = () => {
       toast.error(err.response?.data?.error?.message || 'Failed to approve user');
     }
   };
-
-  const loadActivity = useCallback(async () => {
-    try {
-      setActivityLoading(true);
-      const res = await axiosClient.get(`/admin/activity?${new URLSearchParams({ q: activityQuery, limit: '50' })}`);
-      setActivityLogs(res.data.logs);
-    } catch {
-      toast.error('Failed to load activity log');
-    } finally {
-      setActivityLoading(false);
-    }
-  }, [debouncedActivityQuery]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => { if (activeTab === 'activity') loadActivity(); }, [activeTab, loadActivity]);
 
   const deleteAdminUser = async (u) => {
     if (!window.confirm(`Delete user "${u.name || u.email}"? All their posts, comments, and content will be permanently removed.`)) return;
@@ -676,61 +656,6 @@ const AdminDashboard = () => {
     </div>
   );
 
-  const renderActivity = () => (
-    <div>
-      <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', maxWidth: 400 }}>
-        <Input value={activityQuery} onChange={e => setActivityQuery(e.target.value)} placeholder="Search by action, resource, or user..." />
-        <Button variant="secondary" size="sm" onClick={loadActivity}><RefreshCcw size={13} /></Button>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-        {activityLoading ? (
-          <Spinner text="Loading activity log..." />
-        ) : activityLogs.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No activity recorded yet.</p>
-        ) : activityLogs.map(log => (
-          <div key={log._id} style={{
-            display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)',
-            padding: 'var(--space-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-          }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 'var(--radius-sm)', flexShrink: 0,
-              background: log.action === 'delete' ? 'var(--danger-bg, rgba(239,68,68,0.1))' :
-                           log.action === 'create' ? 'var(--success-bg, rgba(34,197,94,0.1))' :
-                           log.action === 'report' ? 'var(--warning-bg, rgba(234,179,8,0.1))' :
-                           'var(--bg-input)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 'var(--text-xs)', fontWeight: 600,
-              color: log.action === 'delete' ? 'var(--danger)' :
-                     log.action === 'create' ? 'var(--success)' :
-                     log.action === 'report' ? 'var(--warning)' :
-                     'var(--text-secondary)',
-            }}>
-              {log.action === 'create' ? '+' : log.action === 'delete' ? '×' : log.action === 'update' ? '~' : '•'}
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <strong style={{ fontSize: 'var(--text-sm)' }}>{log.userName}</strong>
-                <Badge variant="secondary" size="sm">{log.action}</Badge>
-                <Badge variant="info" size="sm">{log.resource}</Badge>
-              </div>
-              <p style={{ margin: '2px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', wordBreak: 'break-word' }}>
-                {log.description}
-              </p>
-              {log.details && Object.keys(log.details).length > 0 && (
-                <p style={{ margin: '2px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
-                  {JSON.stringify(log.details).slice(0, 120)}
-                </p>
-              )}
-              <p style={{ margin: '2px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-                {new Date(log.createdAt).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   const renderPosts = () => (
     <div>
       <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', maxWidth: 400 }}>
@@ -782,7 +707,6 @@ const AdminDashboard = () => {
             if (activeTab === 'communities') loadCommunities();
             if (activeTab === 'resources') loadResources();
             if (activeTab === 'users') loadUsers();
-            if (activeTab === 'activity') loadActivity();
             if (activeTab === 'posts') loadPosts();
           }}>
             <RefreshCcw size={14} /> Refresh
@@ -795,7 +719,7 @@ const AdminDashboard = () => {
               key={tab}
               active={activeTab === tab}
               label={tab.charAt(0).toUpperCase() + tab.slice(1)}
-              icon={tab === 'overview' ? ShieldAlert : tab === 'clubs' ? Building2 : tab === 'communities' ? Users2 : tab === 'resources' ? BookOpen : tab === 'users' ? UserPlus : tab === 'activity' ? History : FileText}
+              icon={tab === 'overview' ? ShieldAlert : tab === 'clubs' ? Building2 : tab === 'communities' ? Users2 : tab === 'resources' ? BookOpen : tab === 'users' ? UserPlus : FileText}
               onClick={() => setActiveTab(tab)}
             />
           ))}
@@ -806,7 +730,6 @@ const AdminDashboard = () => {
         {activeTab === 'communities' && renderCommunities()}
         {activeTab === 'resources' && renderResources()}
         {activeTab === 'users' && renderUsers()}
-        {activeTab === 'activity' && renderActivity()}
         {activeTab === 'posts' && renderPosts()}
       </div>
     </div>

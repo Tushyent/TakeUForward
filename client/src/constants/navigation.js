@@ -1,7 +1,7 @@
 import {
   Home, BookOpen, Users, Megaphone, Cloud,
   GraduationCap, Briefcase, MessageSquare, FileText, Map,
-  Star, Lightbulb, UserCheck, Package, ShoppingBag, Bookmark, HelpCircle, ShieldAlert
+  Star, Lightbulb, UserCheck, Package, ShoppingBag, Bookmark, HelpCircle, ShieldAlert, History
 } from 'lucide-react';
 
 export const NAV_PRIMARY = [
@@ -34,6 +34,7 @@ export const NAV_COMMUNITY = [
 
 export const NAV_ADMIN = [
   { to: '/admin', icon: ShieldAlert, label: 'Admin' },
+  { to: '/activity', icon: History, label: 'Activity Log' },
   { to: '/moderation', icon: ShieldAlert, label: 'Moderation' },
 ];
 

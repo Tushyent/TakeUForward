@@ -39,6 +39,7 @@ const About = lazy(() => import('./pages/About'));
 const Support = lazy(() => import('./pages/Support'));
 const AdminSupportQueue = lazy(() => import('./pages/AdminSupportQueue'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ActivityLog = lazy(() => import('./pages/ActivityLog'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const AdminOnly = ({ children }) => {
@@ -87,6 +88,7 @@ function App() {
                       <Route path="/bookmarks" element={<Bookmarks />} />
                       <Route path="/moderation" element={<AdminOnly><ModerationQueue /></AdminOnly>} />
                       <Route path="/support" element={<Support />} />
+                      <Route path="/activity" element={<AdminOnly><ActivityLog /></AdminOnly>} />
                       <Route path="/admin" element={<AdminOnly><AdminDashboard /></AdminOnly>} />
                       <Route path="/admin/support" element={<AdminOnly><AdminSupportQueue /></AdminOnly>} />
                       <Route path="/chats" element={<Chats />} />
