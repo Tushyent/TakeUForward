@@ -52,6 +52,9 @@ passport.use(
           let year = null;
           let defaultCommunityId = await assignDefaultCommunity(dept, year);
 
+          // Non-SSN users must be approved by an admin before they can access the platform
+          const isApproved = isSsnDomain || isSystemAdmin;
+
           user = await User.create({
             googleId: profile.id,
             name: profile.displayName,
@@ -62,6 +65,7 @@ passport.use(
             defaultCommunityId,
             isVerifiedAlumni,
             isPlatformAdmin: isSystemAdmin,
+            isApproved,
             ...(currentCompany && { currentCompany })
           });
           const changed = await syncUserIdentity(User, user);

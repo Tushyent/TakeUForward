@@ -7,7 +7,7 @@ import Spinner from '../components/ui/Spinner';
 import { Input, Textarea } from '../components/ui/Input';
 import toast from 'react-hot-toast';
 import EmptyState from '../components/ui/EmptyState';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, User, Link2, Settings2, Eye, Bell, Save } from 'lucide-react';
 
 function ProfileSettings() {
   const { fetchAuth } = useAuth();
@@ -191,103 +191,254 @@ function ProfileSettings() {
 
   return (
     <div className="page-transition">
-            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
-        <h1 style={{ marginTop: 0, marginBottom: '20px' }}>Profile Settings</h1>
-        
-        <form onSubmit={handleSave}>
-          <Card style={{ marginBottom: '20px' }}>
-            <h2 style={{ marginTop: 0 }}>Public Profile Info</h2>
-            
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>About Me</label>
-              <Textarea 
-                name="about"
-                value={profile.about}
-                onChange={e => handleChange(e)}
-                style={{ width: '100%', minHeight: '100px' }}
-                placeholder="Write a little about yourself..."
-                aria-label="About Me"
-              />
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-6) var(--space-8)' }}>
+
+        {/* ── HEADER ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
+          marginBottom: 'var(--space-6)',
+        }}>
+          <div style={{
+            width: 40, height: 40,
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--primary-glow)',
+            border: '1px solid rgba(124,106,247,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <Settings2 size={18} color="var(--primary)" />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 'var(--text-xl)' }}>Profile Settings</h1>
+            <p style={{ margin: '2px 0 0 0', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
+              Manage your public profile and privacy
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
+
+          {/* ── PUBLIC PROFILE INFO ── */}
+          <Card style={{ padding: 'var(--space-5)' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+              marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-4)',
+              borderBottom: '1px solid var(--border-subtle)',
+            }}>
+              <User size={16} color="var(--primary)" />
+              <h2 style={{ margin: 0, fontSize: 'var(--text-base)' }}>Public Profile Info</h2>
             </div>
 
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Skills (comma separated)</label>
-              <Input name="skills" value={profile.skills} onChange={e => handleChange(e)} placeholder="React, Node.js, Python..." style={{ width: '100%' }} aria-label="Skills" />
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Interests (comma separated)</label>
-              <Input name="interests" value={profile.interests} onChange={e => handleChange(e)} placeholder="Machine Learning, Web Dev, Photography..." style={{ width: '100%' }} aria-label="Interests" />
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Experience (comma separated)</label>
-              <Input name="experience" value={profile.experience} onChange={e => handleChange(e)} placeholder="SWE Intern at Google, GDSC Lead..." style={{ width: '100%' }} aria-label="Experience" />
-            </div>
-
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Projects (comma separated)</label>
-              <Input name="projects" value={profile.projects} onChange={e => handleChange(e)} placeholder="TakeUForward, React Native App..." style={{ width: '100%' }} aria-label="Projects" />
-            </div>
-
-            <h3 style={{ marginTop: '25px', marginBottom: '15px' }}>Contact Links</h3>
-            <div style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>WhatsApp Number (for wa.me click-to-chat)</label>
-              <Input name="whatsappNumber" type="tel" value={profile.whatsappNumber} onChange={e => handleChange(e)} placeholder="e.g. 9876543210" style={{ width: '100%' }} aria-label="WhatsApp Number" />
-            </div>
-
-            <div className="grid-2-col" style={{ gap: '15px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>LinkedIn URL</label>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  About Me
+                </label>
+                <Textarea
+                  name="about"
+                  value={profile.about}
+                  onChange={e => handleChange(e)}
+                  style={{ width: '100%', minHeight: '90px' }}
+                  placeholder="Write a little about yourself..."
+                  aria-label="About Me"
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  Skills <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                </label>
+                <Input name="skills" value={profile.skills} onChange={e => handleChange(e)} placeholder="React, Node.js, Python..." style={{ width: '100%' }} aria-label="Skills" />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  Interests <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                </label>
+                <Input name="interests" value={profile.interests} onChange={e => handleChange(e)} placeholder="Machine Learning, Web Dev, Photography..." style={{ width: '100%' }} aria-label="Interests" />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  Experience <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                </label>
+                <Input name="experience" value={profile.experience} onChange={e => handleChange(e)} placeholder="SWE Intern at Google, GDSC Lead..." style={{ width: '100%' }} aria-label="Experience" />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  Projects <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                </label>
+                <Input name="projects" value={profile.projects} onChange={e => handleChange(e)} placeholder="TakeUForward, React Native App..." style={{ width: '100%' }} aria-label="Projects" />
+              </div>
+            </div>
+          </Card>
+
+          {/* ── CONTACT & LINKS ── */}
+          <Card style={{ padding: 'var(--space-5)' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+              marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-4)',
+              borderBottom: '1px solid var(--border-subtle)',
+            }}>
+              <Link2 size={16} color="var(--accent)" />
+              <h2 style={{ margin: 0, fontSize: 'var(--text-base)' }}>Contact & Links</h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  WhatsApp Number
+                </label>
+                <Input name="whatsappNumber" type="tel" value={profile.whatsappNumber} onChange={e => handleChange(e)} placeholder="e.g. 9876543210" style={{ width: '100%' }} aria-label="WhatsApp Number" />
+                <p style={{ margin: '4px 0 0 0', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
+                  Used for wa.me click-to-chat links on your profile
+                </p>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  LinkedIn URL
+                </label>
                 <Input value={profile.socialLinks.linkedin} onChange={e => handleChange(e, 'socialLinks', 'linkedin')} placeholder="https://linkedin.com/in/..." style={{ width: '100%' }} aria-label="LinkedIn URL" />
               </div>
+
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>GitHub URL</label>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  GitHub URL
+                </label>
                 <Input value={profile.socialLinks.github} onChange={e => handleChange(e, 'socialLinks', 'github')} placeholder="https://github.com/..." style={{ width: '100%' }} aria-label="GitHub URL" />
               </div>
+
               <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Instagram URL</label>
+                <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+                  Instagram URL
+                </label>
                 <Input value={profile.socialLinks.instagram} onChange={e => handleChange(e, 'socialLinks', 'instagram')} placeholder="https://instagram.com/..." style={{ width: '100%' }} aria-label="Instagram URL" />
               </div>
             </div>
           </Card>
 
-          <Card style={{ marginBottom: '20px' }}>
-            <h2 style={{ marginTop: 0 }}>Privacy & Settings</h2>
-            
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-primary)' }}>
-                <input type="checkbox" checked={profile.weeklyDigestOptIn} onChange={() => setProfile(prev => ({ ...prev, weeklyDigestOptIn: !prev.weeklyDigestOptIn }))} style={{ width: '18px', height: '18px' }} />
-                Receive Weekly Digest Emails
-              </label>
+          {/* ── PREFERENCES ── */}
+          <Card style={{ padding: 'var(--space-5)' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+              marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-4)',
+              borderBottom: '1px solid var(--border-subtle)',
+            }}>
+              <Bell size={16} color="var(--warning)" />
+              <h2 style={{ margin: 0, fontSize: 'var(--text-base)' }}>Preferences</h2>
             </div>
 
-            {pushSupported && (
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-primary)' }}>
-                  <input type="checkbox" checked={webPushOptIn} onChange={handlePushToggle} style={{ width: '18px', height: '18px' }} />
-                  Receive Web Push Notifications (Mentions & Replies)
-                </label>
-              </div>
-            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <label style={{
+                display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
+                cursor: 'pointer', padding: 'var(--space-3)',
+                borderRadius: 'var(--radius-sm)',
+                background: profile.weeklyDigestOptIn ? 'var(--primary-glow)' : 'transparent',
+                border: '1px solid',
+                borderColor: profile.weeklyDigestOptIn ? 'rgba(124,106,247,0.2)' : 'var(--border-subtle)',
+                transition: 'background 0.15s, border-color 0.15s',
+              }}>
+                <input
+                  type="checkbox"
+                  checked={profile.weeklyDigestOptIn}
+                  onChange={() => setProfile(prev => ({ ...prev, weeklyDigestOptIn: !prev.weeklyDigestOptIn }))}
+                  style={{ width: 18, height: 18, accentColor: 'var(--primary)', flexShrink: 0 }}
+                />
+                <div>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: 'var(--text-sm)' }}>Weekly Digest Emails</span>
+                  <p style={{ margin: '2px 0 0 0', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
+                    Get a weekly summary of activity
+                  </p>
+                </div>
+              </label>
 
-            <h3 style={{ marginBottom: '15px' }}>Visibility</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              {pushSupported && (
+                <label style={{
+                  display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
+                  cursor: 'pointer', padding: 'var(--space-3)',
+                  borderRadius: 'var(--radius-sm)',
+                  background: webPushOptIn ? 'var(--primary-glow)' : 'transparent',
+                  border: '1px solid',
+                  borderColor: webPushOptIn ? 'rgba(124,106,247,0.2)' : 'var(--border-subtle)',
+                  transition: 'background 0.15s, border-color 0.15s',
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={webPushOptIn}
+                    onChange={handlePushToggle}
+                    style={{ width: 18, height: 18, accentColor: 'var(--primary)', flexShrink: 0 }}
+                  />
+                  <div>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 500, fontSize: 'var(--text-sm)' }}>Push Notifications</span>
+                    <p style={{ margin: '2px 0 0 0', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
+                      Get notified on mentions and replies
+                    </p>
+                  </div>
+                </label>
+              )}
+            </div>
+          </Card>
+
+          {/* ── VISIBILITY ── */}
+          <Card style={{ padding: 'var(--space-5)' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+              marginBottom: 'var(--space-5)', paddingBottom: 'var(--space-4)',
+              borderBottom: '1px solid var(--border-subtle)',
+            }}>
+              <Eye size={16} color="var(--success)" />
+              <h2 style={{ margin: 0, fontSize: 'var(--text-base)' }}>Profile Visibility</h2>
+            </div>
+
+            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)', margin: '0 0 var(--space-4) 0', lineHeight: 1.5 }}>
+              Toggle which sections of your profile are visible to other students.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2)' }}>
               {Object.entries(profile.profileVisibility).map(([key, value]) => {
-                const label = key.replace(/([A-Z])/g, ' $1').replace(/^show/, 'Show ').trim();
+                const label = key.replace(/([A-Z])/g, ' $1').replace(/^show/i, '').trim();
                 return (
-                  <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', color: 'var(--text-primary)' }}>
-                    <input type="checkbox" checked={value} onChange={() => handleToggle(key)} style={{ width: '18px', height: '18px' }} />
-                    {label}
+                  <label key={key} style={{
+                    display: 'flex', alignItems: 'center', gap: 'var(--space-2)',
+                    cursor: 'pointer', padding: 'var(--space-2) var(--space-3)',
+                    borderRadius: 'var(--radius-sm)',
+                    background: value ? 'var(--primary-glow)' : 'var(--bg-elevated)',
+                    border: '1px solid',
+                    borderColor: value ? 'rgba(124,106,247,0.2)' : 'var(--border-subtle)',
+                    transition: 'background 0.15s, border-color 0.15s',
+                    fontSize: 'var(--text-xs)',
+                    color: 'var(--text-primary)',
+                    fontWeight: value ? 600 : 400,
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={value}
+                      onChange={() => handleToggle(key)}
+                      style={{ width: 16, height: 16, accentColor: 'var(--primary)', flexShrink: 0 }}
+                    />
+                    {label || key}
                   </label>
                 );
               })}
             </div>
           </Card>
 
-          <Button type="submit" disabled={saving} style={{ width: '100%', padding: '12px', fontSize: '1.1em' }}>
-            {saving ? 'Saving...' : 'Save Settings'}
-          </Button>
+          {/* ── SAVE ── */}
+          <div style={{
+            position: 'sticky', bottom: 'var(--space-4)',
+            zIndex: 10, marginTop: 'var(--space-2)',
+          }}>
+            <Button type="submit" disabled={saving} style={{
+              width: '100%', padding: '14px', fontSize: 'var(--text-base)',
+              fontWeight: 600, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', gap: 'var(--space-2)',
+            }}>
+              <Save size={18} />
+              {saving ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
         </form>
       </div>
     </div>

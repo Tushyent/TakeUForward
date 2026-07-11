@@ -10,7 +10,9 @@
     "seed:communities": "node scripts/seedCommunities.js",
     "seed:clubs": "node scripts/seedClubs.js",
     "assign:admin": "node scripts/assignClubAdmin.js",
-    "seed:admin": "node scripts/ensureSystemAdmin.js"
+    "seed:admin": "node scripts/ensureSystemAdmin.js",
+    "seed:announcement": "node scripts/seedAnnouncement.js",
+    "seed:roadmaps": "node scripts/seedRoadmaps.js"
   },
   "keywords": [],
   "author": "",

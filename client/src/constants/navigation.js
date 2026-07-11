@@ -1,12 +1,12 @@
 import {
-  Home, BookOpen, Users, Megaphone, Cloud, Info,
+  Home, BookOpen, Users, Megaphone, Cloud,
   GraduationCap, Briefcase, MessageSquare, FileText, Map,
   Star, Lightbulb, UserCheck, Package, ShoppingBag, Bookmark, HelpCircle, ShieldAlert
 } from 'lucide-react';
 
 export const NAV_PRIMARY = [
   { to: '/home',          icon: Home,         label: 'Home' },
-  { to: '/about',         icon: Info,         label: 'About TUF' },
+  { to: '/community',     icon: Users,        label: 'Communities' },
   { to: '/resources',     icon: BookOpen,     label: 'Resources' },
   { to: '/clubs',         icon: Users,        label: 'Clubs' },
   { to: '/announcements', icon: Megaphone,    label: 'Announcements' },

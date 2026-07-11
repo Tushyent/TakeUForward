@@ -3,7 +3,7 @@ import { Upload, MapPin } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
+import { Input, Select } from '../components/ui/Input';
 import axiosClient from '../api/axiosClient';
 
 const Support = () => {
@@ -95,88 +95,83 @@ const Support = () => {
 
   return (
     <div className="page-col page-col-form">
-      <h1>Support & Feedback</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>
-        Found a bug? Have a feature request? Let us know below. This is a private channel to the platform admins.
-      </p>
+      <div style={{ marginBottom: 'var(--space-6)' }}>
+        <h1 style={{ margin: 0 }}>Support & Feedback</h1>
+        <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-2) 0 0', fontSize: 'var(--text-sm)' }}>
+          Found a bug? Have a feature request? This is a private channel to the platform admins.
+        </p>
+      </div>
 
-      <Card>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <Card style={{ padding: 'var(--space-6)' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Category *</label>
-            <select
+            <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+              Category <span style={{ color: 'var(--danger)' }}>*</span>
+            </label>
+            <Select
               name="category"
               value={formData.category}
               onChange={handleChange}
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg-main)',
-                color: 'var(--text-main)',
-                fontSize: '1rem',
-                fontFamily: 'inherit'
-              }}
+              style={{ width: '100%' }}
+              aria-label="Category"
             >
               <option value="bug">Report a Bug</option>
               <option value="feature_request">Feature Request</option>
               <option value="other">Other</option>
-            </select>
+            </Select>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Title *</label>
+            <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+              Title <span style={{ color: 'var(--danger)' }}>*</span>
+            </label>
             <Input
               name="title"
               placeholder="Brief summary of the issue..."
               value={formData.title}
               onChange={handleChange}
               required
+              style={{ width: '100%' }}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>Description *</label>
+            <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+              Description <span style={{ color: 'var(--danger)' }}>*</span>
+            </label>
             <textarea
               name="description"
               placeholder="Please provide details..."
               value={formData.description}
               onChange={handleChange}
               required
-              rows={4}
+              rows={5}
+              className="input"
               style={{
-                width: '100%',
-                padding: '12px 14px',
-                borderRadius: 'var(--radius)',
-                border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg-main)',
-                color: 'var(--text-main)',
-                fontSize: '1rem',
-                fontFamily: 'inherit',
-                resize: 'vertical'
+                width: '100%', resize: 'vertical', minHeight: 120,
               }}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              <MapPin size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '5px' }}/>
-              Where did this happen? (Optional)
+            <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+              <MapPin size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+              Where did this happen? <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(Optional)</span>
             </label>
             <Input
               name="pageContext"
               placeholder="e.g., /resources page, or trying to login"
               value={formData.pageContext}
               onChange={handleChange}
+              style={{ width: '100%' }}
             />
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
-              <Upload size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '5px' }}/>
-              Screenshot (Optional)
+            <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
+              <Upload size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
+              Screenshot <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(Optional)</span>
             </label>
             <Input
               id="screenshot-upload"
@@ -184,39 +179,21 @@ const Support = () => {
               accept="image/jpeg, image/png, image/webp"
               onChange={handleScreenshotUpload}
               disabled={isUploading || isSubmitting}
+              style={{ width: '100%' }}
             />
-            {isUploading && <div style={{ fontSize: '0.85rem', color: 'var(--primary)', marginTop: '5px' }}>Uploading screenshot...</div>}
+            {isUploading && (
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--primary)', marginTop: 'var(--space-2)' }}>
+                Uploading screenshot...
+              </div>
+            )}
             {formData.screenshotUrl && (
-              <div style={{ fontSize: '0.85rem', color: 'var(--success)', marginTop: '5px' }}>
+              <div style={{ fontSize: 'var(--text-xs)', color: 'var(--success)', marginTop: 'var(--space-2)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 ✓ Screenshot attached
               </div>
             )}
           </div>
-{/*
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '15px',
-            backgroundColor: 'rgba(124, 106, 247, 0.05)',
-            borderRadius: 'var(--radius)',
-            border: '1px dashed var(--primary)'
-          }}>
-            <input
-              type="checkbox"
-              id="displayNamePublicly"
-              name="displayNamePublicly"
-              checked={formData.displayNamePublicly}
-              onChange={handleChange}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-            />
-            <label htmlFor="displayNamePublicly" style={{ cursor: 'pointer', fontSize: '0.9rem', color: 'var(--text-main)' }}>
-              <strong>Display my name publicly</strong> if this feature request/bug fix is published in a future changelog.
-              <br/><span style={{ color: 'var(--text-muted)' }}>(Note: Platform admins can always see who submitted the ticket regardless of this toggle).</span>
-            </label>
-          </div> */}
 
-          <div style={{ marginTop: '10px' }}>
+          <div style={{ marginTop: 'var(--space-2)' }}>
             <Button type="submit" disabled={isSubmitting || isUploading} style={{ width: '100%' }}>
               {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
             </Button>

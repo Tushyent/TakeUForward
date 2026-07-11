@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
 import axiosClient from '../api/axiosClient';
+import useDebounce from '../hooks/useDebounce';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
@@ -19,6 +21,8 @@ function LostFound() {
   const [filterType, setFilterType] = useState('');
   const [filterStatus, setFilterStatus] = useState('open');
   const [filterLocation, setFilterLocation] = useState('');
+  const [filterSearch, setFilterSearch] = useState('');
+  const debouncedSearch = useDebounce(filterSearch, 300);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -50,6 +54,7 @@ function LostFound() {
       if (filterType) params.append('type', filterType);
       if (filterStatus) params.append('status', filterStatus);
       if (filterLocation) params.append('locationTag', filterLocation);
+      if (debouncedSearch) params.append('search', debouncedSearch);
 
       const res = await axiosClient.get(`/lost-found?${params.toString()}`);
       if (res.data.length < 10) setHasMore(false);
@@ -74,7 +79,7 @@ function LostFound() {
   useEffect(() => {
     setLoading(true);
     fetchItems();
-  }, [filterType, filterStatus, filterLocation]); // eslint-disable-line
+  }, [filterType, filterStatus, filterLocation, debouncedSearch]); // eslint-disable-line
 
   useEffect(() => {
     if (page > 1) {
@@ -119,11 +124,12 @@ function LostFound() {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleMessageUser = async (userId) => {
     try {
-      const res = await axiosClient.post(`/chats`, { participantId: userId });
-      // Redirect to chat
-      window.location.href = `/chat/${res.data._id}`;
+      const res = await axiosClient.get(`/chats/${userId}`);
+      navigate(`/chat/${res.data._id}`);
     } catch (err) {
       console.error(err);
       toast.error('Failed to start chat');
@@ -249,22 +255,31 @@ function LostFound() {
         )}
 
         {/* Filters */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <Select value={filterType} onChange={e => { setFilterType(e.target.value); setPage(1); }}>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+            <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
+            <Input
+              value={filterSearch}
+              onChange={e => { setFilterSearch(e.target.value); setPage(1); }}
+              placeholder="Search items..."
+              style={{ paddingLeft: 36, width: '100%' }}
+            />
+          </div>
+          <Select value={filterType} onChange={e => { setFilterType(e.target.value); setPage(1); }} style={{ minWidth: 130 }}>
             <option value="">All Types</option>
             <option value="lost">Lost</option>
             <option value="found">Found</option>
           </Select>
-          <Select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1); }}>
+          <Select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1); }} style={{ minWidth: 130 }}>
             <option value="">All Statuses</option>
             <option value="open">Open</option>
             <option value="resolved">Resolved</option>
           </Select>
-          <Input 
-            placeholder="Search location..." 
-            value={filterLocation} 
-            onChange={e => { setFilterLocation(e.target.value); setPage(1); }} 
-            style={{ minWidth: '200px' }}
+          <Input
+            placeholder="Filter location..."
+            value={filterLocation}
+            onChange={e => { setFilterLocation(e.target.value); setPage(1); }}
+            style={{ minWidth: 160, width: 'auto' }}
           />
         </div>
 

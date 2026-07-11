@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import Chat from '../models/Chat.js';
 import User from '../models/User.js';
 import { createNotification } from '../services/notificationService.js';
+import { logActivity } from '../services/activityLogger.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -108,6 +109,8 @@ router.post('/:userId/message', chatCreationLimiter, async (req, res, next) => {
     });
 
     await chat.save();
+
+    await logActivity({ action: 'send_message', resource: 'Chat', resourceId: chat._id, description: 'Sent a message', req });
 
     // Create in-app notification for the target user
     await createNotification({

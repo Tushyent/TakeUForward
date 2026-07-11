@@ -2,6 +2,7 @@ import express from 'express';
 import ReferralRequest from '../models/ReferralRequest.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logActivity } from '../services/activityLogger.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -80,6 +81,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       targetCompany
     });
 
+    await logActivity({ action: 'create', resource: 'ReferralRequest', resourceId: request._id, description: 'Requested a referral', req, details: { company: request.targetCompany } });
+
     res.status(201).json(request);
   } catch (err) {
     logger.error('Error creating referral request:', err);
@@ -109,6 +112,8 @@ router.post('/:id/match', postCreationLimiter, async (req, res, next) => {
     request.matchedAlumniId = req.user._id;
     await request.save();
 
+    await logActivity({ action: 'match', resource: 'ReferralRequest', resourceId: request._id, description: 'Matched to a referral request', req });
+
     await request.populate('requesterId', 'name handle dept year username');
     await request.populate('matchedAlumniId', 'name handle currentCompany isVerifiedAlumni username');
 
@@ -133,6 +138,8 @@ router.patch('/:id/close', async (req, res, next) => {
 
     request.status = 'closed';
     await request.save();
+
+    await logActivity({ action: 'update', resource: 'ReferralRequest', resourceId: request._id, description: 'Closed a referral request', req });
 
     res.status(200).json(request);
   } catch (err) {

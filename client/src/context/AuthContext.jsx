@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(null); // null = loading
   const [profileComplete, setProfileComplete] = useState(false);
+  const [isApproved, setIsApproved] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
 
   const fetchAuth = async () => {
@@ -14,6 +15,7 @@ export const AuthProvider = ({ children }) => {
       const response = await axiosClient.get('/auth/me');
       setUser(response.data.user);
       setProfileComplete(response.data.profileComplete);
+      setIsApproved(response.data.isApproved !== false);
       setIsAuthenticated(true);
       setErrorMsg(null);
     } catch (err) {
@@ -61,7 +63,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, profileComplete, fetchAuth }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, profileComplete, isApproved, fetchAuth }}>
       {children}
     </AuthContext.Provider>
   );

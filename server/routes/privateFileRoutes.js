@@ -2,6 +2,7 @@ import express from 'express';
 import PrivateFile from '../models/PrivateFile.js';
 import { generatePrivateUploadUrl, generatePrivateDownloadUrl, validateObjectSize, deleteObjectByKey } from '../config/s3.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();
 
@@ -55,6 +56,8 @@ router.post('/confirm', async (req, res, next) => {
       ownerId: req.user._id
     });
 
+    await logActivity({ action: 'upload', resource: 'PrivateFile', resourceId: newFile._id, description: 'Uploaded a file to drive', req, details: { fileName: newFile.fileName, fileSize: newFile.size } });
+
     res.status(201).json(newFile);
   } catch (err) {
     next(err);
@@ -93,6 +96,7 @@ router.delete('/:id', async (req, res, next) => {
     await deleteObjectByKey(file.s3Key);
 
     await PrivateFile.findByIdAndDelete(file._id);
+    await logActivity({ action: 'delete', resource: 'PrivateFile', resourceId: req.params.id, description: 'Deleted a drive file', req });
     res.json({ message: 'File deleted' });
   } catch (err) {
     next(err);

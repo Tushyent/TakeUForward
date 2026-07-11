@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Button from '../components/ui/Button';
 
 function AlumniInvite() {
   const { token } = useParams();
+  const navigate = useNavigate();
   const [status, setStatus] = useState('loading');
   const [message, setMessage] = useState('');
 
@@ -31,7 +32,7 @@ function AlumniInvite() {
       {status === 'success' && (
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--success)', fontSize: '18px' }}>{message}</p>
-          <Button onClick={() => window.location.href = '/login'} style={{ marginTop: '15px' }}>
+          <Button onClick={() => navigate('/login')} style={{ marginTop: '15px' }}>
             Go to Login
           </Button>
         </div>
@@ -40,7 +41,7 @@ function AlumniInvite() {
       {status === 'error' && (
         <div style={{ textAlign: 'center' }}>
           <p style={{ color: 'var(--danger)', fontSize: '18px' }}>{message}</p>
-          <Button variant="secondary" onClick={() => window.location.href = '/login'} style={{ marginTop: '15px' }}>
+          <Button variant="secondary" onClick={() => navigate('/login')} style={{ marginTop: '15px' }}>
             Return to Login
           </Button>
         </div>

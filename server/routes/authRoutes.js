@@ -1,9 +1,11 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import passport from 'passport';
 import crypto from 'crypto';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
 import { logger } from '../utils/logger.js';
+import { logActivity } from '../services/activityLogger.js';
 import { isSystemAdminEmail, isSystemAdminUser, syncUserIdentity } from '../utils/userIdentity.js';
 
 const router = express.Router();
@@ -17,10 +19,38 @@ router.get(
   '/google/callback',
   (req, res, next) => {
     const getClientUrl = () => (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
-    
-    passport.authenticate('google', {
-      successRedirect: getClientUrl(),
-      failureRedirect: getClientUrl() + '/login?error=domain',
+
+    passport.authenticate('google', (err, user) => {
+      const clientUrl = getClientUrl();
+      if (err || !user) {
+        return res.redirect(clientUrl + '/login?error=domain');
+      }
+      req.logIn(user, (err) => {
+        if (err) return next(err);
+        // Render HTML with a client-side redirect instead of using a 302.
+        // Chrome on Android drops Set-Cookie on 302 responses that are part
+        // of the OAuth bounce chain. A 200 response + script redirect breaks
+        // that detection and the cookie is stored correctly.
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Signing in...</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #0D0E14; color: #fff; }
+    .spinner { width: 40px; height: 40px; border: 4px solid #2a2b35; border-top-color: #7C6AF7; border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="spinner"></div>
+    <p>Signing you in...</p>
+  </div>
+  <script>window.location.replace('${clientUrl}');</script>
+</body>
+</html>`);
+      });
     })(req, res, next);
   }
 );
@@ -39,7 +69,8 @@ router.get('/me', (req, res) => {
     } else {
       profileComplete = !!(req.user.dept && req.user.year);
     }
-    res.status(200).json({ user: req.user, profileComplete });
+    const isApproved = req.user.isApproved !== false;
+    res.status(200).json({ user: req.user, profileComplete, isApproved });
   } else {
     res.status(401).json({ error: 'Not authenticated' });
   }
@@ -52,7 +83,12 @@ router.patch('/profile', async (req, res, next) => {
 
   try {
     const { dept, year, graduationYear, currentCompany, previousCompany, higherEducation } = req.body;
-    
+
+    const oldDept = req.user.dept;
+    const oldYear = req.user.year;
+    const oldGradYear = req.user.graduationYear;
+    const oldClubId = req.user.clubId;
+
     if (req.user.role === 'alumni') {
       if (!dept || !graduationYear || !currentCompany) {
         return res.status(400).json({ error: 'Dept, graduation year, and current company are required' });
@@ -99,8 +135,49 @@ router.patch('/profile', async (req, res, next) => {
       }
     }
 
+    const isFirstCompletion = (
+      (req.user.role === 'student' && !oldDept && !oldYear) ||
+      (req.user.role === 'alumni' && !oldGradYear) ||
+      (req.user.role === 'club_admin' && !oldClubId)
+    );
+
     await req.user.save();
-    res.status(200).json({ message: 'Profile updated', user: req.user, profileComplete: true });
+    await logActivity({ action: 'update', resource: 'User', resourceId: req.user._id, description: 'Updated profile', req, details: { updatedFields: Object.keys(req.body) } });
+    const totalUsers = await mongoose.model('User').countDocuments({ isApproved: true });
+
+    if (isFirstCompletion) {
+      const { sendEmail } = await import('../config/mailer.js');
+      const name = req.user.name || req.user.email || 'there';
+      const welcomeHtml = [
+        `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;">`,
+        `<h1 style="color:#7C6AF7;">Welcome to TakeUForward!</h1>`,
+        `<p>Hi ${name},</p>`,
+        `<p>Welcome to <strong>TakeUForward</strong> — the single place a student needs to survive and thrive in college. We built this platform right here at SSN to connect juniors with seniors and alumni for mentorship, centralize academic and placement knowledge that would otherwise be lost year after year, and create an anonymous-safe space for honest questions.</p>`,
+        `<p>It means no more fragmented WhatsApp groups, no more losing senior knowledge the day they graduate, and no more having to rely on being in the 'right' group to get ahead.</p>`,
+        `<p><strong>Here is what you can do here:</strong></p>`,
+        `<ul>`,
+        `<li>Ask questions anonymously — no fear of judgment</li>`,
+        `<li>Share notes, PYQs, and resources with your batch and department</li>`,
+        `<li>Find seniors and alumni for referrals and company-specific guidance</li>`,
+        `<li>Discover club events, hackathons, and workshops in one feed</li>`,
+        `<li>Join your batch and department communities</li>`,
+        `</ul>`,
+        `<p>Everything is organized by community — your batch, your department, or topic-based spaces. You can also find clubs and teams looking for members.</p>`,
+        `<p>Your journey starts here:</p>`,
+        `<a href="${process.env.CLIENT_URL || 'https://takeuforward-ssn.vercel.app'}/home" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Go to Your Dashboard</a>`,
+        `<p style="margin-top:24px;color:#777;font-size:12px;">Have questions? Drop them in the General community or any batch community. Your seniors and alumni are here to help.</p>`,
+        `<p style="color:#777;font-size:12px;">— The TakeUForward Team</p>`,
+        `</div>`
+      ].join('\n');
+
+      sendEmail({
+        to: req.user.email,
+        subject: 'Welcome to TakeUForward — Your Campus Community Awaits!',
+        html: welcomeHtml,
+      }).catch(err => logger.error('Failed to send welcome email:', err));
+    }
+
+    res.status(200).json({ message: 'Profile updated', user: req.user, profileComplete: true, totalUsers });
   } catch (err) {
     logger.error('Error updating profile:', err);
     next(err);
@@ -134,13 +211,14 @@ router.post('/alumni/invite', async (req, res, next) => {
 
     const inviteToken = crypto.randomBytes(32).toString('hex');
     
-    await ApprovedAlumniEmail.create({
+    const record = await ApprovedAlumniEmail.create({
       email,
       currentCompany,
       invitedBy: req.user._id,
       inviteToken,
       status: 'pending'
     });
+    await logActivity({ action: 'create', resource: 'ApprovedAlumniEmail', resourceId: record._id, description: `Admin invited alumni ${email}`, req });
 
     const getClientUrl = () => (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
     const inviteLink = `${getClientUrl()}/alumni-invite/${inviteToken}`;

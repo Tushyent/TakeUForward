@@ -59,8 +59,13 @@ function CompleteProfile() {
         payload = { dept, year };
       }
 
-      await axiosClient.patch('/auth/profile', payload);
-      toast.success('Profile completed successfully!');
+      const profileRes = await axiosClient.patch('/auth/profile', payload);
+      const totalUsers = profileRes.data?.totalUsers;
+      if (totalUsers) {
+        toast.success(`Welcome to TUF SSN! You're member #${totalUsers} — share it with your peers 🎉`, { duration: 5000 });
+      } else {
+        toast.success('Profile completed successfully!');
+      }
       // Refresh global auth state so ProtectedRoute sees profileComplete: true
       await fetchAuth();
       navigate('/home');

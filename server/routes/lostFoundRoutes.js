@@ -4,13 +4,14 @@ import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { generatePresignedUrl } from '../config/s3.js';
 import { logger } from '../utils/logger.js';
+import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();
 
 // GET /api/lost-found
 router.get('/', async (req, res, next) => {
   try {
-    const { type, locationTag, status, page: pageQuery, limit: limitQuery } = req.query;
+    const { type, locationTag, status, search, page: pageQuery, limit: limitQuery } = req.query;
     const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = {};
@@ -19,6 +20,13 @@ router.get('/', async (req, res, next) => {
     if (locationTag) {
       const safeLocation = locationTag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.locationTag = { $regex: new RegExp(safeLocation, 'i') };
+    }
+    if (search) {
+      const safeSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.$or = [
+        { itemName: { $regex: new RegExp(safeSearch, 'i') } },
+        { description: { $regex: new RegExp(safeSearch, 'i') } },
+      ];
     }
 
     const items = await LostFoundItem.find(query)
@@ -75,6 +83,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       contactPreference: contactPreference || 'Message me via app'
     });
 
+    await logActivity({ action: 'create', resource: 'LostFoundItem', resourceId: item._id, description: 'Posted a lost/found item', req, details: { itemName: item.itemName, category: item.category } });
+
     const populatedItem = await LostFoundItem.findById(item._id)
       .populate('authorId', 'name dept role handle username isVerifiedAlumni');
 
@@ -99,6 +109,8 @@ router.post('/:id/resolve', async (req, res, next) => {
 
     item.status = 'resolved';
     await item.save();
+
+    await logActivity({ action: 'update', resource: 'LostFoundItem', resourceId: item._id, description: 'Marked lost/found item as resolved', req, details: { itemName: item.itemName } });
 
     const updatedItem = await LostFoundItem.findById(req.params.id)
       .populate('authorId', 'name dept role handle username isVerifiedAlumni');

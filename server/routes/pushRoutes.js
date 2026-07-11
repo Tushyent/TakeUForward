@@ -1,5 +1,6 @@
 import express from 'express';
 import User from '../models/User.js';
+import { logActivity } from '../services/activityLogger.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -24,6 +25,7 @@ router.post('/subscribe', async (req, res, next) => {
       await user.save();
     }
     
+    await logActivity({ action: 'update', resource: 'User', resourceId: req.user._id, description: 'Subscribed to push notifications', req });
     res.status(200).json({ message: 'Push subscription saved' });
   } catch (err) {
     logger.error('Error saving push subscription:', err);
@@ -47,6 +49,7 @@ router.post('/unsubscribe', async (req, res, next) => {
     user.pushSubscriptions = user.pushSubscriptions.filter(sub => sub.endpoint !== endpoint);
     await user.save();
     
+    await logActivity({ action: 'update', resource: 'User', resourceId: req.user._id, description: 'Unsubscribed from push notifications', req });
     res.status(200).json({ message: 'Push subscription removed' });
   } catch (err) {
     logger.error('Error removing push subscription:', err);

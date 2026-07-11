@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
 import axiosClient from '../api/axiosClient';
+import useDebounce from '../hooks/useDebounce';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
@@ -8,10 +10,11 @@ import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import ReportModal from '../components/ui/ReportModal';
 import Badge from '../components/ui/Badge';
-import { Store, AlertCircle } from 'lucide-react';
+import { Store, AlertCircle, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function Marketplace() {
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,6 +24,8 @@ function Marketplace() {
   // Filters
   const [filterCategory, setFilterCategory] = useState('');
   const [filterStatus, setFilterStatus] = useState('available');
+  const [filterSearch, setFilterSearch] = useState('');
+  const debouncedSearch = useDebounce(filterSearch, 300);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -46,6 +51,7 @@ function Marketplace() {
       });
       if (filterCategory) params.append('category', filterCategory);
       if (filterStatus) params.append('status', filterStatus);
+      if (debouncedSearch) params.append('search', debouncedSearch);
 
       const res = await axiosClient.get(`/marketplace?${params.toString()}`);
       if (res.data.length < 12) setHasMore(false);
@@ -70,7 +76,7 @@ function Marketplace() {
   useEffect(() => {
     setLoading(true);
     fetchItems();
-  }, [filterCategory, filterStatus]); // eslint-disable-line
+  }, [filterCategory, filterStatus, debouncedSearch]); // eslint-disable-line
 
   useEffect(() => {
     if (page > 1) {
@@ -199,15 +205,24 @@ function Marketplace() {
         )}
 
         {/* Filters */}
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <Select value={filterCategory} onChange={e => { setFilterCategory(e.target.value); setPage(1); }}>
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+            <Search size={15} color="var(--text-muted)" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+            <Input
+              value={filterSearch}
+              onChange={e => { setFilterSearch(e.target.value); setPage(1); }}
+              placeholder="Search items..."
+              style={{ paddingLeft: 36, width: '100%' }}
+            />
+          </div>
+          <Select value={filterCategory} onChange={e => { setFilterCategory(e.target.value); setPage(1); }} style={{ minWidth: 140 }}>
             <option value="">All Categories</option>
             <option value="book">Books</option>
             <option value="cycle">Cycles</option>
             <option value="electronics">Electronics</option>
             <option value="other">Other</option>
           </Select>
-          <Select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1); }}>
+          <Select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1); }} style={{ minWidth: 140 }}>
             <option value="">All Statuses</option>
             <option value="available">Available</option>
             <option value="sold">Sold</option>
@@ -249,7 +264,7 @@ function Marketplace() {
                   {currentUser && item.sellerId && currentUser._id !== item.sellerId._id && item.status === 'available' && (
                     <Button
                       style={{ flex: 1 }}
-                      onClick={() => { window.location.href = `/chat/${item.sellerId._id}`; }}
+                      onClick={() => navigate(`/chat/${item.sellerId._id}`)}
                     >
                       Message Seller
                     </Button>

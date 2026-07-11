@@ -48,6 +48,7 @@ const userSchema = new mongoose.Schema(
     },
     isAnonymousDefault: { type: Boolean, default: false },
     isPlatformAdmin: { type: Boolean, default: false },
+    isApproved: { type: Boolean, default: true },
     reputation: { type: Number, default: 0 },
     defaultCommunityId: { type: mongoose.Schema.Types.ObjectId, ref: 'Community' },
     weeklyDigestOptIn: { type: Boolean, default: true },

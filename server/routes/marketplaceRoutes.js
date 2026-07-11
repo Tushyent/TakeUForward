@@ -2,6 +2,7 @@ import express from 'express';
 import MarketplaceItem from '../models/MarketplaceItem.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, reportLimiter } from '../middleware/rateLimiter.js';
+import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();
 
@@ -9,12 +10,13 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
   try {
-    const { category, status, page: pageQuery, limit: limitQuery } = req.query;
+    const { category, status, search, page: pageQuery, limit: limitQuery } = req.query;
     const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = {};
     if (category) query.category = category;
     if (status) query.status = status;
+    if (search) query.title = { $regex: search, $options: 'i' };
 
     const items = await MarketplaceItem.find(query)
       .populate('sellerId', 'name username dept year handle')
@@ -63,6 +65,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
     });
 
     await newItem.save();
+
+    await logActivity({ action: 'create', resource: 'MarketplaceItem', resourceId: newItem._id, description: 'Listed an item for sale', req, details: { title: newItem.title, price: newItem.price } });
     
     const populatedItem = await MarketplaceItem.findById(newItem._id)
       .populate('sellerId', 'name username dept year handle');
@@ -88,6 +92,8 @@ router.patch('/:id/sold', async (req, res, next) => {
 
     item.status = 'sold';
     await item.save();
+
+    await logActivity({ action: 'update', resource: 'MarketplaceItem', resourceId: item._id, description: 'Marked item as sold', req, details: { title: item.title } });
 
     const populatedItem = await MarketplaceItem.findById(item._id)
       .populate('sellerId', 'name username dept year handle');
@@ -119,6 +125,8 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
 
     item.reports.push({ reporterId: req.user._id, reason });
     await item.save();
+
+    await logActivity({ action: 'report', resource: 'MarketplaceItem', resourceId: item._id, description: 'Reported a marketplace listing', req });
 
     res.json({ message: 'Item reported successfully' });
   } catch (err) {

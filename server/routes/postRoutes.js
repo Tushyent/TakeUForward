@@ -8,6 +8,7 @@ import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { logger } from '../utils/logger.js';
+import { logActivity } from '../services/activityLogger.js';
 import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
@@ -75,6 +76,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
         }
       }
     }
+
+    await logActivity({ action: 'create', resource: 'Post', resourceId: post._id, description: 'Created a post in community', req, details: { communityId, isAnonymous: Boolean(isAnonymous), contentLength: content.length } });
 
     res.status(201).json(applyAnonymity(post));
   } catch (err) {
@@ -251,6 +254,8 @@ router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
       });
     }
 
+    await logActivity({ action: 'comment', resource: 'Post', resourceId: post._id, description: 'Commented on a post', req, details: { textLength: text.length } });
+
     // Populate the newly added comment author for the response
     await post.populate('comments.authorId', 'name dept role handle isVerifiedAlumni username');
     
@@ -279,6 +284,7 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
 
     const updatedPost = await Post.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!updatedPost) return res.status(404).json({ error: { message: 'Post not found' } });
+    await logActivity({ action: 'upvote', resource: 'Post', resourceId: req.params.id, description: hasUpvoted ? 'Removed upvote from a post' : 'Upvoted a post', req });
     res.status(200).json({ upvoteCount: updatedPost.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);
@@ -314,6 +320,7 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     }
 
     await post.save();
+    await logActivity({ action: 'report', resource: 'Post', resourceId: post._id, description: 'Reported a post', req, details: { reason } });
     res.status(200).json({ message: 'Post reported successfully', isHidden: post.isHidden });
   } catch (err) {
     logger.error('Error reporting post:', err);
@@ -334,6 +341,7 @@ router.delete('/:id', async (req, res, next) => {
     }
 
     await Post.findByIdAndDelete(req.params.id);
+    await logActivity({ action: 'delete', resource: 'Post', resourceId: req.params.id, description: 'Deleted a post', req });
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (err) {
     logger.error('Error deleting post:', err);
@@ -358,6 +366,7 @@ router.delete('/:id/comments/:commentId', async (req, res, next) => {
 
     post.comments.pull({ _id: req.params.commentId });
     await post.save();
+    await logActivity({ action: 'delete', resource: 'Comment', resourceId: req.params.commentId, description: 'Deleted a comment', req });
     
     res.status(200).json({ message: 'Comment deleted successfully' });
   } catch (err) {

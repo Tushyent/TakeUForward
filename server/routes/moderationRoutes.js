@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { sendEmail } from '../config/mailer.js';
 import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
+import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();
 
@@ -105,11 +106,13 @@ router.post('/:itemId/resolve', requireSystemAdmin, async (req, res, next) => {
       item.reports = [];
       item.isHidden = false;
       await item.save();
+      await logActivity({ action: 'update', resource: Model.modelName, resourceId: req.params.itemId, description: 'Moderated a reported item', req });
       return res.json({ message: 'Item dismissed successfully', item });
     } 
     
     if (action === 'remove') {
       await Model.findByIdAndDelete(req.params.itemId);
+      await logActivity({ action: 'update', resource: Model.modelName, resourceId: req.params.itemId, description: 'Moderated a reported item', req });
       return res.json({ message: 'Item removed successfully' });
     }
 
@@ -169,6 +172,7 @@ router.post('/alumni-requests/:id/approve', requireSystemAdmin, async (req, res,
     const loginLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?token=${inviteToken}`;
     await sendEmail({ to: request.email, subject: 'Your Alumni Request is Approved', html: `<p>Click here to login: <a href="${loginLink}">${loginLink}</a></p>` });
 
+    await logActivity({ action: 'approve', resource: 'AlumniRegistrationRequest', resourceId: req.params.id, description: 'Approved alumni verification request', req });
     res.json({ message: 'Request approved and invite sent' });
   } catch (err) {
     next(err);
@@ -189,6 +193,7 @@ router.post('/alumni-requests/:id/reject', requireSystemAdmin, async (req, res, 
     request.status = 'rejected';
     await request.save();
 
+    await logActivity({ action: 'update', resource: 'AlumniRegistrationRequest', resourceId: req.params.id, description: 'Rejected alumni verification request', req });
     res.json({ message: 'Request rejected' });
   } catch (err) {
     next(err);

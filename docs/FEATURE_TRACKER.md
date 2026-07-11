@@ -14,13 +14,13 @@ Status values: Not Started / In Progress / Done / Blocked
 |---|---|---|---|---|---|
 | Google OAuth (SSN-restricted + alumni whitelist + fixed system admin) | 1 | Done | | server/config/passport.js, server/routes/authRoutes.js, server/middleware/requireApprovedUser.js, server/middleware/requireSystemAdmin.js, server/models/ApprovedAlumniEmail.js | 2026-07-11 |
 | Alumni Registration Request Flow | 1 | Done | | server/routes/authRoutes.js, server/routes/moderationRoutes.js, client/src/pages/Login.jsx, client/src/pages/ModerationQueue.jsx | 2026-07-10 |
-| Role & Profile System | 1 | Done | | server/models/User.js, server/utils/userIdentity.js, client/src/pages/CompleteProfile.jsx | 2026-07-11 |
+| Role & Profile System | 1 | Done | | server/models/User.js, server/utils/userIdentity.js, client/src/pages/CompleteProfile.jsx (+welcome toast) | 2026-07-12 |
 | Sub-Community Feed Structure | 1 | Done | | server/models/Community.js, server/routes/communityRoutes.js, client/src/pages/CommunityPosts.jsx | 2026-07-05 |
 | Discussion/Q&A Posts | 1 | Done | | server/models/Post.js, server/routes/postRoutes.js | 2026-07-05 |
 | Anonymity Engine | 1 | Done (Tested) | | server/routes/postRoutes.js, server/utils/anonymity.js, server/tests/anonymity.test.js, server/tests/alumniGate.test.js | 2026-07-10 |
 | Comments & Upvotes | 1 | Done | | server/models/Post.js, server/routes/postRoutes.js, client/src/pages/CommunityPosts.jsx | 2026-07-05 |
 | Academic Resource Repository | 1 | Done (Upload/List/Summarization/Extraction) | | server/models/Resource.js, server/routes/resourceRoutes.js, server/services/geminiService.js | 2026-07-05 |
-| Club Pages | 1 | Done | | server/models/Club.js, server/routes/clubRoutes.js, client/src/pages/ClubsList.jsx, client/src/pages/ClubPage.jsx | 2026-07-05 |
+| Club Pages | 1 | Done | | server/models/Club.js, server/routes/clubRoutes.js, client/src/pages/ClubsList.jsx (autocomplete search), client/src/pages/ClubPage.jsx | 2026-07-12 |
 | Announcements Feed | 1 | Done (Retested) | | server/routes/announcementRoutes.js, server/routes/clubRoutes.js, client/src/pages/Announcements.jsx, client/src/pages/ClubPage.jsx | 2026-07-11 |
 | 1:1 Direct Messaging (polling) | 1 | Done | | server/models/Chat.js, server/routes/chatRoutes.js, client/src/pages/Chats.jsx | 2026-07-05 |
 | Report/Moderation Queue | 1 | Done (System Admin Only) | | server/routes/moderationRoutes.js, server/middleware/requireSystemAdmin.js, client/src/pages/ModerationQueue.jsx | 2026-07-11 |
@@ -53,7 +53,13 @@ Status values: Not Started / In Progress / Done / Blocked
 
 | Feature | Phase | Status | Owner | Files | Last Updated |
 |---|---|---|---|---|---|
-| System Admin Dashboard | Ops | Done | | server/routes/adminRoutes.js, server/middleware/requireSystemAdmin.js, client/src/pages/AdminDashboard.jsx, client/src/App.jsx | 2026-07-11 |
+| System Admin Dashboard | Ops | Done | | server/routes/adminRoutes.js (+signups feed), server/middleware/requireSystemAdmin.js, client/src/pages/AdminDashboard.jsx (+Recent Signups), client/src/App.jsx | 2026-07-12 |
+| Seed: Welcome Announcement | 1 | Done | | server/scripts/seedAnnouncement.js | 2026-07-12 |
+| Seed: Career Roadmaps | 2 | Done | | server/scripts/seedRoadmaps.js | 2026-07-12 |
+| Community Browse Page | 4 | Done | | client/src/pages/CommunityBrowse.jsx, client/src/constants/navigation.js, client/src/App.jsx | 2026-07-12 |
+| Search Autocomplete (Clubs) | 4 | Done | | client/src/pages/ClubsList.jsx | 2026-07-12 |
+| About Page Revamp | 4 | Done | | client/src/pages/About.jsx | 2026-07-12 |
+| Feedback CTA / Home Support | 4 | Done | | client/src/pages/Home.jsx | 2026-07-12 |
 | Explicit MongoDB Database Name | Ops | Done | | server/config/db.js, server/index.js, server/.env.example, server/scripts/ensureSystemAdmin.js | 2026-07-11 |
 
 ## Phase 3: Campus Utility Expansion
@@ -71,7 +77,7 @@ Status values: Not Started / In Progress / Done / Blocked
 |---|---|---|---|---|---|
 | Sidebar Migration & AppLayout | 4 | Done | | client/src/components/Sidebar.jsx, client/src/components/AppLayout.jsx, client/src/App.jsx | 2026-07-09 |
 | Dashboard Redesign (Home.jsx) | 4 | Done | | client/src/pages/Home.jsx | 2026-07-09 |
-| Progressive Web App (PWA) | 4 | Done | | client/vite.config.js, client/src/sw.js | 2026-07-09 |
+| Progressive Web App (PWA) | 4 | Done | | client/vite.config.js (PNG icons, orientation, scope, start_url), client/src/sw.js | 2026-07-12 |
 | Pre-Deployment Audit & Security | 4 | Done | | AGENTS.md, docs/DEPLOYMENT.md, docs/CHANGELOG.md, server/index.js, server/middleware/requireApprovedUser.js, server/models/Notification.js, server/models/Resource.js, server/models/LostFoundItem.js | 2026-07-11 |
 | Production Readiness — Part 3 | 4 | Done | | server/models/Post.js, server/models/User.js, server/routes/referralRoutes.js, server/routes/mockInterviewRoutes.js, server/routes/bookmarkRoutes.js, server/middleware/rateLimiter.js, server/services/digestService.js, all server routes, client/src/api/axiosClient.js, client/src/pages/Marketplace.jsx | 2026-07-10 |
 | Jest ESM Configuration | 1 | Done (Tested) | | server/jest.config.js, server/tests/anonymity.test.js, server/tests/chat.test.js, server/tests/alumniGate.test.js | 2026-07-10 |

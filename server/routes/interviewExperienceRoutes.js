@@ -4,6 +4,7 @@ import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { logger } from '../utils/logger.js';
+import { logActivity } from '../services/activityLogger.js';
 import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
@@ -86,6 +87,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       tags: tags || []
     });
 
+    await logActivity({ action: 'create', resource: 'InterviewExperience', resourceId: experience._id, description: 'Shared an interview experience', req, details: { company: experience.company, role: experience.role } });
+
     res.status(201).json(applyAnonymity(experience));
   } catch (err) {
     logger.error('Error creating interview experience:', err);
@@ -110,6 +113,9 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
 
     const updatedExperience = await InterviewExperience.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!updatedExperience) return res.status(404).json({ error: { message: 'Experience not found' } });
+
+    await logActivity({ action: 'upvote', resource: 'InterviewExperience', resourceId: req.params.id, description: 'Upvoted an interview experience', req });
+
     res.status(200).json({ upvoteCount: updatedExperience.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);
@@ -145,6 +151,9 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     }
 
     await experience.save();
+
+    await logActivity({ action: 'report', resource: 'InterviewExperience', resourceId: experience._id, description: 'Reported an interview experience', req });
+
     res.status(200).json({ message: 'Experience reported successfully', isHidden: experience.isHidden });
   } catch (err) {
     logger.error('Error reporting experience:', err);

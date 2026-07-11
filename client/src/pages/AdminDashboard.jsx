@@ -4,9 +4,10 @@ import toast from 'react-hot-toast';
 import {
   ShieldAlert, Users, BookOpen, MessageSquareWarning, UserCheck,
   RefreshCcw, Trash2, Plus, Pencil, Building2, Users2, Layers,
-  FileText
+  FileText, UserPlus, CheckCircle, History
 } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
+import useDebounce from '../hooks/useDebounce';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -14,7 +15,7 @@ import { Input } from '../components/ui/Input';
 import Spinner from '../components/ui/Spinner';
 import Modal from '../components/ui/Modal';
 
-const TABS = ['overview', 'clubs', 'communities', 'posts'];
+const TABS = ['overview', 'clubs', 'communities', 'resources', 'posts', 'users', 'activity'];
 
 const TabButton = ({ active, label, icon: Icon, onClick }) => (
   <button
@@ -64,6 +65,7 @@ const AdminDashboard = () => {
   // Clubs state
   const [clubs, setClubs] = useState([]);
   const [clubQuery, setClubQuery] = useState('');
+  const debouncedClubQuery = useDebounce(clubQuery, 300);
   const [showClubForm, setShowClubForm] = useState(false);
   const [editingClub, setEditingClub] = useState(null);
   const [clubForm, setClubForm] = useState({ name: '', description: '' });
@@ -71,13 +73,37 @@ const AdminDashboard = () => {
   // Communities state
   const [communities, setCommunities] = useState([]);
   const [communityQuery, setCommunityQuery] = useState('');
+  const debouncedCommunityQuery = useDebounce(communityQuery, 300);
   const [showCommunityForm, setShowCommunityForm] = useState(false);
   const [editingCommunity, setEditingCommunity] = useState(null);
   const [communityForm, setCommunityForm] = useState({ name: '', type: 'batch', description: '' });
 
+  // Signups state
+  const [signups, setSignups] = useState([]);
+  const [signupsLoading, setSignupsLoading] = useState(false);
+
   // Posts state
   const [posts, setPosts] = useState([]);
   const [postQuery, setPostQuery] = useState('');
+  const debouncedPostQuery = useDebounce(postQuery, 300);
+
+  // Resources state
+  const [resources, setResources] = useState([]);
+  const [resourceQuery, setResourceQuery] = useState('');
+  const debouncedResourceQuery = useDebounce(resourceQuery, 300);
+  const [resourcesLoading, setResourcesLoading] = useState(false);
+
+  // Users state
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [userQuery, setUserQuery] = useState('');
+  const debouncedUserQuery = useDebounce(userQuery, 300);
+  const [usersLoading, setUsersLoading] = useState(false);
+
+  // Activity log state
+  const [activityLogs, setActivityLogs] = useState([]);
+  const [activityQuery, setActivityQuery] = useState('');
+  const debouncedActivityQuery = useDebounce(activityQuery, 300);
+  const [activityLoading, setActivityLoading] = useState(false);
 
   const loadAdminData = useCallback(async () => {
     setLoading(true);
@@ -98,7 +124,7 @@ const AdminDashboard = () => {
     } catch {
       toast.error('Failed to load clubs');
     }
-  }, [clubQuery]);
+  }, [debouncedClubQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadCommunities = useCallback(async () => {
     try {
@@ -107,7 +133,7 @@ const AdminDashboard = () => {
     } catch {
       toast.error('Failed to load communities');
     }
-  }, [communityQuery]);
+  }, [debouncedCommunityQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadPosts = useCallback(async () => {
     try {
@@ -116,12 +142,37 @@ const AdminDashboard = () => {
     } catch {
       toast.error('Failed to load posts');
     }
-  }, [postQuery]);
+  }, [debouncedPostQuery]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { loadAdminData(); }, [loadAdminData]);
+  const loadResources = useCallback(async () => {
+    try {
+      setResourcesLoading(true);
+      const res = await axiosClient.get(`/admin/resources?${new URLSearchParams({ q: resourceQuery, limit: '50' })}`);
+      setResources(res.data.resources);
+    } catch {
+      toast.error('Failed to load resources');
+    } finally {
+      setResourcesLoading(false);
+    }
+  }, [debouncedResourceQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadSignups = useCallback(async () => {
+    setSignupsLoading(true);
+    try {
+      const res = await axiosClient.get('/admin/signups?limit=15');
+      setSignups(res.data.signups);
+    } catch {
+      toast.error('Failed to load signups');
+    } finally {
+      setSignupsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadAdminData(); loadSignups(); }, [loadAdminData, loadSignups]);
   useEffect(() => { if (activeTab === 'clubs') loadClubs(); }, [activeTab, loadClubs]);
   useEffect(() => { if (activeTab === 'communities') loadCommunities(); }, [activeTab, loadCommunities]);
   useEffect(() => { if (activeTab === 'posts') loadPosts(); }, [activeTab, loadPosts]);
+  useEffect(() => { if (activeTab === 'resources') loadResources(); }, [activeTab, loadResources]);
 
   // Club CRUD
   const openCreateClub = () => {
@@ -224,6 +275,67 @@ const AdminDashboard = () => {
     }
   };
 
+  const deleteResource = async (resource) => {
+    if (!window.confirm(`Delete resource "${resource.title}"? The file and metadata will be permanently removed.`)) return;
+    try {
+      await axiosClient.delete(`/admin/resources/${resource._id}`);
+      toast.success('Resource deleted');
+      loadResources();
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to delete resource');
+    }
+  };
+
+  // ── Users management ──
+  const loadUsers = useCallback(async () => {
+    try {
+      setUsersLoading(true);
+      const res = await axiosClient.get(`/admin/users?${new URLSearchParams({ q: userQuery, limit: '50' })}`);
+      setAdminUsers(res.data.users);
+    } catch {
+      toast.error('Failed to load users');
+    } finally {
+      setUsersLoading(false);
+    }
+  }, [debouncedUserQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => { if (activeTab === 'users') loadUsers(); }, [activeTab, loadUsers]);
+
+  const approveUser = async (userId) => {
+    try {
+      await axiosClient.patch(`/admin/users/${userId}/approve`);
+      toast.success('User approved');
+      loadUsers();
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to approve user');
+    }
+  };
+
+  const loadActivity = useCallback(async () => {
+    try {
+      setActivityLoading(true);
+      const res = await axiosClient.get(`/admin/activity?${new URLSearchParams({ q: activityQuery, limit: '50' })}`);
+      setActivityLogs(res.data.logs);
+    } catch {
+      toast.error('Failed to load activity log');
+    } finally {
+      setActivityLoading(false);
+    }
+  }, [debouncedActivityQuery]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => { if (activeTab === 'activity') loadActivity(); }, [activeTab, loadActivity]);
+
+  const deleteAdminUser = async (u) => {
+    if (!window.confirm(`Delete user "${u.name || u.email}"? All their posts, comments, and content will be permanently removed.`)) return;
+    try {
+      await axiosClient.delete(`/admin/users/${u._id}`);
+      toast.success('User deleted');
+      loadUsers();
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to delete user');
+    }
+  };
+
   if (loading && !overview && activeTab === 'overview') {
     return <Spinner text="Loading admin dashboard..." />;
   }
@@ -250,6 +362,53 @@ const AdminDashboard = () => {
       </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-5)' }}>
+      <Card style={{ marginBottom: 'var(--space-6)' }}>
+        <h2 style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-3)' }}>
+          <UserPlus size={18} color="var(--primary)" /> Recent Signups
+          {signupsLoading && <Spinner />}
+        </h2>
+        {signups.length === 0 && !signupsLoading && (
+          <p style={{ color: 'var(--text-secondary)' }}>No signups yet.</p>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 320, overflowY: 'auto' }}>
+          {signups.map(u => (
+            <div key={u._id} style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: 'var(--space-2) var(--space-3)',
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--bg-card)',
+              fontSize: 'var(--text-sm)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <div style={{
+                  width: 28, height: 28, borderRadius: '50%',
+                  background: 'var(--accent)', color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 'var(--text-xs)', fontWeight: 600, flexShrink: 0,
+                }}>
+                  {(u.name || u.email || '?')[0].toUpperCase()}
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <span style={{ fontWeight: 500, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {u.name || 'Unnamed'}
+                  </span>
+                  {u.email && (
+                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {u.email}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                {u.dept && <Badge variant="secondary">{u.dept}</Badge>}
+                {u.year && <span>{u.year}</span>}
+                <span>{new Date(u.createdAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
         <Card>
           <h2 style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <Building2 size={16} /> Clubs <Badge>{clubs.length || overview?.clubs || 0}</Badge>
@@ -429,6 +588,149 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const renderResources = () => (
+    <div>
+      <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', maxWidth: 400 }}>
+        <Input value={resourceQuery} onChange={e => setResourceQuery(e.target.value)} placeholder="Search by title, course code, or tags..." />
+        <Button variant="secondary" size="sm" onClick={loadResources}><RefreshCcw size={13} /></Button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        {resourcesLoading ? (
+          <Spinner text="Loading resources..." />
+        ) : resources.length === 0 ? (
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No resources found.</p>
+        ) : resources.map(res => (
+          <div key={res._id} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)',
+            padding: 'var(--space-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+          }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <strong style={{ fontSize: 'var(--text-sm)' }}>{res.title}</strong>
+                <Badge variant="info">{res.courseCode}</Badge>
+                <Badge variant="secondary">Sem {res.semester}</Badge>
+              </div>
+              {res.tags?.length > 0 && (
+                <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
+                  {res.tags.map(t => <Badge key={t} size="sm">{t}</Badge>)}
+                </div>
+              )}
+              <p style={{ margin: '4px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                by {res.uploaderId?.name || res.uploaderId?.email || 'Unknown'}
+                · {new Date(res.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <Button variant="danger" size="sm" onClick={() => deleteResource(res)} style={{ flexShrink: 0 }}>
+              <Trash2 size={13} /> Delete
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderUsers = () => (
+    <div>
+      <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', maxWidth: 400 }}>
+        <Input value={userQuery} onChange={e => setUserQuery(e.target.value)} placeholder="Search by name, email, or username..." />
+        <Button variant="secondary" size="sm" onClick={loadUsers}><RefreshCcw size={13} /></Button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        {usersLoading ? (
+          <Spinner text="Loading users..." />
+        ) : adminUsers.length === 0 ? (
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No users found.</p>
+        ) : adminUsers.map(u => (
+          <div key={u._id} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)',
+            padding: 'var(--space-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+          }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <strong style={{ fontSize: 'var(--text-sm)' }}>{u.name || 'Unnamed'}</strong>
+                {u.isApproved === false ? (
+                  <Badge variant="warning" size="sm">Pending</Badge>
+                ) : (
+                  <Badge variant="success" size="sm">Approved</Badge>
+                )}
+                <Badge variant={u.role === 'platform_admin' ? 'danger' : 'secondary'} size="sm">{u.role}</Badge>
+                {u.dept && <Badge variant="info" size="sm">{u.dept}</Badge>}
+              </div>
+              <p style={{ margin: '4px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                {u.email} · {u.handle && `@${u.handle}`} · Joined {new Date(u.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', flexShrink: 0, alignItems: 'center' }}>
+              {u.isApproved === false && (
+                <Button variant="primary" size="sm" onClick={() => approveUser(u._id)}>
+                  <CheckCircle size={13} /> Approve
+                </Button>
+              )}
+              <Button variant="danger" size="sm" onClick={() => deleteAdminUser(u)}>
+                <Trash2 size={13} /> Delete
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderActivity = () => (
+    <div>
+      <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', maxWidth: 400 }}>
+        <Input value={activityQuery} onChange={e => setActivityQuery(e.target.value)} placeholder="Search by action, resource, or user..." />
+        <Button variant="secondary" size="sm" onClick={loadActivity}><RefreshCcw size={13} /></Button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        {activityLoading ? (
+          <Spinner text="Loading activity log..." />
+        ) : activityLogs.length === 0 ? (
+          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No activity recorded yet.</p>
+        ) : activityLogs.map(log => (
+          <div key={log._id} style={{
+            display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)',
+            padding: 'var(--space-3)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+          }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 'var(--radius-sm)', flexShrink: 0,
+              background: log.action === 'delete' ? 'var(--danger-bg, rgba(239,68,68,0.1))' :
+                           log.action === 'create' ? 'var(--success-bg, rgba(34,197,94,0.1))' :
+                           log.action === 'report' ? 'var(--warning-bg, rgba(234,179,8,0.1))' :
+                           'var(--bg-input)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 'var(--text-xs)', fontWeight: 600,
+              color: log.action === 'delete' ? 'var(--danger)' :
+                     log.action === 'create' ? 'var(--success)' :
+                     log.action === 'report' ? 'var(--warning)' :
+                     'var(--text-secondary)',
+            }}>
+              {log.action === 'create' ? '+' : log.action === 'delete' ? '×' : log.action === 'update' ? '~' : '•'}
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                <strong style={{ fontSize: 'var(--text-sm)' }}>{log.userName}</strong>
+                <Badge variant="secondary" size="sm">{log.action}</Badge>
+                <Badge variant="info" size="sm">{log.resource}</Badge>
+              </div>
+              <p style={{ margin: '2px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', wordBreak: 'break-word' }}>
+                {log.description}
+              </p>
+              {log.details && Object.keys(log.details).length > 0 && (
+                <p style={{ margin: '2px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>
+                  {JSON.stringify(log.details).slice(0, 120)}
+                </p>
+              )}
+              <p style={{ margin: '2px 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                {new Date(log.createdAt).toLocaleString()}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   const renderPosts = () => (
     <div>
       <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', maxWidth: 400 }}>
@@ -478,6 +780,9 @@ const AdminDashboard = () => {
             loadAdminData();
             if (activeTab === 'clubs') loadClubs();
             if (activeTab === 'communities') loadCommunities();
+            if (activeTab === 'resources') loadResources();
+            if (activeTab === 'users') loadUsers();
+            if (activeTab === 'activity') loadActivity();
             if (activeTab === 'posts') loadPosts();
           }}>
             <RefreshCcw size={14} /> Refresh
@@ -490,7 +795,7 @@ const AdminDashboard = () => {
               key={tab}
               active={activeTab === tab}
               label={tab.charAt(0).toUpperCase() + tab.slice(1)}
-              icon={tab === 'overview' ? ShieldAlert : tab === 'clubs' ? Building2 : tab === 'communities' ? Users2 : FileText}
+              icon={tab === 'overview' ? ShieldAlert : tab === 'clubs' ? Building2 : tab === 'communities' ? Users2 : tab === 'resources' ? BookOpen : tab === 'users' ? UserPlus : tab === 'activity' ? History : FileText}
               onClick={() => setActiveTab(tab)}
             />
           ))}
@@ -499,6 +804,9 @@ const AdminDashboard = () => {
         {activeTab === 'overview' && renderOverview()}
         {activeTab === 'clubs' && renderClubs()}
         {activeTab === 'communities' && renderCommunities()}
+        {activeTab === 'resources' && renderResources()}
+        {activeTab === 'users' && renderUsers()}
+        {activeTab === 'activity' && renderActivity()}
         {activeTab === 'posts' && renderPosts()}
       </div>
     </div>

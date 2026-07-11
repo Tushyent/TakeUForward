@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
+import useDebounce from '../hooks/useDebounce';
 import SearchFilterBar from '../components/SearchFilterBar';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
@@ -16,6 +17,7 @@ import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 function InterviewExperiences() {
   const [experiences, setExperiences] = useState([]);
   const [filters, setFilters] = useState({});
+  const debouncedFilters = useDebounce(filters, 300);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +37,7 @@ function InterviewExperiences() {
   const fetchExperiences = useCallback(async () => {
     setLoading(true);
     try {
-      const queryParams = new URLSearchParams(filters).toString();
+      const queryParams = new URLSearchParams(debouncedFilters).toString();
       const response = await axiosClient.get(`/interview-experiences?${queryParams}`);
       setExperiences(response.data);
       setError(null);
@@ -46,7 +48,7 @@ function InterviewExperiences() {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [debouncedFilters]);
 
   useEffect(() => {
     fetchExperiences();

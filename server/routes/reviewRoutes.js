@@ -3,6 +3,7 @@ import Review from '../models/Review.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { postCreationLimiter, reportLimiter } from '../middleware/rateLimiter.js';
+import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();
 
@@ -52,6 +53,8 @@ router.post('/', requireAuth, postCreationLimiter, async (req, res, next) => {
     
     // Populate author before stripping
     await review.populate('authorId', 'name handle role');
+
+    await logActivity({ action: 'create', resource: 'Review', description: 'Submitted a course review', req, details: { courseCode: review.courseCode, rating: review.rating } });
 
     res.status(201).json(applyAnonymity(review));
   } catch (err) {
@@ -135,6 +138,9 @@ router.post('/:id/report', requireAuth, reportLimiter, async (req, res, next) =>
     });
 
     await review.save();
+
+    await logActivity({ action: 'report', resource: 'Review', resourceId: review._id, description: 'Reported a review', req });
+
     res.json({ message: 'Review reported successfully' });
   } catch (err) {
     next(err);

@@ -23,6 +23,8 @@ import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
 import { deleteObjectByKey, deletePublicObjectByUrl } from '../config/s3.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { isSystemAdminUser } from '../utils/userIdentity.js';
+import { logActivity } from '../services/activityLogger.js';
+import ActivityLog from '../models/ActivityLog.js';
 
 const router = express.Router();
 
@@ -80,6 +82,24 @@ router.get('/overview', requireSystemAdmin, async (req, res, next) => {
     ]);
 
     res.json({ users, posts, resources, reports, supportTickets, pendingAlumniRequests });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/signups', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { limit, skip } = getPaginationParams(req.query.page, req.query.limit);
+    const [users, totalCount] = await Promise.all([
+      User.find()
+        .select('name email username handle dept year role createdAt isPlatformAdmin')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      User.countDocuments()
+    ]);
+    res.json({ signups: users, totalCount, hasMore: skip + users.length < totalCount });
   } catch (err) {
     next(err);
   }
@@ -148,6 +168,7 @@ router.delete('/resources/:id', requireSystemAdmin, async (req, res, next) => {
     if (deletedCount === 0) {
       return res.status(404).json({ error: { message: 'Resource not found' } });
     }
+    await logActivity({ action: 'delete', resource: 'Resource', resourceId: req.params.id, description: 'Admin deleted a resource', req });
     res.json({ message: 'Resource file and metadata deleted' });
   } catch (err) {
     next(err);
@@ -200,11 +221,25 @@ router.delete('/users/:id', requireSystemAdmin, async (req, res, next) => {
       User.findByIdAndDelete(userId)
     ]);
 
+    await logActivity({ action: 'delete', resource: 'User', resourceId: req.params.id, description: `Admin deleted user ${user.email || user._id}`, req });
     res.json({
       message: 'User and associated content deleted',
       deletedResources,
       deletedPrivateFiles
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/users/:id/approve', requireSystemAdmin, async (req, res, next) => {
+  if (!validateObjectId(req.params.id, res)) return;
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { isApproved: true }, { new: true })
+      .select('name email role dept isApproved');
+    if (!user) return res.status(404).json({ error: { message: 'User not found' } });
+    await logActivity({ action: 'approve', resource: 'User', resourceId: req.params.id, description: 'Admin approved user', req, details: { userName: user.name, userEmail: user.email } });
+    res.json({ message: 'User approved', user });
   } catch (err) {
     next(err);
   }
@@ -243,6 +278,7 @@ router.post('/clubs', requireSystemAdmin, async (req, res, next) => {
       return res.status(409).json({ error: { message: 'A club with that name already exists' } });
     }
     const club = await Club.create({ name, description });
+    await logActivity({ action: 'create', resource: 'Club', resourceId: club._id, description: `Admin created club "${name}"`, req });
     res.status(201).json(club);
   } catch (err) {
     next(err);
@@ -258,6 +294,7 @@ router.put('/clubs/:id', requireSystemAdmin, async (req, res, next) => {
     if (name) club.name = name;
     if (description) club.description = description;
     await club.save();
+    await logActivity({ action: 'update', resource: 'Club', resourceId: req.params.id, description: `Admin updated club "${club.name}"`, req });
     res.json(club);
   } catch (err) {
     next(err);
@@ -270,6 +307,7 @@ router.delete('/clubs/:id', requireSystemAdmin, async (req, res, next) => {
     const club = await Club.findByIdAndDelete(req.params.id);
     if (!club) return res.status(404).json({ error: { message: 'Club not found' } });
     await Post.updateMany({ clubId: req.params.id }, { clubId: null });
+    await logActivity({ action: 'delete', resource: 'Club', resourceId: req.params.id, description: 'Admin deleted a club', req });
     res.json({ message: 'Club deleted' });
   } catch (err) {
     next(err);
@@ -313,6 +351,7 @@ router.post('/communities', requireSystemAdmin, async (req, res, next) => {
       return res.status(409).json({ error: { message: 'A community with that name already exists' } });
     }
     const community = await Community.create({ name, type, description: description || '' });
+    await logActivity({ action: 'create', resource: 'Community', resourceId: community._id, description: `Admin created community "${name}"`, req });
     res.status(201).json(community);
   } catch (err) {
     next(err);
@@ -328,6 +367,7 @@ router.put('/communities/:id', requireSystemAdmin, async (req, res, next) => {
     if (name) community.name = name;
     if (description !== undefined) community.description = description;
     await community.save();
+    await logActivity({ action: 'update', resource: 'Community', resourceId: req.params.id, description: `Admin updated community "${community.name}"`, req });
     res.json(community);
   } catch (err) {
     next(err);
@@ -340,6 +380,7 @@ router.delete('/communities/:id', requireSystemAdmin, async (req, res, next) => 
     const community = await Community.findByIdAndDelete(req.params.id);
     if (!community) return res.status(404).json({ error: { message: 'Community not found' } });
     await Post.updateMany({ communityId: req.params.id }, { $set: { communityId: null } });
+    await logActivity({ action: 'delete', resource: 'Community', resourceId: req.params.id, description: 'Admin deleted a community', req });
     res.json({ message: 'Community deleted' });
   } catch (err) {
     next(err);
@@ -381,7 +422,43 @@ router.delete('/posts/:id', requireSystemAdmin, async (req, res, next) => {
     const post = await Post.findByIdAndDelete(req.params.id);
     if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
     await Bookmark.deleteMany({ itemType: 'post', itemId: req.params.id });
+    await logActivity({ action: 'delete', resource: 'Post', resourceId: req.params.id, description: 'Admin deleted a post', req });
     res.json({ message: 'Post deleted' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ──────────────────────────────────────────────
+// Activity Log
+// ──────────────────────────────────────────────
+
+router.get('/activity', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { limit, skip } = getPaginationParams(req.query.page, req.query.limit);
+    const { q } = req.query;
+
+    const query = {};
+    if (q) {
+      const regex = new RegExp(escapeRegex(q), 'i');
+      query.$or = [
+        { description: regex },
+        { userName: regex },
+        { resource: regex },
+        { action: regex },
+      ];
+    }
+
+    const [logs, totalCount] = await Promise.all([
+      ActivityLog.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      ActivityLog.countDocuments(query),
+    ]);
+
+    res.json({ logs, totalCount, hasMore: skip + logs.length < totalCount });
   } catch (err) {
     next(err);
   }

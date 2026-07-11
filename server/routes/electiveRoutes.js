@@ -3,6 +3,7 @@ import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { logger } from '../utils/logger.js';
+import { logActivity } from '../services/activityLogger.js';
 import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
@@ -89,6 +90,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
     const responseData = populatedSuggestion.toObject();
     responseData.upvotesCount = 0;
 
+    await logActivity({ action: 'create', resource: 'ElectiveSuggestion', resourceId: suggestion._id, description: 'Suggested an elective course', req, details: { courseCode: suggestion.courseCode, courseName: suggestion.courseName } });
+
     res.status(201).json(responseData);
   } catch (err) {
     logger.error('Error creating elective suggestion:', err);
@@ -113,6 +116,9 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
 
     const updatedSuggestion = await ElectiveSuggestion.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!updatedSuggestion) return res.status(404).json({ error: { message: 'Suggestion not found' } });
+
+    await logActivity({ action: 'upvote', resource: 'ElectiveSuggestion', resourceId: req.params.id, description: 'Upvoted an elective suggestion', req });
+
     res.status(200).json({ upvotesCount: updatedSuggestion.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);
@@ -148,6 +154,9 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     }
 
     await suggestion.save();
+
+    await logActivity({ action: 'report', resource: 'ElectiveSuggestion', resourceId: suggestion._id, description: 'Reported an elective suggestion', req });
+
     res.status(200).json({ message: 'Suggestion reported successfully', isHidden: suggestion.isHidden });
   } catch (err) {
     logger.error('Error reporting suggestion:', err);

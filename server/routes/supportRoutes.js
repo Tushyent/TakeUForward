@@ -3,6 +3,7 @@ import SupportTicket from '../models/SupportTicket.js';
 import { generatePresignedUrl, validateObjectSize } from '../config/s3.js';
 import { supportTicketLimiter } from '../middleware/rateLimiter.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logActivity } from '../services/activityLogger.js';
 import { logger } from '../utils/logger.js';
 import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
 
@@ -62,6 +63,8 @@ router.post('/', supportTicketLimiter, async (req, res, next) => {
       screenshotUrl,
       displayNamePublicly: Boolean(displayNamePublicly)
     });
+
+    await logActivity({ action: 'create', resource: 'SupportTicket', resourceId: ticket._id, description: 'Created a support ticket', req, details: { subject: ticket.title } });
 
     res.status(201).json(ticket);
   } catch (err) {
@@ -128,6 +131,8 @@ router.patch('/:id/status', requireSystemAdmin, async (req, res, next) => {
     if (!ticket) {
       return res.status(404).json({ error: 'Ticket not found' });
     }
+
+    await logActivity({ action: 'update', resource: 'SupportTicket', resourceId: ticket._id, description: `Updated ticket status to ${req.body.status}`, req });
 
     res.status(200).json(ticket);
   } catch (err) {

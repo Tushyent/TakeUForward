@@ -3,6 +3,7 @@ import Bookmark from '../models/Bookmark.js';
 import { bookmarkLimiter } from '../middleware/rateLimiter.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logActivity } from '../services/activityLogger.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -68,14 +69,16 @@ router.post('/', bookmarkLimiter, async (req, res, next) => {
     const deleted = await Bookmark.findOneAndDelete({ userId: req.user._id, itemId });
     
     if (deleted) {
+      await logActivity({ action: 'bookmark', resource: 'Bookmark', description: 'Removed a bookmark', req, details: { itemType, itemId } });
       return res.status(200).json({ message: 'Bookmark removed', bookmarked: false });
     } else {
       try {
-        await Bookmark.create({
+        const bookmark = await Bookmark.create({
           userId: req.user._id,
           itemType,
           itemId
         });
+        await logActivity({ action: 'bookmark', resource: 'Bookmark', resourceId: bookmark._id, description: 'Bookmarked an item', req, details: { itemType: bookmark.itemType } });
         return res.status(201).json({ message: 'Bookmark added', bookmarked: true });
       } catch (createErr) {
         if (createErr.code === 11000) {

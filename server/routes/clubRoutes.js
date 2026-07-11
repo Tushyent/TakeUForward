@@ -5,6 +5,7 @@ import Community from '../models/Community.js';
 import User from '../models/User.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { createNotification } from '../services/notificationService.js';
+import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();
 
@@ -114,6 +115,8 @@ router.post('/:id/posts', postCreationLimiter, async (req, res, next) => {
         }
       }
     }
+
+    await logActivity({ action: 'create', resource: 'Post', resourceId: post._id, description: 'Created a club announcement', req, details: { clubId: req.params.id } });
 
     res.status(201).json(post);
   } catch (err) {

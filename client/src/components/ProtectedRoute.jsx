@@ -4,7 +4,7 @@ import { useAuth } from '../context/auth-context';
 import Spinner from './ui/Spinner';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, isAuthenticated, profileComplete } = useAuth();
+  const { isAuthenticated, profileComplete, isApproved } = useAuth();
   const location = useLocation();
 
   if (isAuthenticated === null) {
@@ -15,14 +15,14 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Alumni without verification
-  if (user?.role === 'alumni' && !user?.isVerifiedAlumni) {
-    return <Navigate to="/pending-approval" replace />;
-  }
-
-  // Allow users to reach /complete-profile if it's incomplete
+  // Allow completing profile first, then check approval
   if (!profileComplete && location.pathname !== '/complete-profile') {
     return <Navigate to="/complete-profile" replace />;
+  }
+
+  // Non-approved users (non-SSN emails waiting for admin approval)
+  if (profileComplete && !isApproved && location.pathname !== '/pending-approval') {
+    return <Navigate to="/pending-approval" replace />;
   }
 
   return children;

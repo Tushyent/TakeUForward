@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import axios from 'axios';
+import useDebounce from '../hooks/useDebounce';
 import SearchFilterBar from '../components/SearchFilterBar';
+import { useAuth } from '../context/auth-context';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
@@ -10,9 +12,10 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Search, AlertTriangle } from 'lucide-react';
+import { Search, AlertTriangle, Trash2 } from 'lucide-react';
 
 function Resources() {
+  const { user } = useAuth();
   const [resources, setResources] = useState([]);
   const [title, setTitle] = useState('');
   const [courseCode, setCourseCode] = useState('');
@@ -24,13 +27,14 @@ function Resources() {
   const [error, setError] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [filters, setFilters] = useState({});
+  const debouncedFilters = useDebounce(filters, 300);
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
-  const fetchResources = React.useCallback(async () => {
+  const fetchResources = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const queryParams = new URLSearchParams(filters).toString();
+      const queryParams = new URLSearchParams(debouncedFilters).toString();
       const response = await axiosClient.get(`/resources?${queryParams}`);
       setResources(response.data);
     } catch (err) {
@@ -38,7 +42,7 @@ function Resources() {
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [debouncedFilters]);
 
   const fetchBookmarks = React.useCallback(async () => {
     try {
@@ -122,6 +126,17 @@ function Resources() {
     }
   };
 
+  const handleDeleteResource = async (res) => {
+    if (!window.confirm(`Delete resource "${res.title}"? This cannot be undone.`)) return;
+    try {
+      await axiosClient.delete(`/admin/resources/${res._id}`);
+      toast.success('Resource deleted');
+      fetchResources();
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to delete resource');
+    }
+  };
+
   return (
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
@@ -187,13 +202,18 @@ function Resources() {
                   Uploaded by: {res.uploaderId?.name || 'Unknown'}
                 </p>
                 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <a href={res.fileUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
                     <Button variant="secondary">Download / View File</Button>
                   </a>
                   <Button variant="secondary" onClick={() => handleBookmark(res._id)} style={{ color: bookmarkedIds.has(res._id) ? 'var(--primary)' : 'inherit' }}>
                     {bookmarkedIds.has(res._id) ? '★ Saved' : '☆ Save'}
                   </Button>
+                  {user?.isPlatformAdmin && (
+                    <Button variant="danger" size="sm" onClick={() => handleDeleteResource(res)}>
+                      <Trash2 size={13} /> Delete
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))}

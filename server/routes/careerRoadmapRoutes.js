@@ -3,6 +3,7 @@ import CareerRoadmap from '../models/CareerRoadmap.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { logger } from '../utils/logger.js';
+import { logActivity } from '../services/activityLogger.js';
 import { REPORT_THRESHOLD } from '../utils/constants.js';
 
 const router = express.Router();
@@ -72,6 +73,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
     const responseData = populatedRoadmap.toObject();
     responseData.upvotesCount = 0;
 
+    await logActivity({ action: 'create', resource: 'CareerRoadmap', resourceId: roadmap._id, description: 'Created a career roadmap', req, details: { title: roadmap.title, targetRole: roadmap.targetRole } });
+
     res.status(201).json(responseData);
   } catch (err) {
     logger.error('Error creating career roadmap:', err);
@@ -96,6 +99,9 @@ router.post('/:id/upvote', upvoteLimiter, async (req, res, next) => {
 
     const updatedRoadmap = await CareerRoadmap.findByIdAndUpdate(req.params.id, update, { new: true });
     if (!updatedRoadmap) return res.status(404).json({ error: { message: 'Career roadmap not found' } });
+
+    await logActivity({ action: 'upvote', resource: 'CareerRoadmap', resourceId: req.params.id, description: 'Upvoted a career roadmap', req });
+
     res.status(200).json({ upvotesCount: updatedRoadmap.upvotes.length });
   } catch (err) {
     logger.error('Error toggling upvote:', err);
@@ -131,6 +137,9 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     }
 
     await roadmap.save();
+
+    await logActivity({ action: 'report', resource: 'CareerRoadmap', resourceId: roadmap._id, description: 'Reported a career roadmap', req });
+
     res.status(200).json({ message: 'Roadmap reported successfully', isHidden: roadmap.isHidden });
   } catch (err) {
     logger.error('Error reporting roadmap:', err);

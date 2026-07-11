@@ -2,6 +2,7 @@ import express from 'express';
 import TeamRequest from '../models/TeamRequest.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, applyTeamLimiter } from '../middleware/rateLimiter.js';
+import { logActivity } from '../services/activityLogger.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -79,6 +80,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
     const populatedRequest = await TeamRequest.findById(teamRequest._id)
       .populate('authorId', 'name dept role handle username isVerifiedAlumni');
 
+    await logActivity({ action: 'create', resource: 'TeamRequest', resourceId: teamRequest._id, description: 'Created a team request', req, details: { eventType: teamRequest.eventType, eventName: teamRequest.eventName } });
+
     res.status(201).json(maskContactInfo(populatedRequest, req.user._id));
   } catch (err) {
     logger.error('Error creating team request:', err);
@@ -116,6 +119,8 @@ router.post('/:id/apply', applyTeamLimiter, async (req, res, next) => {
 
     await teamRequest.save();
 
+    await logActivity({ action: 'apply', resource: 'TeamRequest', resourceId: teamRequest._id, description: 'Applied to a team request', req });
+
     const updatedRequest = await TeamRequest.findById(req.params.id)
       .populate('authorId', 'name dept role handle username isVerifiedAlumni')
       .populate('applicants.userId', 'name dept role handle username isVerifiedAlumni');
@@ -141,6 +146,8 @@ router.post('/:id/close', async (req, res, next) => {
 
     teamRequest.status = 'closed';
     await teamRequest.save();
+
+    await logActivity({ action: 'update', resource: 'TeamRequest', resourceId: teamRequest._id, description: 'Closed a team request', req });
 
     const updatedRequest = await TeamRequest.findById(req.params.id)
       .populate('authorId', 'name dept role handle username isVerifiedAlumni')

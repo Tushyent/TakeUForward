@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import MobileBottomNav from './MobileBottomNav';
+import NotificationsDropdown from './NotificationsDropdown';
 import { Menu, Zap } from 'lucide-react';
 
 const AppLayout = ({ children }) => {
@@ -28,13 +29,16 @@ const AppLayout = ({ children }) => {
               TakeUForward
             </div>
           </div>
-          <button 
-            className="hamburger-btn"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open menu"
-          >
-            <Menu size={20} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <NotificationsDropdown placement="bottom-right" />
+            <button 
+              className="hamburger-btn"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
+          </div>
         </header>
         
         <div className="app-content">

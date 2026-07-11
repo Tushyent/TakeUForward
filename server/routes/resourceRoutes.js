@@ -7,6 +7,7 @@ import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { logger } from '../utils/logger.js';
 import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
+import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();
 
@@ -73,6 +74,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       // We do not throw or fail the response here. The resource is still created.
     }
 
+    await logActivity({ action: 'create', resource: 'Resource', resourceId: resource._id, description: 'Uploaded a resource', req, details: { title: resource.title, courseCode: resource.courseCode } });
+
     res.status(201).json(resource);
   } catch (err) {
     logger.error('Error creating resource:', err);
@@ -137,6 +140,7 @@ router.delete('/:id', requireSystemAdmin, async (req, res, next) => {
     await deletePublicObjectByUrl(resource.fileUrl);
     await Resource.findByIdAndDelete(req.params.id);
     await Bookmark.deleteMany({ itemType: 'resource', itemId: req.params.id });
+    await logActivity({ action: 'delete', resource: 'Resource', resourceId: req.params.id, description: 'Admin deleted a resource', req });
     res.status(200).json({ message: 'Resource deleted successfully' });
   } catch (err) {
     logger.error('Error deleting resource:', err);

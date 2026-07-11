@@ -327,7 +327,7 @@ function Login() {
             <button 
               type="button"
               onClick={() => setShowAlumniForm(true)} 
-              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: 0, fontWeight: 600, fontFamily: 'inherit' }}
+              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: 'var(--space-1) var(--space-1)', fontWeight: 600, fontFamily: 'inherit', fontSize: 'inherit' }}
             >
               Request Access
             </button>

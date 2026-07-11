@@ -13,6 +13,7 @@ const Home = lazy(() => import('./pages/Home'));
 const AlumniInvite = lazy(() => import('./pages/AlumniInvite'));
 const CompleteProfile = lazy(() => import('./pages/CompleteProfile'));
 const CommunityPosts = lazy(() => import('./pages/CommunityPosts'));
+const CommunityBrowse = lazy(() => import('./pages/CommunityBrowse'));
 const Resources = lazy(() => import('./pages/Resources'));
 const ClubsList = lazy(() => import('./pages/ClubsList'));
 const ClubPage = lazy(() => import('./pages/ClubPage'));
@@ -66,6 +67,7 @@ function App() {
                     <Routes>
                       <Route path="/about" element={<About />} />
                       <Route path="/complete-profile" element={<CompleteProfile />} />
+                      <Route path="/community" element={<CommunityBrowse />} />
                       <Route path="/community/:id" element={<CommunityPosts />} />
                       <Route path="/resources" element={<Resources />} />
                       <Route path="/clubs" element={<ClubsList />} />

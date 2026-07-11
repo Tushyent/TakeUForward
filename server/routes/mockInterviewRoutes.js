@@ -2,6 +2,7 @@ import express from 'express';
 import MockInterviewRequest from '../models/MockInterviewRequest.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
+import { logActivity } from '../services/activityLogger.js';
 import { logger } from '../utils/logger.js';
 
 const router = express.Router();
@@ -84,6 +85,8 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       requestType
     });
 
+    await logActivity({ action: 'create', resource: 'MockInterviewRequest', resourceId: request._id, description: 'Requested a mock interview', req, details: { role: request.targetRole, company: request.targetCompany } });
+
     res.status(201).json(request);
   } catch (err) {
     logger.error('Error creating mock interview request:', err);
@@ -113,6 +116,8 @@ router.post('/:id/match', postCreationLimiter, async (req, res, next) => {
     request.matchedMentorId = req.user._id;
     await request.save();
 
+    await logActivity({ action: 'match', resource: 'MockInterviewRequest', resourceId: request._id, description: 'Matched to a mock interview request', req });
+
     await request.populate('requesterId', 'name handle dept year username');
     await request.populate('matchedMentorId', 'name handle currentCompany isVerifiedAlumni username');
 
@@ -137,6 +142,8 @@ router.patch('/:id/close', async (req, res, next) => {
 
     request.status = 'closed';
     await request.save();
+
+    await logActivity({ action: 'update', resource: 'MockInterviewRequest', resourceId: request._id, description: 'Closed a mock interview request', req });
 
     res.status(200).json(request);
   } catch (err) {

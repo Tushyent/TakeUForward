@@ -7,8 +7,36 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased]
 
-### Security
-- **[Deployment] Standardized email addresses across the platform:** Replaced all hardcoded `noreply@takeuforward.com` and `noreply@takeuforward-ssn.com` fallbacks in `mailer.js` with `takeuforwardssn@gmail.com`. Updated `.env.example` and `DEPLOYMENT.md` to reflect the canonical support/admin email. Added `REPLY_TO_EMAIL` env var to the deployment reference.
+### Added
+- **[Admin] Recent signups feed:** Added `GET /admin/signups` endpoint returning recent user registrations. Displayed as a scrollable "Recent Signups" card on the admin dashboard overview tab with avatar, name, email, dept, year, and date. (PART 12)
+- **[Seed] Welcome announcement:** `seedAnnouncement.js` creates a pinned announcement post in the General community authored by the system admin with the TakeUForward vision and an overview of platform features. (PART 4)
+- **[Seed] Career roadmaps:** `seedRoadmaps.js` seeds four structured career roadmaps (SDE, PM, Core Engineering, Higher Studies) authored by the system admin, each with 6 detailed steps. (PART 7)
+- **[UX] New-user welcome toast:** After profile completion, `CompleteProfile.jsx` shows a welcome toast: "Welcome to TUF SSN! You're member #[N] — share it with your peers" with ordinal count computed server-side. (PART 13)
+- **[Seed] Welcome email:** On first profile completion, `authRoutes.js` sends a welcome email via `sendEmail` with the TakeUForward vision and a CTA link. (PART 4 email variant)
+
+### Changed
+- **[UI] About page revamp:** Rewrote `About.jsx` with content drawn from MASTER_PLAN.md §2 (fragmented WhatsApp groups, lost senior knowledge, no safe space to ask) and §3 (vision statement). No generic boilerplate. (PART 5)
+- **[UI] Home page feedback CTA:** Added a highlighted "We need your support!" Card linking to `/support`. (PART 6)
+- **[UI] Home community filtering:** Home page now shows only user's dept+batch community, General, and Placements — computed from `user.year` + `user.dept` with a `deptToShort` mapping for Mechanical/Chemical/Biomedical/Civil compatibility. (PART 9)
+- **[UI] Mobile notification bell always visible:** Moved `NotificationsDropdown` into the mobile header alongside the hamburger in `AppLayout.jsx`. (PART 10)
+- **[UI] Mobile Home title font size:** Increased `h1` font-size from `--text-xl` to `--text-2xl` at `max-width: 375px` in `index.css`. (PART 11)
+- **[UI] Clubs search with autocomplete:** Rewrote `ClubsList.jsx` with live-filtering typeahead search — debounced client-side filter, dropdown of up to 8 matches, clear button, outside-click dismiss. (PART 3)
+- **[UI] Community browse page:** Created `CommunityBrowse.jsx` with full listing and search/autocomplete. Added route `/community` and nav link "Communities" to `NAV_PRIMARY`. (PART 8)
+- **[UI] Empty-state copy:** Updated Home.jsx "No communities yet" to community-driven platform messaging. (Audit)
+- **[UI] Login page mobile UX:** Improved "Request Access" button touch-target sizing; added `overflow-y: auto` to `.login-form-panel` for short-viewport safety. (PART 1b)
+- **[Seed] Added seed commands:** Added `seed:announcement` and `seed:roadmaps` scripts to server/package.json.
+- **[Roadmaps] Added interview round structure:** SDE, PM, and Core roadmaps now describe typical interview round structure (OA, technical rounds, HR fit) with general, widely-known process descriptions. (PART 7)
+- **[UI] Card system overhaul:** Increased glass-surface opacity (0.45→0.75), reduced blur, updated border colors and shadows for better readability and depth. Card variants now have hover state border transitions. (UI polish)
+- **[UI] Bottom nav opacity:** Changed mobile bottom nav from translucent glass (`--glass-bg`) to solid `--bg-elevated` with `--border-strong` top border for reduced transparency. (UI polish)
+- **[UI] Announcements page redesign:** Redesigned announcement cards with club avatar gradient icons, proper typography hierarchy, cleaner header layout with category badges, improved spacing and date formatting. Replaced Card-based filter bar with surface-styled filter row. (UI polish)
+- **[UI] Support page redesign:** Replaced inline-styled `<select>`/`<textarea>` with project-standard `Select` component and `.input` CSS class for consistency. Proper label hierarchy, spacing, and muted optional-field hints. (UI polish)
+
+### Fixed
+- **[P0] Android OAuth bounce-tracking cookie drop:** Replaced `successRedirect` 302 in `authRoutes.js` Google callback with a custom handler that sends 200 HTML with inline spinner + `window.location.replace('/home')`, avoiding Chrome Android's bounce-tracking protections that clear session cookies on 302 responses. (PART 1)
+- **[PWA] Mobile PWA manifest:** Added `orientation: 'portrait'`, `start_url: '/home'`, `scope: '/'`, and PNG icon references (`pwa-192x192.png`, `pwa-512x512.png`) to `vite.config.js`. Generated actual PNG icons. (PART 1b)
+- **[Lint] Unused imports:** Removed unused `Users` and `Card` imports in `CommunityBrowse.jsx`, unused `ordinal` function in `CompleteProfile.jsx`.
+- **[Home] Dept-batch community filter mismatch:** Fixed `Home.jsx` community filtering to use a `deptToShort` mapping (e.g., `Mechanical` → `MECH`, `Chemical` → `CHEM`, `Biomedical` → `BIOMED`, `Civil` → `CIVIL`) so the filter works correctly for Mechanical, Chemical, Biomedical, and Civil students — previously the full department name was used directly, which didn't match the community seed short codes. (Audit PART 9)
+- **[Admin] Signups pagination hasMore:** Fixed `GET /admin/signups` to return a computed `hasMore` value and support `skip` for proper pagination. (Audit PART 12)
 
 ### Added
 - **[Admin] Full platform CRUD management UI:** Expanded the System Admin Dashboard (`/admin`) with four management tabs — Overview, Clubs, Communities, and Posts. Admins can now create, edit, and delete clubs and communities directly from the UI, and search + delete any post on the platform. All operations are gated by the `requireSystemAdmin` middleware.

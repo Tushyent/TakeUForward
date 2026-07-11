@@ -10,7 +10,7 @@ import { Input } from '../components/ui/Input';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import {
-  Users, BookOpen, ShieldAlert,
+  Users, BookOpen, ShieldAlert, MessageCircle,
   ArrowRight, ChevronRight, Hash, Link2, MessageSquare, Briefcase, GraduationCap, FileText, Map, Star, Lightbulb, UserCheck, Package, ShoppingBag
 } from 'lucide-react';
 
@@ -40,13 +40,13 @@ const CAMPUS_LINKS = [
 
 const renderGrid = (title, items, icon) => (
   <div style={{ marginBottom: 'var(--space-8)' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-4)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-5)' }}>
       {icon}
       <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{title}</h3>
     </div>
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(165px, 1fr))',
       gap: 'var(--space-4)',
     }}>
       {items.map(({ to, icon: Icon, label, desc, color, glow }) => (
@@ -56,37 +56,44 @@ const renderGrid = (title, items, icon) => (
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
-              padding: 'var(--space-4)',
-              borderTop: `2px solid ${color}`, // Keep the brand color accent
+              padding: 'var(--space-5)',
+              borderTop: `3px solid ${color}`,
+              background: `linear-gradient(180deg, ${glow}08 0%, transparent 100%)`,
+              transition: 'box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease, background 0.25s ease',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.boxShadow = `0 0 0 1px ${glow}, 0 8px 24px rgba(0,0,0,0.4)`;
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.borderColor = color + '55';
+              e.currentTarget.style.boxShadow = `0 0 0 1px ${color}44, 0 0 24px ${color}22, 0 8px 32px rgba(0,0,0,0.3)`;
+              e.currentTarget.style.transform = 'translateY(-3px)';
+              e.currentTarget.style.borderColor = `${color}88`;
+              e.currentTarget.style.background = `linear-gradient(180deg, ${glow}14 0%, ${glow}04 100%)`;
             }}
             onMouseLeave={e => {
               e.currentTarget.style.boxShadow = 'none';
               e.currentTarget.style.transform = 'none';
               e.currentTarget.style.borderColor = 'var(--border)';
+              e.currentTarget.style.background = `linear-gradient(180deg, ${glow}08 0%, transparent 100%)`;
             }}
           >
             <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: 'var(--radius-sm)',
-              background: glow,
-              border: `1px solid ${color}33`,
+              width: 40,
+              height: 40,
+              borderRadius: 'var(--radius-md)',
+              background: `linear-gradient(135deg, ${color}22 0%, ${color}08 100%)`,
+              border: `1px solid ${color}44`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 'var(--space-3)',
-            }}>
-              <Icon size={16} color={color} />
+              marginBottom: 'var(--space-4)',
+              transition: 'background 0.25s ease, border-color 0.25s ease, transform 0.25s ease',
+            }}
+            className="grid-card-icon"
+            >
+              <Icon size={18} color={color} />
             </div>
             <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
               {label}
             </p>
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
               {desc}
             </p>
           </Card>
@@ -102,6 +109,16 @@ const renderGrid = (title, items, icon) => (
 const communityVariant = (type) => {
   const map = { dept: 'primary', batch: 'info', general: 'success', topic: 'accent' };
   return map[type] || 'secondary';
+};
+
+const communityAccent = (type) => {
+  const map = { dept: 'var(--primary)', batch: 'var(--info)', general: 'var(--success)', topic: 'var(--accent)' };
+  return map[type] || 'var(--text-muted)';
+};
+
+const communityBg = (type) => {
+  const map = { dept: 'var(--primary-glow)', batch: 'var(--info-bg)', general: 'var(--success-bg)', topic: 'var(--accent-bg)' };
+  return map[type] || 'var(--bg-elevated)';
 };
 
 /* ---------------------------------------------------------------
@@ -150,7 +167,22 @@ function Home() {
     const fetchCommunities = async () => {
       try {
         const response = await axiosClient.get('/communities');
-        setCommunities(response.data);
+        const all = response.data;
+        // Filter to only show: user's dept+batch community, General, and Placements
+        const deptToShort = {
+          Mechanical: 'MECH', Chemical: 'CHEM', Biomedical: 'BIOMED', Civil: 'CIVIL',
+          'MTECH-CSE': 'MTECH-CSE',
+        };
+        const relevant = all.filter(c => {
+          if (c.name === 'General' || c.name === 'Placements') return true;
+          if (user?.dept && user?.year) {
+            const batchSuffix = String(user.year).slice(-2);
+            const short = deptToShort[user.dept] || user.dept;
+            if (c.name === `${short}'${batchSuffix}`) return true;
+          }
+          return false;
+        });
+        setCommunities(relevant);
       } catch {
         // silently fail — communities are supplementary on home
       } finally {
@@ -158,7 +190,7 @@ function Home() {
       }
     };
     fetchCommunities();
-  }, []);
+  }, [user]);
 
   const handleGenerateInvite = async () => {
     if (!inviteEmail) { toast.error('Please enter an email'); return; }
@@ -353,6 +385,56 @@ function Home() {
         {renderGrid('Career & Placements', CAREER_LINKS, <Briefcase size={16} color="var(--accent)" />)}
         {renderGrid('Campus Life', CAMPUS_LINKS, <Users size={16} color="var(--success)" />)}
 
+        {/* ── FEEDBACK CTA ── */}
+        <Card
+          variant="highlight"
+          style={{
+            marginBottom: 'var(--space-6)',
+            background: 'linear-gradient(135deg, var(--primary-glow) 0%, transparent 100%)',
+            border: '1px solid var(--primary)',
+            textAlign: 'center',
+            padding: 'var(--space-8)',
+            transition: 'box-shadow 0.3s ease',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.boxShadow = '0 0 30px var(--primary-glow), 0 0 60px rgba(124,106,247,0.10)';
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.boxShadow = 'none';
+          }}
+        >
+          <div style={{
+            width: 48,
+            height: 48,
+            borderRadius: 'var(--radius-full)',
+            background: 'var(--primary-glow)',
+            border: '1px solid rgba(124,106,247,0.3)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto var(--space-4)',
+          }}>
+            <MessageCircle size={22} color="var(--primary)" />
+          </div>
+          <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-xl)' }}>
+            We need your support! 🙌
+          </h3>
+          <p style={{
+            color: 'var(--text-secondary)',
+            fontSize: 'var(--text-sm)',
+            margin: '0 auto var(--space-5)',
+            maxWidth: 480,
+            lineHeight: 1.7,
+          }}>
+            TakeUForward SSN is built and improved by students like you. Spot a bug, have an idea,
+            or just want to tell us what's missing? Share it with us — every bit of feedback helps
+            us make this better for everyone.
+          </p>
+          <Link to="/support" style={{ textDecoration: 'none' }}>
+            <Button variant="primary" className="btn-lg">Share Feedback</Button>
+          </Link>
+        </Card>
+
         {/* ── COMMUNITIES LIST ── */}
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-5)' }}>
@@ -366,67 +448,74 @@ function Home() {
           {communities.length === 0 ? (
             <EmptyState
               icon={Users}
-              title="No communities yet"
-              message="Communities will appear here once your department and batch are set up."
+              title="No communities to show"
+              message="This is a community-driven platform. Help us grow it by joining or creating a community."
             />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-              {communities.map(comm => (
-                <Link
-                  key={comm._id}
-                  to={`/community/${comm._id}`}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: 'var(--space-3) var(--space-4)',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'var(--bg-elevated)',
-                      border: '1px solid var(--border-subtle)',
-                      transition: 'background var(--transition-fast), border-color var(--transition-fast)',
-                      cursor: 'pointer',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.background = 'var(--bg-input)';
-                      e.currentTarget.style.borderColor = 'var(--primary)';
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.background = 'var(--bg-elevated)';
-                      e.currentTarget.style.borderColor = 'var(--border-subtle)';
-                    }}
+              {communities.map(comm => {
+                const accent = communityAccent(comm.type);
+                const bgg = communityBg(comm.type);
+                return (
+                  <Link
+                    key={comm._id}
+                    to={`/community/${comm._id}`}
+                    style={{ textDecoration: 'none' }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                      <div style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'rgba(124,106,247,0.12)',
+                    <div
+                      style={{
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                      }}>
-                        <Hash size={14} color="var(--primary)" />
+                        justifyContent: 'space-between',
+                        padding: 'var(--space-3) var(--space-4)',
+                        borderRadius: 'var(--radius-md)',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
+                        transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
+                        cursor: 'pointer',
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = `${bgg}18`;
+                        e.currentTarget.style.borderColor = `${accent}55`;
+                        e.currentTarget.style.boxShadow = `0 0 0 1px ${accent}22`;
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'var(--bg-elevated)';
+                        e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                        <div style={{
+                          width: 34,
+                          height: 34,
+                          borderRadius: 'var(--radius-md)',
+                          background: `linear-gradient(135deg, ${accent}22 0%, ${accent}08 100%)`,
+                          border: `1px solid ${accent}33`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}>
+                          <Hash size={15} color={accent} />
+                        </div>
+                        <div>
+                          <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
+                            {comm.name}
+                          </p>
+                          <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                            {comm.memberCount} member{comm.memberCount !== 1 ? 's' : ''}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>
-                          {comm.name}
-                        </p>
-                        <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-                          {comm.memberCount} members
-                        </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                        <Badge variant={communityVariant(comm.type)} size="sm">{comm.type}</Badge>
+                        <ChevronRight size={14} color="var(--text-muted)" />
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                      <Badge variant={communityVariant(comm.type)} size="sm">{comm.type}</Badge>
-                      <ChevronRight size={14} color="var(--text-muted)" />
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
           )}
         </Card>

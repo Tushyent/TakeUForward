@@ -31,7 +31,7 @@ function Announcements() {
 
   if (error) return (
     <div className="page-transition">
-            <div className="page-col page-col-feed" style={{ paddingTop: 'var(--space-8)' }}>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <EmptyState
           icon={AlertTriangle}
           title="Error"
@@ -45,18 +45,28 @@ function Announcements() {
 
   return (
     <div className="page-transition">
-            <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
-        <h1 style={{ marginTop: 0 }}>Campus Announcements</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1em' }}>
-          Aggregated feed of all official club and CDC announcements.
-        </p>
+      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+        <div style={{ marginBottom: 'var(--space-6)' }}>
+          <h1 style={{ margin: 0 }}>Campus Announcements</h1>
+          <p style={{ color: 'var(--text-secondary)', margin: 'var(--space-2) 0 0', fontSize: 'var(--text-sm)' }}>
+            Official updates from clubs, departments, and the CDC.
+          </p>
+        </div>
 
-        <Card style={{ marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '15px', padding: '1rem 1.5rem' }}>
-          <label style={{ fontWeight: 500, color: 'var(--text-primary)' }}>Filter by Category:</label>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
+          marginBottom: 'var(--space-6)', flexWrap: 'wrap',
+          padding: 'var(--space-4) var(--space-5)',
+          background: 'var(--bg-surface)',
+          borderRadius: 'var(--radius-md)',
+          border: '1px solid var(--border)',
+        }}>
+          <label style={{ fontWeight: 500, color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', whiteSpace: 'nowrap' }}>Filter:</label>
           <Select 
             value={category} 
             onChange={e => setCategory(e.target.value)}
-            style={{ width: '200px' }}
+            style={{ width: '220px' }}
+            aria-label="Filter by category"
           >
             <option value="">All Announcements</option>
             <option value="event">Event</option>
@@ -64,30 +74,47 @@ function Announcements() {
             <option value="hackathon">Hackathon</option>
             <option value="workshop">Workshop</option>
           </Select>
-        </Card>
+        </div>
 
         {loading ? (
           <Spinner text="Loading announcements..." />
         ) : announcements.length === 0 ? (
           <EmptyState icon={BellOff} message="No announcements found." />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {announcements.map(post => (
-              <Card key={post._id} style={{ marginBottom: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
-                  <span style={{ fontSize: '0.9em', color: 'var(--text-secondary)' }}>
-                    <strong style={{ color: 'var(--primary)' }}>{post.clubId?.name || 'Unknown Club'}</strong> &bull; Posted by {post.authorId?.name}
-                  </span>
-                  <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+              <Card key={post._id} style={{ marginBottom: 0, padding: 'var(--space-5)' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 'var(--space-4)',
+                  marginBottom: 'var(--space-4)',
+                }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 'var(--radius-sm)',
+                    background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, fontSize: 'var(--text-lg)', fontWeight: 700, color: '#fff',
+                  }}>
+                    {(post.clubId?.name || '?')[0].toUpperCase()}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+                      <strong style={{ color: 'var(--primary)', fontSize: 'var(--text-sm)' }}>
+                        {post.clubId?.name || 'Unknown Club'}
+                      </strong>
+                      {post.category && (
+                        <Badge variant="primary" size="sm">{post.category}</Badge>
+                      )}
+                    </div>
+                    <p style={{ margin: 'var(--space-1) 0 0', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                      Posted by {post.authorId?.name || 'Unknown'} &middot; {new Date(post.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                  </div>
                 </div>
-                
-                {post.category && (
-                  <Badge variant="primary" style={{ marginBottom: '15px' }}>
-                    {post.category}
-                  </Badge>
-                )}
-                
-                <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-primary)', fontSize: '1.1em' }}>
+
+                <div style={{
+                  whiteSpace: 'pre-wrap', color: 'var(--text-primary)',
+                  fontSize: 'var(--text-sm)', lineHeight: 1.7,
+                }}>
                   {post.content}
                 </div>
               </Card>

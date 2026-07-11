@@ -1,4 +1,5 @@
 import express from 'express';
+import { logActivity } from '../services/activityLogger.js';
 import User from '../models/User.js';
 
 const router = express.Router();
@@ -108,6 +109,7 @@ router.patch('/me/profile', async (req, res, next) => {
     if (weeklyDigestOptIn !== undefined) user.weeklyDigestOptIn = weeklyDigestOptIn;
 
     await user.save();
+    await logActivity({ action: 'update', resource: 'User', resourceId: req.user._id, description: 'Updated user profile', req, details: { updatedFields: Object.keys(req.body) } });
     res.json(user);
   } catch (err) {
     next(err);
