@@ -53,7 +53,7 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
       } catch { /* silent */ }
     }
     setIsOpen(false);
-    navigate(notif.type === 'message' ? `/chat/${notif.refId}` : '/home');
+    navigate(notif.targetPath || (notif.type === 'message' ? `/chat/${notif.refId}` : '/home'));
   };
 
   return (

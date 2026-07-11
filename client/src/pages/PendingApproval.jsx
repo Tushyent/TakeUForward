@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldAlert, LogOut } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
+import Button from '../components/ui/Button';
 
 const PendingApproval = () => {
   const handleLogout = async () => {
@@ -26,10 +27,10 @@ const PendingApproval = () => {
         <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)', marginBottom: 'var(--space-8)' }}>
           Please wait for an admin to verify your credentials. You will be able to access the community once approved.
         </p>
-        <button className="btn" onClick={handleLogout} style={{ width: '100%', background: 'var(--bg-elevated)', border: '1px solid var(--border-strong)', color: 'var(--text-primary)' }}>
+        <Button variant="secondary" onClick={handleLogout} style={{ width: '100%' }}>
           <LogOut size={18} />
           Sign Out
-        </button>
+        </Button>
       </div>
     </div>
   );

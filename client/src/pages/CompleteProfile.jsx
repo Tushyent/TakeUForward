@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
@@ -86,6 +86,20 @@ function CompleteProfile() {
 
           {role === 'alumni' ? (
             <>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Department</label>
+                <Select value={dept} onChange={(e) => setDept(e.target.value)} style={{ width: '100%' }} aria-label="Department">
+                  <option value="EEE">Electrical & Electronics (EEE)</option>
+                  <option value="ECE">Electronics & Communication (ECE)</option>
+                  <option value="CSE">Computer Science & Engineering (CSE)</option>
+                  <option value="IT">Information Technology (IT)</option>
+                  <option value="Mechanical">Mechanical Engineering</option>
+                  <option value="Chemical">Chemical Engineering</option>
+                  <option value="Biomedical">Biomedical Engineering</option>
+                  <option value="Civil">Civil Engineering</option>
+                  <option value="English">English</option>
+                </Select>
+              </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Graduation Year</label>
                 <Select value={graduationYear} onChange={(e) => setGraduationYear(e.target.value)} style={{ width: '100%' }} aria-label="Graduation Year">

@@ -7,24 +7,14 @@ import CareerRoadmap from '../models/CareerRoadmap.js';
 import crypto from 'crypto';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { sendEmail } from '../config/mailer.js';
+import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
 
 const router = express.Router();
-
-// Middleware to ensure user is platform admin
-const requirePlatformAdmin = (req, res, next) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: { message: 'Not authenticated' } });
-  }
-  if (!req.user.isPlatformAdmin) {
-    return res.status(403).json({ error: { message: 'Not authorized as platform admin' } });
-  }
-  next();
-};
 
 // @route   GET /api/moderation/queue
 // @desc    Get all reported/hidden posts and reviews
 // @access  Private (Platform Admin)
-router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
+router.get('/queue', requireSystemAdmin, async (req, res, next) => {
   try {
     const flaggedPosts = await Post.find({
       $or: [
@@ -93,7 +83,7 @@ router.get('/queue', requirePlatformAdmin, async (req, res, next) => {
 // @route   POST /api/moderation/:itemId/resolve
 // @desc    Resolve a reported post or review (dismiss or remove)
 // @access  Private (Platform Admin)
-router.post('/:itemId/resolve', requirePlatformAdmin, async (req, res, next) => {
+router.post('/:itemId/resolve', requireSystemAdmin, async (req, res, next) => {
   try {
     const { action, type = 'post' } = req.body;
     
@@ -131,7 +121,7 @@ router.post('/:itemId/resolve', requirePlatformAdmin, async (req, res, next) => 
 // @route   GET /api/moderation/alumni-requests
 // @desc    Get all pending alumni registration requests
 // @access  Private (Platform Admin)
-router.get('/alumni-requests', requirePlatformAdmin, async (req, res, next) => {
+router.get('/alumni-requests', requireSystemAdmin, async (req, res, next) => {
   try {
     const { getPaginationParams } = await import('../utils/paginationUtils.js');
     const { limit, skip } = getPaginationParams(req.query.page, req.query.limit);
@@ -151,7 +141,7 @@ router.get('/alumni-requests', requirePlatformAdmin, async (req, res, next) => {
 // @route   POST /api/moderation/alumni-requests/:id/approve
 // @desc    Approve an alumni request and send invite
 // @access  Private (Platform Admin)
-router.post('/alumni-requests/:id/approve', requirePlatformAdmin, async (req, res, next) => {
+router.post('/alumni-requests/:id/approve', requireSystemAdmin, async (req, res, next) => {
   try {
     const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
     const ApprovedAlumniEmail = (await import('../models/ApprovedAlumniEmail.js')).default;
@@ -188,7 +178,7 @@ router.post('/alumni-requests/:id/approve', requirePlatformAdmin, async (req, re
 // @route   POST /api/moderation/alumni-requests/:id/reject
 // @desc    Reject an alumni request
 // @access  Private (Platform Admin)
-router.post('/alumni-requests/:id/reject', requirePlatformAdmin, async (req, res, next) => {
+router.post('/alumni-requests/:id/reject', requireSystemAdmin, async (req, res, next) => {
   try {
     const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
     const request = await AlumniRegistrationRequest.findById(req.params.id);

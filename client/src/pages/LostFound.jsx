@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -21,6 +21,7 @@ function LostFound() {
   const [filterLocation, setFilterLocation] = useState('');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -41,6 +42,7 @@ function LostFound() {
 
   const fetchItems = async (isNewPage = false) => {
     try {
+      if (isNewPage) setLoadingMore(true);
       const params = new URLSearchParams({
         page: isNewPage ? page : 1,
         limit: 10
@@ -65,6 +67,7 @@ function LostFound() {
       toast.error('Failed to load items');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -348,8 +351,8 @@ function LostFound() {
             ))}
             
             {hasMore && (
-              <Button variant="outline" onClick={() => setPage(p => p + 1)} style={{ alignSelf: 'center' }}>
-                Load More
+              <Button variant="outline" onClick={() => setPage(p => p + 1)} disabled={loadingMore} style={{ alignSelf: 'center' }}>
+                {loadingMore ? 'Loading...' : 'Load More'}
               </Button>
             )}
           </div>

@@ -48,7 +48,7 @@ function Bookmarks() {
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginBottom: '10px' }}>My Saved Items</h1>
-        <p style={{ color: 'var(--text)', marginBottom: '20px' }}>Your personal tracker for posts and resources.</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Your personal tracker for posts and resources.</p>
 
         <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
           <Button variant={filterType === 'all' ? 'primary' : 'secondary'} onClick={() => setFilterType('all')}>All</Button>
@@ -86,7 +86,7 @@ function Bookmarks() {
                     <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-primary)' }}>
                       {item.content}
                     </p>
-                    <div style={{ fontSize: '0.85em', color: 'var(--text)', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
                       {item.type === 'announcement' && item.clubId ? (
                         <span>📢 Announcement by {item.clubId.name}</span>
                       ) : (

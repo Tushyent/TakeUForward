@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import ReportModal from '../components/ui/ReportModal';
 import { Search } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
@@ -19,6 +20,7 @@ function Reviews() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reportingId, setReportingId] = useState(null);
 
   // New review state
   const [courseCode, setCourseCode] = useState('');
@@ -81,15 +83,13 @@ function Reviews() {
     }
   };
 
-  const handleReport = async (reviewId) => {
-    const reason = prompt('Why are you reporting this review?');
-    if (!reason) return;
-    try {
-      await axiosClient.post(`/reviews/${reviewId}/report`, { reason });
-      toast.success('Review reported successfully');
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to report review');
-    }
+  const handleReport = (reviewId) => {
+    setReportingId(reviewId);
+  };
+
+  const submitReport = async (reason) => {
+    await axiosClient.post(`/reviews/${reportingId}/report`, { reason });
+    toast.success('Review reported successfully');
   };
 
   return (
@@ -205,7 +205,7 @@ function Reviews() {
                   {review.comment}
                 </p>
                 
-                <div style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     By: {review.isAnonymous ? 'Anonymous' : (
                       <>
@@ -234,6 +234,14 @@ function Reviews() {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={!!reportingId}
+        onClose={() => setReportingId(null)}
+        onSubmit={submitReport}
+        title="Report Review"
+        placeholder="Why are you reporting this review?"
+      />
     </div>
   );
 }

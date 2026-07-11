@@ -23,11 +23,12 @@ router.get('/search', async (req, res, next) => {
 
     const users = await User.find({
       $or: [
+        { username: { $regex: regex } },
         { handle: { $regex: regex } },
         { name: { $regex: regex } }
       ]
     })
-      .select('name handle')
+      .select('name username handle')
       .limit(5)
       .lean();
 

@@ -38,12 +38,27 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       return res.status(400).json({ error: { message: 'All fields are required' } });
     }
 
+    const validCategories = ['book', 'cycle', 'electronics', 'other'];
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ error: { message: 'Invalid category' } });
+    }
+
+    const validConditions = ['new', 'like_new', 'good', 'fair'];
+    if (!validConditions.includes(condition)) {
+      return res.status(400).json({ error: { message: 'Invalid condition' } });
+    }
+
+    const numericPrice = Number(price);
+    if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+      return res.status(400).json({ error: { message: 'Price must be a non-negative number' } });
+    }
+
     const newItem = new MarketplaceItem({
       sellerId: req.user._id,
       title,
       description,
       category,
-      price: Number(price),
+      price: numericPrice,
       condition
     });
 

@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import User from '../models/User.js';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
-import crypto from 'crypto';
+import { isSystemAdminEmail, syncUserIdentity } from '../utils/userIdentity.js';
 
 dotenv.config();
 
@@ -20,11 +20,14 @@ passport.use(
         const email = profile.emails[0].value;
         let role;
         let isVerifiedAlumni = false;
+        const isSystemAdmin = isSystemAdminEmail(email);
 
         const isStudentEmail = /^[a-zA-Z]+\d{7}@ssn\.edu\.in$/.test(email);
         const isSsnDomain = email.endsWith('@ssn.edu.in');
 
-        if (isStudentEmail) {
+        if (isSystemAdmin) {
+          role = 'platform_admin';
+        } else if (isStudentEmail) {
           role = 'student';
         } else if (isSsnDomain) {
           role = 'club_admin';
@@ -41,7 +44,7 @@ passport.use(
           }
         }
 
-        let user = await User.findOne({ googleId: profile.id });
+        let user = await User.findOne({ $or: [{ googleId: profile.id }, { email }] });
         if (!user) {
           // Attempt to extract dept/year from email or defaults (since it's not provided by Google directly)
           // For now we assume they might be null unless we can parse them, or we just leave them null
@@ -49,31 +52,25 @@ passport.use(
           let year = null;
           let defaultCommunityId = await assignDefaultCommunity(dept, year);
 
-          let usernameBase = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-          let username = usernameBase;
-          let counter = 1;
-          while (await User.findOne({ username })) {
-            username = `${usernameBase}${counter}`;
-            counter++;
-          }
-
-          const baseHandle = profile.displayName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-          const handle = `${baseHandle}_${crypto.randomBytes(2).toString('hex')}`;
-
           user = await User.create({
             googleId: profile.id,
             name: profile.displayName,
             email: email,
-            username,
-            handle,
             role: role,
-            dept,
-            year,
+            dept: role === 'platform_admin' ? 'CSE' : dept,
+            year: role === 'platform_admin' ? 2025 : year,
             defaultCommunityId,
             isVerifiedAlumni,
+            isPlatformAdmin: isSystemAdmin,
             ...(currentCompany && { currentCompany })
           });
+          const changed = await syncUserIdentity(User, user);
+          if (changed) await user.save();
         } else {
+          if (user.googleId !== profile.id) {
+            user.googleId = profile.id;
+            await user.save();
+          }
           // If the user already exists but just became a verified alumni, update them
           if (isVerifiedAlumni && !user.isVerifiedAlumni) {
             user.isVerifiedAlumni = true;
@@ -81,6 +78,8 @@ passport.use(
             if (currentCompany) user.currentCompany = currentCompany;
             await user.save();
           }
+          const changed = await syncUserIdentity(User, user);
+          if (changed) await user.save();
         }
         return done(null, user);
       } catch (err) {

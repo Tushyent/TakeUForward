@@ -2,76 +2,17 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
-import {
-  Home, BookOpen, Users, Megaphone, GraduationCap, Briefcase,
-  MessageSquare, FileText, UserCheck, Lightbulb, Map,
-  Package, ShoppingBag, Star, Bookmark, LogOut, Zap, X, Info, Cloud, Settings
-} from 'lucide-react';
+import { LogOut, Zap, X, Settings } from 'lucide-react';
+import { NAV_PRIMARY, NAV_CAREERS, NAV_COMMUNITY, NAV_ADMIN } from '../constants/navigation';
+import { useAuth } from '../context/auth-context';
 
-/* ---------------------------------------------------------------
-   Navigation structure
-   --------------------------------------------------------------- */
-const NAV_PRIMARY = [
-  { to: '/home',                icon: Home,           label: 'Home' },
-  { to: '/about',               icon: Info,           label: 'About TUF' },
-  { to: '/resources',           icon: BookOpen,        label: 'Resources' },
-  { to: '/clubs',               icon: Users,           label: 'Clubs' },
-  { to: '/announcements',       icon: Megaphone,       label: 'Announcements' },
-  { to: '/drive',               icon: Cloud,           label: 'My Drive' },
-];
-
-const NAV_CAREERS = [
-  { to: '/alumni',              icon: GraduationCap,   label: 'Alumni' },
-  { to: '/referrals',           icon: Briefcase,       label: 'Referrals' },
-  { to: '/mock-interviews',     icon: MessageSquare,   label: 'Interviews' },
-  { to: '/interview-experiences', icon: FileText,      label: 'Experiences' },
-  { to: '/career-roadmaps',     icon: Map,             label: 'Roadmaps' },
-  { to: '/reviews',             icon: Star,            label: 'Reviews' },
-  { to: '/electives',           icon: Lightbulb,       label: 'Electives' },
-];
-
-const NAV_COMMUNITY = [
-  { to: '/team-finder',         icon: UserCheck,       label: 'Team Finder' },
-  { to: '/lost-found',          icon: Package,         label: 'Lost & Found' },
-  { to: '/marketplace',         icon: ShoppingBag,     label: 'Marketplace' },
-  { to: '/bookmarks',           icon: Bookmark,        label: 'Saved' },
-  { to: '/chats',               icon: MessageSquare,   label: 'Inbox' },
-];
-
-/* ---------------------------------------------------------------
-   Sidebar Item
-   --------------------------------------------------------------- */
 const SidebarItem = ({ to, icon: Icon, label, isActive, onClick }) => {
   return (
     <Link
       to={to}
       title={label}
       onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 'var(--space-3)',
-        padding: '10px var(--space-4)',
-        borderRadius: 'var(--radius-sm)',
-        color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-        background: isActive ? 'var(--bg-elevated)' : 'transparent',
-        fontSize: 'var(--text-sm)',
-        fontWeight: isActive ? 600 : 500,
-        textDecoration: 'none',
-        transition: 'background var(--transition-fast), color var(--transition-fast)',
-      }}
-      onMouseEnter={e => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'var(--bg-input)';
-          e.currentTarget.style.color = 'var(--text-primary)';
-        }
-      }}
-      onMouseLeave={e => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.color = 'var(--text-secondary)';
-        }
-      }}
+      className={`sidebar-link ${isActive ? 'active' : ''}`}
     >
       <Icon size={18} color={isActive ? 'var(--primary)' : 'currentColor'} />
       {label}
@@ -79,12 +20,10 @@ const SidebarItem = ({ to, icon: Icon, label, isActive, onClick }) => {
   );
 };
 
-/* ---------------------------------------------------------------
-   Sidebar Component
-   --------------------------------------------------------------- */
 const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
 
   const isActive = (path) => location.pathname === path;
 
@@ -93,108 +32,64 @@ const Sidebar = ({ isOpen, onClose }) => {
     navigate('/login');
   };
 
+  const sections = [
+    { label: 'Main', items: NAV_PRIMARY },
+    { label: 'Careers', items: NAV_CAREERS },
+    { label: 'Campus Life', items: NAV_COMMUNITY },
+    ...(user?.isPlatformAdmin ? [{ label: 'Admin', items: NAV_ADMIN }] : []),
+  ];
+
   const SidebarContent = (
     <>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-6)', padding: '0 var(--space-2)' }}>
-        <Link to="/home" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }} onClick={onClose}>
-          <div style={{
-            width: 32,
-            height: 32,
-            borderRadius: 'var(--radius-sm)',
-            background: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 16px var(--primary-glow)',
-          }}>
+      <div className="sidebar-brand">
+        <Link to="/home" onClick={onClose} className="sidebar-brand-link">
+          <div className="sidebar-logo">
             <Zap size={18} color="white" fill="white" />
           </div>
-          <span style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            TakeUForward
-          </span>
+          <div>
+            <span className="sidebar-brand-name">TakeUForward</span>
+          </div>
         </Link>
         <button className="sidebar-close-btn" onClick={onClose} aria-label="Close menu">
           <X size={20} />
         </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-1)', paddingRight: 'var(--space-2)', scrollbarWidth: 'thin' }}>
-        <span className="sidebar-section-label" style={{ marginTop: 0 }}>Main</span>
-        {NAV_PRIMARY.map(({ to, icon, label }) => (
-          <SidebarItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} onClick={onClose} />
-        ))}
-
-        <span className="sidebar-section-label">Careers</span>
-        {NAV_CAREERS.map(({ to, icon, label }) => (
-          <SidebarItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} onClick={onClose} />
-        ))}
-
-        <span className="sidebar-section-label">Campus Life</span>
-        {NAV_COMMUNITY.map(({ to, icon, label }) => (
-          <SidebarItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} onClick={onClose} />
-        ))}
-      </div>
-
-      <div style={{ marginTop: 'auto', paddingTop: 'var(--space-4)', borderTop: '1px solid var(--border-subtle)', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--space-4)' }}>
-          <Link
-            to="/settings/profile"
-            onClick={onClose}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-3)',
-              padding: '8px 12px',
-              marginLeft: '-12px',
-              borderRadius: 'var(--radius-sm)',
-              color: 'var(--text-secondary)',
-              textDecoration: 'none',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 500,
-              transition: 'background var(--transition-fast), color var(--transition-fast)',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'var(--bg-input)';
-              e.currentTarget.style.color = 'var(--text-primary)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--text-secondary)';
-            }}
-          >
-            <Settings size={16} />
-            Profile Settings
-          </Link>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
-            <NotificationsDropdown placement="top-left" />
-            <button
-              title="Logout"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onClose();
-                handleLogout();
-              }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '8px',
-                cursor: 'pointer',
-                color: 'var(--danger)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 'var(--radius-sm)',
-                transition: 'background var(--transition-fast)',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-bg)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-            >
-              <LogOut size={16} />
-            </button>
+      <nav className="sidebar-nav">
+        {sections.map(({ label, items }) => (
+          <div key={label}>
+            <span className="sidebar-section-label">{label}</span>
+            {items.map(({ to, icon, label: itemLabel }) => (
+              <SidebarItem key={to} to={to} icon={icon} label={itemLabel} isActive={isActive(to)} onClick={onClose} />
+            ))}
           </div>
+        ))}
+      </nav>
+
+      <div className="sidebar-footer">
+        <Link
+          to="/settings/profile"
+          onClick={onClose}
+          className="sidebar-footer-link"
+        >
+          <Settings size={16} />
+          Profile Settings
+        </Link>
+
+        <div className="sidebar-footer-actions">
+          <NotificationsDropdown placement="top-left" />
+          <button
+            title="Logout"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClose();
+              handleLogout();
+            }}
+            className="sidebar-logout-btn"
+          >
+            <LogOut size={16} />
+          </button>
         </div>
       </div>
     </>

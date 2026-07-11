@@ -42,7 +42,7 @@ function AlumniDirectory() {
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Alumni Directory</h1>
-        <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Connect with verified SSN alumni across the industry.
         </p>
 
@@ -88,7 +88,7 @@ function AlumniDirectory() {
                       <VerifiedAlumniBadge isVerifiedAlumni={alumni.isVerifiedAlumni} style={{ marginLeft: '8px' }} />
                     </h2>
                 </div>
-                <p style={{ color: 'var(--text)', fontSize: '0.9em', margin: '0 0 15px 0' }}>@{alumni.handle}</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9em', margin: '0 0 15px 0' }}>@{alumni.handle || alumni.username || 'unknown'}</p>
                 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '15px' }}>
                   {alumni.currentCompany && (
@@ -106,7 +106,7 @@ function AlumniDirectory() {
                 )}
 
                 <div style={{ marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.9em', color: 'var(--text)' }}>⭐ {alumni.reputation} Rep</span>
+                  <span style={{ fontSize: '0.9em', color: 'var(--text-secondary)' }}>⭐ {alumni.reputation ?? 0} Rep</span>
                   <Link to={`/chat/${alumni._id}`} style={{ textDecoration: 'none' }}>
                     <Button variant="success" style={{ padding: '6px 12px', fontSize: '0.9em' }}>Message</Button>
                   </Link>

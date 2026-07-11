@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import ReportModal from '../components/ui/ReportModal';
 import { Route, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
@@ -17,6 +18,7 @@ function CareerRoadmaps() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reportingId, setReportingId] = useState(null);
   const { user } = useAuth();
 
   // Filter state
@@ -100,15 +102,13 @@ function CareerRoadmaps() {
     }
   };
 
-  const handleReport = async (id) => {
-    const reason = prompt('Why are you reporting this roadmap?');
-    if (!reason) return;
-    try {
-      await axiosClient.post(`/career-roadmaps/${id}/report`, { reason });
-      toast.success('Roadmap reported successfully');
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to report roadmap');
-    }
+  const handleReport = (id) => {
+    setReportingId(id);
+  };
+
+  const submitReport = async (reason) => {
+    await axiosClient.post(`/career-roadmaps/${reportingId}/report`, { reason });
+    toast.success('Roadmap reported successfully');
   };
 
   const handleUpvote = async (id) => {
@@ -172,7 +172,7 @@ function CareerRoadmaps() {
               {steps.map((step, idx) => (
                 <div key={`step-${idx}`} style={{ background: 'var(--bg-surface)', padding: '15px', borderRadius: '6px', marginBottom: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <strong style={{ color: 'var(--text)' }}>Step {idx + 1}</strong>
+                    <strong style={{ color: 'var(--text-secondary)' }}>Step {idx + 1}</strong>
                     {steps.length > 1 && (
                       <Button variant="danger" onClick={() => handleRemoveStep(idx)} style={{ padding: '4px 8px', fontSize: '0.8rem' }}>
                         Remove
@@ -222,7 +222,7 @@ function CareerRoadmaps() {
                     </h3>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
                       <Badge variant="primary">{roadmap.careerPath.toUpperCase()}</Badge>
-                      <span style={{ fontSize: '0.85em', color: 'var(--text)' }}>
+                      <span style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
                         Curated by: {roadmap.authorId ? (
                           <>
                             <Link to={`/profile/${roadmap.authorId.username}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: 500 }}>
@@ -232,7 +232,7 @@ function CareerRoadmaps() {
                           </>
                         ) : 'Unknown'}
                       </span>
-                      <span style={{ fontSize: '0.85em', color: 'var(--text)' }}>
+                      <span style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
                         • {new Date(roadmap.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -240,14 +240,14 @@ function CareerRoadmaps() {
                 </div>
                 
                 <div style={{ padding: '15px 0', borderTop: '1px solid var(--border)' }}>
-                  {roadmap.steps.map((step, idx) => (
-                    <div key={step.order || idx} style={{ marginBottom: idx === roadmap.steps.length - 1 ? 0 : '15px', display: 'flex', gap: '15px' }}>
+                  {roadmap.steps?.map((step, idx) => (
+                    <div key={step.order || idx} style={{ marginBottom: idx === (roadmap.steps?.length || 0) - 1 ? 0 : '15px', display: 'flex', gap: '15px' }}>
                       <div style={{ background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 'bold' }}>
                         {step.order}
                       </div>
                       <div>
                         <strong style={{ display: 'block', marginBottom: '5px', color: 'var(--text-primary)', fontSize: '1.1em' }}>{step.stepTitle}</strong>
-                        <p style={{ margin: 0, color: 'var(--text)', whiteSpace: 'pre-wrap' }}>{step.description}</p>
+                        <p style={{ margin: 0, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>{step.description}</p>
                       </div>
                     </div>
                   ))}
@@ -266,6 +266,14 @@ function CareerRoadmaps() {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={!!reportingId}
+        onClose={() => setReportingId(null)}
+        onSubmit={submitReport}
+        title="Report Roadmap"
+        placeholder="Why are you reporting this roadmap?"
+      />
     </div>
   );
 }

@@ -7,8 +7,9 @@ dotenv.config();
 
 const run = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward');
-    logger.info('Connected to MongoDB');
+    const dbName = process.env.MONGODB_DB_NAME || (process.env.NODE_ENV === 'production' ? 'takeuforward' : 'takeuforward_dev');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev', { dbName });
+    logger.info({ dbName }, 'Connected to MongoDB');
 
     const duplicates = await Review.aggregate([
       {

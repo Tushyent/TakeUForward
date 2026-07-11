@@ -19,26 +19,43 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY && process.env
   logger.warn('VAPID keys not fully configured. Web push notifications will not work.');
 }
 
-export const createNotification = async ({ userId, type, refId, isAnonymousSender, content }) => {
+export const createNotification = async ({
+  userId,
+  type,
+  refId,
+  isAnonymousSender,
+  content,
+  targetPath,
+  actorName,
+  contextTitle,
+  contextType
+}) => {
   try {
     const notification = await Notification.create({
       userId,
       type,
       refId,
+      targetPath,
+      contentPreview: content ? String(content).slice(0, 180) : undefined
     });
 
-    if (type === 'reply' || type === 'mention' || type === 'comment') {
+    if (type === 'reply' || type === 'mention' || type === 'comment' || type === 'message') {
       const user = await User.findById(userId);
       if (user) {
         // Send email
-        await sendNotificationEmail(user, type, refId, isAnonymousSender, content);
+        await sendNotificationEmail(user, type, isAnonymousSender, content, {
+          targetPath,
+          actorName,
+          contextTitle,
+          contextType
+        });
 
         // Send web push if configured and user has subscriptions
         if (process.env.VAPID_PUBLIC_KEY && user.pushSubscriptions && user.pushSubscriptions.length > 0) {
           const payload = JSON.stringify({
             title: `New ${type} on TakeUForward`,
-            body: isAnonymousSender ? `An anonymous user sent a ${type}.` : `Someone sent a ${type}.`,
-            url: '/home'
+            body: isAnonymousSender ? `An anonymous user sent a ${type}.` : `${actorName || 'Someone'} sent a ${type}.`,
+            url: targetPath || '/home'
           });
 
           // Send to all devices, filter out expired ones

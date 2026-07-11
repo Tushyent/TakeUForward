@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
 import { logger } from '../utils/logger.js';
+import { isSystemAdminEmail, isSystemAdminUser, syncUserIdentity } from '../utils/userIdentity.js';
 
 const router = express.Router();
 
@@ -29,7 +30,9 @@ router.get(
 router.get('/me', (req, res) => {
   if (req.isAuthenticated()) {
     let profileComplete = false;
-    if (req.user.role === 'alumni') {
+    if (req.user.isPlatformAdmin || req.user.role === 'platform_admin') {
+      profileComplete = true;
+    } else if (req.user.role === 'alumni') {
       profileComplete = !!(req.user.dept && req.user.graduationYear && req.user.currentCompany);
     } else if (req.user.role === 'club_admin') {
       profileComplete = !!req.user.clubId;
@@ -119,8 +122,8 @@ router.post('/alumni/invite', async (req, res, next) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Must be logged in to invite alumni' });
   }
-  if (!req.user.isPlatformAdmin && req.user.role !== 'alumni') {
-    return res.status(403).json({ error: 'Only admins or verified alumni can generate invites' });
+  if (!isSystemAdminUser(req.user)) {
+    return res.status(403).json({ error: 'Only the system admin can generate invites' });
   }
 
   try {
@@ -183,16 +186,20 @@ if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_SESSION === 
       const { email } = req.body;
       if (!email) return res.status(400).json({ error: 'email required' });
       let user = await User.findOne({ email });
+
       if (!user) {
         user = await User.create({
           googleId: `playwright_${email.replace(/[@.]/g, '_')}`,
           email,
           name: 'Playwright Test User',
-          role: 'student',
+          role: isSystemAdminEmail(email) ? 'platform_admin' : 'student',
           dept: 'CSE',
-          year: 2025
+          year: 2025,
+          isPlatformAdmin: isSystemAdminEmail(email)
         });
       }
+      const changed = await syncUserIdentity(User, user);
+      if (changed) await user.save();
       req.login(user, (err) => {
         if (err) return next(err);
         res.status(200).json({ message: 'Test session seeded', user });

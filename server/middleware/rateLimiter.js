@@ -51,3 +51,10 @@ export const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+export const supportTicketLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: { message: 'Too many support tickets submitted, please try again after an hour.' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

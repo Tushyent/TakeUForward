@@ -171,7 +171,7 @@ function PersonalDrive() {
                   <Button variant="outline" style={{ flex: 1, padding: '6px' }} onClick={() => handleDownload(file._id, file.fileName)}>
                     <Download size={16} />
                   </Button>
-                  <Button variant="outline" style={{ flex: 1, padding: '6px', color: 'var(--danger)', borderColor: 'var(--danger-bg)' }} onClick={() => handleDelete(file._id)}>
+                  <Button variant="outline" style={{ flex: 1, padding: '6px', color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleDelete(file._id)}>
                     <Trash2 size={16} />
                   </Button>
                 </div>

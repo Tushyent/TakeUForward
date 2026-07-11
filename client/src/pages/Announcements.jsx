@@ -47,7 +47,7 @@ function Announcements() {
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Campus Announcements</h1>
-        <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Aggregated feed of all official club and CDC announcements.
         </p>
 
@@ -75,7 +75,7 @@ function Announcements() {
             {announcements.map(post => (
               <Card key={post._id} style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
-                  <span style={{ fontSize: '0.9em', color: 'var(--text)' }}>
+                  <span style={{ fontSize: '0.9em', color: 'var(--text-secondary)' }}>
                     <strong style={{ color: 'var(--primary)' }}>{post.clubId?.name || 'Unknown Club'}</strong> &bull; Posted by {post.authorId?.name}
                   </span>
                   <span>{new Date(post.createdAt).toLocaleDateString()}</span>

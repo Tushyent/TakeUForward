@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import MentionTextarea from '../components/MentionTextarea';
 
@@ -13,9 +13,14 @@ import { Input } from '../components/ui/Input';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 import { ThumbsUp, Send, Bookmark, Flag, MessageSquare } from 'lucide-react';
 import EmptyState from '../components/ui/EmptyState';
+import ReportModal from '../components/ui/ReportModal';
 
 function CommunityPosts() {
   const { id } = useParams();
+  const location = useLocation();
+  const searchParams = React.useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const targetPostId = searchParams.get('post');
+  const targetCommentId = searchParams.get('comment');
   const [community, setCommunity] = useState(null);
   const [posts, setPosts] = useState([]);
   const [newPostContent, setNewPostContent] = useState('');
@@ -24,6 +29,7 @@ function CommunityPosts() {
   const [filters, setFilters] = useState({ sort: 'newest' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [reportingId, setReportingId] = useState(null);
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   const fetchPosts = React.useCallback(async () => {
@@ -67,6 +73,21 @@ function CommunityPosts() {
     fetchBookmarks();
   }, [fetchCommunity, fetchPosts, fetchBookmarks]);
 
+  useEffect(() => {
+    if (loading || posts.length === 0 || (!targetPostId && !targetCommentId)) return;
+
+    const selector = targetCommentId
+      ? `[data-comment-id="${targetCommentId}"]`
+      : `[data-post-id="${targetPostId}"]`;
+
+    window.requestAnimationFrame(() => {
+      const target = document.querySelector(selector);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }, [loading, posts, targetPostId, targetCommentId]);
+
   const handleCreatePost = async (e) => {
     e.preventDefault();
     if (!newPostContent.trim()) return;
@@ -103,17 +124,14 @@ function CommunityPosts() {
     }
   };
 
-  const handleReport = async (postId) => {
-    const reason = prompt('Why are you reporting this post?');
-    if (!reason) return;
-    try {
-      await axiosClient.post(`/posts/${postId}/report`, { reason });
-      fetchPosts();
-      toast.success('Post reported successfully');
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.error || 'Failed to report post');
-    }
+  const handleReport = (postId) => {
+    setReportingId(postId);
+  };
+
+  const submitReport = async (reason) => {
+    await axiosClient.post(`/posts/${reportingId}/report`, { reason });
+    fetchPosts();
+    toast.success('Post reported successfully');
   };
 
   const handleComment = async (postId) => {
@@ -161,22 +179,22 @@ function CommunityPosts() {
     <div className="page-transition">
       
       <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
-        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
+        <Link to="/home" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: 'var(--space-5)', display: 'inline-block' }}>
           ← Back to Home
         </Link>
         <h1>{community.name}</h1>
-        <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>{community.description}</p>
+        <p style={{ marginBottom: 'var(--space-8)', fontSize: 'var(--text-lg)' }}>{community.description}</p>
         
         <SearchFilterBar filters={filters} setFilters={setFilters} />
 
-        <Card style={{ marginTop: '2rem' }}>
+        <Card style={{ marginTop: 'var(--space-8)' }}>
           <form onSubmit={handleCreatePost}>
             <h3 style={{ marginTop: 0 }}>Create a Post</h3>
             <MentionTextarea 
               value={newPostContent}
               onChange={(val) => setNewPostContent(val)}
               placeholder="What's on your mind?"
-              style={{ width: '100%', minHeight: '80px', marginBottom: '15px' }}
+              style={{ width: '100%', minHeight: '80px', marginBottom: 'var(--space-4)' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
@@ -201,13 +219,18 @@ function CommunityPosts() {
           <EmptyState icon={MessageSquare} message="No posts in this community yet." />
         ) : (<div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {posts.map((post) => (
-              <Card key={post._id} style={{ marginBottom: 0 }}>
+              <Card
+                key={post._id}
+                data-post-id={post._id}
+                className={targetPostId === post._id && !targetCommentId ? 'notification-target-highlight' : ''}
+                style={{ marginBottom: 0 }}
+              >
                 <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-primary)' }}>
                   {post.content}
                 </p>
-                <div style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   {post.type === 'announcement' && post.clubId ? (
-                    <Badge variant="info">📢 Announcement by {post.clubId.name}</Badge>
+                    <Badge variant="info">📢 Announcement by {post.clubId?.name}</Badge>
                   ) : (
                     <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       By: {post.isAnonymous ? 'Anonymous' : (
@@ -228,14 +251,14 @@ function CommunityPosts() {
                   <span>• {new Date(post.createdAt).toLocaleString()}</span>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-                  <Button variant="secondary" onClick={() => handleUpvote(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
+                <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+                  <Button variant="secondary" size="sm" onClick={() => handleUpvote(post._id)}>
                     <ThumbsUp size={14} /> Upvote ({post.upvotes?.length || 0})
                   </Button>
-                  <Button variant="secondary" onClick={() => handleBookmark(post._id)} style={{ padding: '6px 12px', fontSize: '13px', color: bookmarkedIds.has(post._id) ? 'var(--primary)' : 'inherit' }}>
+                  <Button variant="secondary" size="sm" onClick={() => handleBookmark(post._id)} style={{ color: bookmarkedIds.has(post._id) ? 'var(--primary)' : 'inherit' }}>
                     <Bookmark size={14} fill={bookmarkedIds.has(post._id) ? "currentColor" : "none"} /> {bookmarkedIds.has(post._id) ? 'Saved' : 'Save'}
                   </Button>
-                  <Button variant="secondary" onClick={() => handleReport(post._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
+                  <Button variant="secondary" size="sm" onClick={() => handleReport(post._id)}>
                     <Flag size={14} /> Report
                   </Button>
                 </div>
@@ -245,9 +268,14 @@ function CommunityPosts() {
                   {post.comments && post.comments.length > 0 ? (
                     <ul style={{ listStyleType: 'none', padding: 0, margin: '0 0 15px 0' }}>
                       {post.comments.map(c => (
-                        <li key={c._id} style={{ marginBottom: '10px', padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px' }}>
+                        <li
+                          key={c._id}
+                          data-comment-id={c._id}
+                          className={targetCommentId === c._id ? 'notification-target-highlight' : ''}
+                          style={{ marginBottom: '10px', padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px' }}
+                        >
                           <p style={{ marginBottom: '5px', color: 'var(--text-primary)' }}>{c.text}</p>
-                          <div style={{ fontSize: '0.8em', color: 'var(--text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ fontSize: '0.8em', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {c.isAnonymous ? 'Anonymous' : (
                               <>
                                 <Link to={`/profile/${c.authorId?.username}`} style={{ color: 'inherit', textDecoration: 'none', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
@@ -299,6 +327,14 @@ function CommunityPosts() {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={!!reportingId}
+        onClose={() => setReportingId(null)}
+        onSubmit={submitReport}
+        title="Report Post"
+        placeholder="Why are you reporting this post?"
+      />
     </div>
   );
 }

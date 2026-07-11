@@ -79,7 +79,7 @@ function ChatThread() {
 
         <div style={{ flex: 1, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: 'var(--space-4)', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-base)' }}>
           {chat.messages.length === 0 ? (
-            <p style={{ textAlign: 'center', color: 'var(--text)', marginTop: '2rem' }}>No messages yet. Say hi!</p>
+            <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginTop: '2rem' }}>No messages yet. Say hi!</p>
           ) : (
             chat.messages.map((msg) => {
               const isMine = msg.senderId._id === myUserId;

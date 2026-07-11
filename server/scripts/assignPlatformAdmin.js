@@ -4,21 +4,23 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import User from '../models/User.js';
 import { logger } from '../utils/logger.js';
+import { SYSTEM_ADMIN_EMAIL, syncUserIdentity } from '../utils/userIdentity.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 const assignPlatformAdmin = async () => {
-  const email = process.argv[2];
+  const email = process.argv[2] || SYSTEM_ADMIN_EMAIL;
 
-  if (!email) {
-    logger.error('Usage: node assignPlatformAdmin.js <email>');
+  if (email.toLowerCase() !== SYSTEM_ADMIN_EMAIL) {
+    logger.error(`Only ${SYSTEM_ADMIN_EMAIL} can be assigned as system admin.`);
     process.exit(1);
   }
 
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev');
+    const dbName = process.env.MONGODB_DB_NAME || (process.env.NODE_ENV === 'production' ? 'takeuforward' : 'takeuforward_dev');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev', { dbName });
     
     const user = await User.findOne({ email });
     if (!user) {
@@ -26,8 +28,8 @@ const assignPlatformAdmin = async () => {
       process.exit(1);
     }
 
-    user.isPlatformAdmin = true;
-    await user.save();
+    const changed = await syncUserIdentity(User, user);
+    if (changed) await user.save();
 
     logger.info(`Successfully granted platform admin rights to ${email}`);
     process.exit(0);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Spinner from '../components/ui/Spinner';
@@ -108,7 +108,7 @@ function MockInterviews() {
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1 style={{ marginTop: 0 }}>Mock Interview & Resume Pairing</h1>
-        <p style={{ color: 'var(--text)', marginBottom: '2rem', fontSize: '1.1em' }}>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '1.1em' }}>
           Connect students with verified alumni for 1:1 interview prep and resume reviews.
         </p>
 
@@ -170,7 +170,7 @@ function MockInterviews() {
                   )}
 
                   <div style={{ marginTop: 'auto', paddingTop: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85em', color: 'var(--text)' }}>
+                    <span style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
                       Posted {new Date(req.createdAt).toLocaleDateString()}
                     </span>
                     {req.status !== 'closed' && (
@@ -215,21 +215,21 @@ function MockInterviews() {
                   
                   <div style={{ marginBottom: '20px' }}>
                     <Badge variant="info" style={{ marginBottom: '10px' }}>{getRequestTypeLabel(req.requestType)}</Badge>
-                    <p style={{ margin: '0 0 5px 0', fontSize: '0.9em', color: 'var(--text)' }}>Requested by:</p>
+                    <p style={{ margin: '0 0 5px 0', fontSize: '0.9em', color: 'var(--text-secondary)' }}>Requested by:</p>
                     <strong style={{ display: 'flex', alignItems: 'center' }}>
                       <Link to={`/profile/${req.requesterId?.username || ''}`} style={{ color: 'inherit', textDecoration: 'none' }}>
                         {req.requesterId?.name || 'Unknown'} (@{req.requesterId?.handle || 'unknown'})
                       </Link>
                     </strong>
                     {req.requesterId?.dept && req.requesterId?.year && (
-                      <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text)' }}>
+                      <p style={{ margin: '5px 0 0 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
                         {req.requesterId.dept} '{req.requesterId.year.toString().slice(-2)}
                       </p>
                     )}
                   </div>
 
                   <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.85em', color: 'var(--text)' }}>
+                    <span style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
                       {new Date(req.createdAt).toLocaleDateString()}
                     </span>
                     

@@ -109,7 +109,7 @@ At most Indian engineering colleges, including SSN, information relevant to a st
 | # | Feature | Description |
 |---|---|---|
 | 1 | **Auth (Google OAuth, domain-restricted + alumni whitelist)** | Students sign in with SSN institutional Google account only; alumni sign in with personal Gmail, permitted only if pre-approved (see §9) |
-| 2 | **Role & Profile System** | Every user has a clear, visible role: Student (tagged year + dept), Alumni (tagged current company, verified badge), Club Admin |
+| 2 | **Role & Profile System** | Every user has a clear, visible role: Student (tagged year + dept), Alumni (tagged current company, verified badge), Club Admin, and one fixed System Admin (`takeuforwardssn@gmail.com`, handle `@admin`) |
 | 3 | **Sub-Community Feed Structure** | Reddit-style sub-communities: dept-wise (`CSE-2028`), batch-wise, and a general campus-wide feed; posts belong to exactly one community |
 | 4 | **Discussion / Q&A Posts** | Post questions/discussions inside a community, tagged by course code where relevant; identified or anonymous, chosen per post |
 | 5 | **Anonymity Engine (posts + safe-mode replies)** | Server-side identity stripping for anonymous posts/comments — never sent to the client at all. Anonymous 1:1 DMs to strangers are **not permitted** (see §13 for the safety reasoning); anonymous replies are allowed only in the context of an existing post thread |
@@ -132,7 +132,7 @@ At most Indian engineering colleges, including SSN, information relevant to a st
 | 17 | **Mock Interview / Resume Review Pairing** | Seniors who've cleared a specific company paired with juniors targeting that same company |
 | 18 | **Real Real-Time Chat (WebSocket/Socket.io upgrade)** | Upgrades the Phase 1 polling-based chat to instant, push-based delivery — see §11 for the full technical explanation of this migration |
 | 19 | **Trending / Hot Sort** | Feed sort option beyond "newest," weighted by recent upvotes/comment velocity |
-| 20 | **Verified Alumni Badge** | Visual badge for confirmed, whitelisted alumni accounts |
+| 20 | **Verified Alumni Badge & Support System** | Verified Alumni Badge: visual badge for confirmed alumni. Support/Feedback System: private channel between users and admins for bugs/feature requests, with admin-visible identity (Option B anonymity model). |
 | 21 | **Web Push Notifications** | Browser push as a lighter-weight alternative to email for logged-in, opted-in users |
 | 22 | **Personal Tracker / Bookmarks** | Save posts, resources, and deadlines to a personal dashboard |
 | 23 | **NPTEL / Elective Suggestion Aggregator** | Crowdsourced senior recommendations on which electives/NPTEL courses are worthwhile |
@@ -281,12 +281,15 @@ Render's free tier spins a service down after roughly 15 minutes without traffic
 // users
 {
   _id, name, email, googleId,
-  role: ["student" | "alumni" | "club_admin"],
+  username: String,       // mention handle without @, derived from email local-part
+  handle: String,         // same value as username for profile/mention lookup
+  role: ["student" | "alumni" | "club_admin" | "platform_admin"],
   year: Number,           // students
   dept: String,           // students
   currentCompany: String, // alumni
   isVerifiedAlumni: Boolean,
   clubId: ObjectId,       // club_admin only
+  isPlatformAdmin: Boolean, // true only for takeuforwardssn@gmail.com
   bio: String,
   isAnonymousDefault: Boolean,
   reputation: Number,
@@ -485,7 +488,7 @@ Formalizes what would otherwise be tag-based filtering into visually distinct sp
 ```
 GET    /api/auth/google              -> redirects to Google OAuth consent
 GET    /api/auth/google/callback     -> verifies domain/whitelist, issues session
-POST   /api/auth/alumni/invite       -> admin/verified-alumni generates invite link
+POST   /api/auth/alumni/invite       -> system admin generates invite link
 GET    /api/auth/logout
 
 GET    /api/communities
@@ -623,6 +626,7 @@ Since this is an ongoing project, phrase in active/building tense rather than cl
 | Interview Experience Repository | 2 |
 | Teammate Finder (Hackathons/Events) | 2 |
 | Club Analytics | 2 |
+| Support / Feedback System | 2 |
 | WhatsApp Notifications | 3 |
 | Lost & Found Board | 3 |
 | Secondhand Marketplace (Razorpay future) | 3 |

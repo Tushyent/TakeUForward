@@ -62,7 +62,7 @@ const ModerationQueue = () => {
     try {
       await axiosClient.post(`/moderation/alumni-requests/${requestId}/${action}`);
       setAlumniRequests(alumniRequests.filter((r) => r._id !== requestId));
-      toast.success(`Request ${action}d successfully`);
+      toast.success(`Request ${action === 'approve' ? 'approved' : 'rejected'} successfully`);
     } catch (err) {
       toast.error(err.response?.data?.error?.message || `Failed to ${action} request`);
     } finally {
@@ -83,13 +83,13 @@ const ModerationQueue = () => {
         
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border)' }}>
           <button 
-            style={{ padding: '10px 20px', background: 'none', border: 'none', borderBottom: activeTab === 'reported' ? '2px solid var(--primary)' : 'none', color: activeTab === 'reported' ? 'var(--primary)' : 'var(--text)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ padding: '10px 20px', background: 'none', border: 'none', borderBottom: activeTab === 'reported' ? '2px solid var(--primary)' : 'none', color: activeTab === 'reported' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
             onClick={() => setActiveTab('reported')}
           >
             Reported Content ({posts.length})
           </button>
           <button 
-            style={{ padding: '10px 20px', background: 'none', border: 'none', borderBottom: activeTab === 'alumni' ? '2px solid var(--primary)' : 'none', color: activeTab === 'alumni' ? 'var(--primary)' : 'var(--text)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            style={{ padding: '10px 20px', background: 'none', border: 'none', borderBottom: activeTab === 'alumni' ? '2px solid var(--primary)' : 'none', color: activeTab === 'alumni' ? 'var(--primary)' : 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
             onClick={() => setActiveTab('alumni')}
           >
             Alumni Requests ({alumniRequests.length})
@@ -155,7 +155,11 @@ const ModerationQueue = () => {
                   </Button>
                   <Button 
                     variant="danger"
-                    onClick={() => handleResolve(post._id, 'remove', post.type)}
+                    onClick={() => {
+                      if (window.confirm('Are you sure you want to permanently delete this item? This action cannot be undone.')) {
+                        handleResolve(post._id, 'remove', post.type);
+                      }
+                    }}
                     disabled={isSubmitting}
                   >
                     Remove (Delete)

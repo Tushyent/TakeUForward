@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import toast from 'react-hot-toast';
 import { SkeletonCard } from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
@@ -46,7 +46,7 @@ const renderGrid = (title, items, icon) => (
     </div>
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
       gap: 'var(--space-4)',
     }}>
       {items.map(({ to, icon: Icon, label, desc, color, glow }) => (
@@ -250,7 +250,7 @@ function Home() {
                   </h1>
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)', flexWrap: 'wrap' }}>
-                  <Badge variant={user?.role === 'alumni' ? 'accent' : user?.role === 'platform_admin' ? 'danger' : 'primary'}>
+                  <Badge variant={user?.isPlatformAdmin ? 'danger' : user?.role === 'alumni' ? 'accent' : 'primary'}>
                     {user?.role?.replace('_', ' ')}
                   </Badge>
                   {user?.dept && <Badge variant="secondary">{user.dept}</Badge>}
@@ -309,7 +309,7 @@ function Home() {
         )}
 
         {/* ── ALUMNI INVITE (platform admin only) ── */}
-        {user?.role === 'platform_admin' && (
+        {user?.isPlatformAdmin && (
           <Card style={{ marginBottom: 'var(--space-6)' }}>
             <h3 style={{ fontSize: 'var(--text-base)', marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Link2 size={16} color="var(--primary)" />

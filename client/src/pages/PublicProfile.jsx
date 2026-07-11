@@ -52,7 +52,7 @@ function PublicProfile() {
                 {profile.name}
                 {profile.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={profile.isVerifiedAlumni} />}
               </h1>
-              <p style={{ color: 'var(--text)', fontSize: '1.1em', margin: '0 0 15px 0' }}>@{profile.username}</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '1.1em', margin: '0 0 15px 0' }}>@{profile.username}</p>
             </div>
             {isMe && (
               <Link to="/settings/profile" style={{ textDecoration: 'none' }}>

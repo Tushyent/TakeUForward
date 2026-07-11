@@ -18,7 +18,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 blob-report/
+.playwright-mcp/
 *.log
+tmp-*.log
 
 # OS & Editor
 .DS_Store

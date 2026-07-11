@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import ReportModal from '../components/ui/ReportModal';
 import { Search, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
@@ -18,6 +19,7 @@ function Electives() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reportingId, setReportingId] = useState(null);
 
   // New elective state
   const [courseCode, setCourseCode] = useState('');
@@ -83,15 +85,13 @@ function Electives() {
     }
   };
 
-  const handleReport = async (id) => {
-    const reason = prompt('Why are you reporting this suggestion?');
-    if (!reason) return;
-    try {
-      await axiosClient.post(`/elective-suggestions/${id}/report`, { reason });
-      toast.success('Suggestion reported successfully');
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to report suggestion');
-    }
+  const handleReport = (id) => {
+    setReportingId(id);
+  };
+
+  const submitReport = async (reason) => {
+    await axiosClient.post(`/elective-suggestions/${reportingId}/report`, { reason });
+    toast.success('Suggestion reported successfully');
   };
 
   const handleUpvote = async (id) => {
@@ -222,7 +222,7 @@ function Electives() {
                   {elective.comment}
                 </p>
                 
-                <div style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     By: {elective.authorId ? (
                       <>
@@ -249,6 +249,14 @@ function Electives() {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={!!reportingId}
+        onClose={() => setReportingId(null)}
+        onSubmit={submitReport}
+        title="Report Suggestion"
+        placeholder="Why are you reporting this suggestion?"
+      />
     </div>
   );
 }

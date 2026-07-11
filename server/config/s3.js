@@ -85,3 +85,23 @@ export const validateObjectSize = async (key, maxSizeInBytes) => {
     throw err;
   }
 };
+
+export const getObjectKeyFromPublicUrl = (fileUrl) => {
+  if (!fileUrl) return null;
+  const keyMatch = String(fileUrl).split('amazonaws.com/');
+  return keyMatch.length === 2 ? decodeURIComponent(keyMatch[1]) : null;
+};
+
+export const deleteObjectByKey = async (key) => {
+  const bucketName = process.env.AWS_BUCKET_NAME;
+  if (!bucketName) throw new Error('AWS_BUCKET_NAME is missing');
+  if (!key) return;
+
+  await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: key }));
+};
+
+export const deletePublicObjectByUrl = async (fileUrl) => {
+  const key = getObjectKeyFromPublicUrl(fileUrl);
+  if (!key) return;
+  await deleteObjectByKey(key);
+};

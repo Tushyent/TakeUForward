@@ -2,112 +2,34 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
-import {
-  Home, BookOpen, Users, Megaphone, GraduationCap, Briefcase,
-  MessageSquare, FileText, UserCheck, Lightbulb, Map,
-  Package, ShoppingBag, Star, Bookmark, LogOut, Zap, Menu, X, Info, Cloud, Settings
-} from 'lucide-react';
+import { LogOut, Zap, Menu, X, Settings } from 'lucide-react';
+import { NAV_PRIMARY, NAV_CAREERS, NAV_COMMUNITY, ALL_NAV_ITEMS } from '../constants/navigation';
 
-/* ---------------------------------------------------------------
-   Navigation structure — split into PRIMARY and SECONDARY groups
-   so the mobile drawer can render them with section labels.
-   --------------------------------------------------------------- */
-const NAV_PRIMARY = [
-  { to: '/home',                icon: Home,           label: 'Home' },
-  { to: '/about',               icon: Info,           label: 'About TUF' },
-  { to: '/resources',           icon: BookOpen,        label: 'Resources' },
-  { to: '/clubs',               icon: Users,           label: 'Clubs' },
-  { to: '/announcements',       icon: Megaphone,       label: 'Announcements' },
-  { to: '/drive',               icon: Cloud,           label: 'My Drive' },
-];
-
-const NAV_CAREERS = [
-  { to: '/alumni',              icon: GraduationCap,   label: 'Alumni' },
-  { to: '/referrals',           icon: Briefcase,       label: 'Referrals' },
-  { to: '/mock-interviews',     icon: MessageSquare,   label: 'Mock Interviews' },
-  { to: '/interview-experiences', icon: FileText,      label: 'Experiences' },
-  { to: '/career-roadmaps',     icon: Map,             label: 'Roadmaps' },
-  { to: '/reviews',             icon: Star,            label: 'Reviews' },
-  { to: '/electives',           icon: Lightbulb,       label: 'Electives' },
-];
-
-const NAV_COMMUNITY = [
-  { to: '/team-finder',         icon: UserCheck,       label: 'Team Finder' },
-  { to: '/lost-found',          icon: Package,         label: 'Lost & Found' },
-  { to: '/marketplace',         icon: ShoppingBag,     label: 'Marketplace' },
-  { to: '/bookmarks',           icon: Bookmark,        label: 'Saved' },
-  { to: '/chats',               icon: MessageSquare,   label: 'Inbox' },
-];
-
-/* All items for the desktop scrollable bar */
-const ALL_NAV_ITEMS = [...NAV_PRIMARY, ...NAV_CAREERS, ...NAV_COMMUNITY];
-
-/* ---------------------------------------------------------------
-   NavLink — single item for desktop bar or drawer
-   --------------------------------------------------------------- */
-const NavItem = ({ to, icon: Icon, label, isActive, drawer = false }) => {
-  if (drawer) {
-    return (
-      <Link to={to} className={isActive ? 'active' : ''}>
-        <Icon size={16} />
-        {label}
-      </Link>
-    );
-  }
-
+const NavItem = ({ to, icon: Icon, label, isActive }) => {
   return (
     <Link
       to={to}
       title={label}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 5,
-        padding: '6px 10px',
-        borderRadius: 'var(--radius-sm)',
-        color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-        background: isActive ? 'var(--bg-elevated)' : 'transparent',
-        fontSize: 'var(--text-xs)',
-        fontWeight: isActive ? 600 : 500,
-        whiteSpace: 'nowrap',
-        transition: 'background var(--transition-fast), color var(--transition-fast)',
-        textDecoration: 'none',
-        position: 'relative',
-      }}
-      onMouseEnter={e => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'var(--bg-elevated)';
-          e.currentTarget.style.color = 'var(--text-primary)';
-        }
-      }}
-      onMouseLeave={e => {
-        if (!isActive) {
-          e.currentTarget.style.background = 'transparent';
-          e.currentTarget.style.color = 'var(--text-muted)';
-        }
-      }}
+      className={`nav-desktop-item ${isActive ? 'active' : ''}`}
     >
       <Icon size={14} />
       {label}
-      {isActive && (
-        <span style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 10,
-          right: 10,
-          height: 2,
-          background: 'var(--primary)',
-          borderRadius: 'var(--radius-full)',
-          boxShadow: '0 0 6px var(--primary)',
-        }} />
-      )}
+      {isActive && <span className="nav-active-bar" />}
     </Link>
   );
 };
 
-/* ---------------------------------------------------------------
-   Navbar
-   --------------------------------------------------------------- */
+const DrawerItem = ({ to, icon: Icon, label, isActive, onClick }) => (
+  <Link
+    to={to}
+    onClick={onClick}
+    className={`nav-drawer-item ${isActive ? 'active' : ''}`}
+  >
+    <Icon size={16} />
+    {label}
+  </Link>
+);
+
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -122,131 +44,40 @@ const Navbar = () => {
 
   const closeDrawer = () => setDrawerOpen(false);
 
+  const drawerSections = [
+    { label: 'Main', items: NAV_PRIMARY },
+    { label: 'Careers & Academics', items: NAV_CAREERS },
+    { label: 'Campus Life', items: NAV_COMMUNITY },
+  ];
+
   return (
     <>
-      {/* ── NAVBAR BAR ── */}
-      <nav style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '0 var(--space-5)',
-        height: 58,
-        background: 'var(--glass-bg)',
-        backdropFilter: 'blur(var(--glass-blur))',
-        WebkitBackdropFilter: 'blur(var(--glass-blur))',
-        borderBottom: '1px solid var(--border)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        flexShrink: 0,
-        width: '100%',
-      }}>
-
-        {/* Brand */}
-        <Link to="/home" style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 8,
-          textDecoration: 'none',
-          flexShrink: 0,
-        }}>
-          <div style={{
-            width: 30,
-            height: 30,
-            borderRadius: 'var(--radius-sm)',
-            background: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 0 12px var(--primary-glow)',
-          }}>
+      <nav className="navbar">
+        <Link to="/home" className="navbar-brand">
+          <div className="navbar-logo">
             <Zap size={16} color="white" fill="white" />
           </div>
-          <span style={{
-            fontSize: 'var(--text-sm)',
-            fontWeight: 700,
-            color: 'var(--text-primary)',
-            letterSpacing: '-0.03em',
-          }}>
-            TakeUForward
-          </span>
+          <div className="navbar-brand-text">
+            <span className="navbar-brand-name">TakeUForward</span>
+            {/* <span className="navbar-brand-sub">SSN College of Engineering</span> */}
+          </div>
         </Link>
 
-        {/* Desktop nav links (hidden below 900px via CSS class) */}
         <div className="nav-desktop-links">
           {ALL_NAV_ITEMS.map(({ to, icon, label }) => (
             <NavItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} />
           ))}
         </div>
 
-        {/* Right cluster */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexShrink: 0 }}>
+        <div className="navbar-actions">
           <NotificationsDropdown />
-          
-          <Link
-            to="/settings/profile"
-            title="Profile Settings"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              color: 'var(--text-muted)',
-              padding: '6px',
-              borderRadius: 'var(--radius-sm)',
-              textDecoration: 'none',
-              transition: 'background var(--transition-fast), color var(--transition-fast)',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'var(--bg-elevated)';
-              e.currentTarget.style.color = 'var(--text-primary)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--text-muted)';
-            }}
-          >
+          <Link to="/settings/profile" title="Profile Settings" className="navbar-settings-btn">
             <Settings size={16} />
           </Link>
-
-          <button
-            onClick={handleLogout}
-            title="Logout"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              background: 'var(--bg-elevated)',
-              color: 'var(--text-muted)',
-              border: '1px solid var(--border)',
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              fontSize: 'var(--text-xs)',
-              fontWeight: 500,
-              fontFamily: 'inherit',
-              transition: 'background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast)',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'var(--danger-bg)';
-              e.currentTarget.style.color = 'var(--danger)';
-              e.currentTarget.style.borderColor = 'var(--danger)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'var(--bg-elevated)';
-              e.currentTarget.style.color = 'var(--text-muted)';
-              e.currentTarget.style.borderColor = 'var(--border)';
-            }}
-          >
+          <button onClick={handleLogout} title="Logout" className="navbar-logout-btn">
             <LogOut size={13} />
-            <span className="nav-desktop-links" style={{
-              display: 'inline',
-              flex: 'unset',
-              overflow: 'visible',
-              margin: 0,
-            }}>Logout</span>
+            <span className="nav-desktop-links logout-label">Logout</span>
           </button>
-
-          {/* Hamburger (visible below 900px) */}
           <button
             className="hamburger-btn"
             onClick={() => setDrawerOpen(o => !o)}
@@ -258,97 +89,47 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* ── MOBILE DRAWER OVERLAY ── */}
       <div
         className={`nav-overlay ${drawerOpen ? 'visible' : ''}`}
         onClick={closeDrawer}
         aria-hidden="true"
       />
 
-      {/* ── MOBILE DRAWER ── */}
       <div className={`nav-drawer ${drawerOpen ? 'open' : ''}`} role="dialog" aria-label="Navigation menu">
-        {/* Drawer header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 26,
-              height: 26,
-              borderRadius: 'var(--radius-sm)',
-              background: 'var(--primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-              <Zap size={13} color="white" fill="white" />
+        <div className="nav-drawer-header">
+          <div className="navbar-brand">
+            <div className="navbar-logo">
+              <Zap size={14} color="white" fill="white" />
             </div>
-            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-              TakeUForward
-            </span>
+            <div className="navbar-brand-text">
+              <span className="navbar-brand-name">TakeUForward</span>
+              <span className="navbar-brand-sub">SSN College of Engineering</span>
+            </div>
           </div>
-          <button
-            onClick={closeDrawer}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--text-muted)',
-              display: 'flex',
-              padding: 4,
-            }}
-            aria-label="Close menu"
-          >
+          <button onClick={closeDrawer} className="nav-drawer-close" aria-label="Close menu">
             <X size={18} />
           </button>
         </div>
 
-        {/* Primary */}
-        <span className="nav-section-label" style={{ marginTop: 0, borderTop: 'none', paddingTop: 0 }}>Main</span>
-        {NAV_PRIMARY.map(({ to, icon, label }) => (
-          <NavItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} drawer onClick={closeDrawer} />
+        {drawerSections.map(({ label, items }) => (
+          <div key={label}>
+            <span className="nav-section-label">{label}</span>
+            {items.map(({ to, icon, label: itemLabel }) => (
+              <DrawerItem key={to} to={to} icon={icon} label={itemLabel} isActive={isActive(to)} onClick={closeDrawer} />
+            ))}
+          </div>
         ))}
 
-        <span className="nav-section-label">Careers & Academics</span>
-        {NAV_CAREERS.map(({ to, icon, label }) => (
-          <NavItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} drawer onClick={closeDrawer} />
-        ))}
-
-        <span className="nav-section-label">Campus Life</span>
-        {NAV_COMMUNITY.map(({ to, icon, label }) => (
-          <NavItem key={to} to={to} icon={icon} label={label} isActive={isActive(to)} drawer onClick={closeDrawer} />
-        ))}
-
-        {/* Account in drawer */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 var(--space-4)' }}>
+        <div className="nav-drawer-account">
           <Link
             to="/settings/profile"
             onClick={closeDrawer}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-3)',
-              padding: '8px 12px',
-              marginLeft: '-12px',
-              borderRadius: 'var(--radius-sm)',
-              color: 'var(--text-secondary)',
-              textDecoration: 'none',
-              fontSize: 'var(--text-sm)',
-              fontWeight: 500,
-              transition: 'background var(--transition-fast), color var(--transition-fast)',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'var(--bg-input)';
-              e.currentTarget.style.color = 'var(--text-primary)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--text-secondary)';
-            }}
+            className="nav-drawer-item"
           >
             <Settings size={16} />
             Profile Settings
           </Link>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-1)' }}>
+          <div className="nav-drawer-account-actions">
             <NotificationsDropdown placement="bottom-right" />
             <button
               title="Logout"
@@ -358,20 +139,7 @@ const Navbar = () => {
                 closeDrawer();
                 handleLogout();
               }}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '8px',
-                cursor: 'pointer',
-                color: 'var(--danger)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 'var(--radius-sm)',
-                transition: 'background var(--transition-fast)',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'var(--danger-bg)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              className="nav-drawer-logout"
             >
               <LogOut size={16} />
             </button>

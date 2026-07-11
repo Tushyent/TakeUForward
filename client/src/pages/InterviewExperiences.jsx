@@ -9,6 +9,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import ReportModal from '../components/ui/ReportModal';
 import { Search, AlertCircle } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 
@@ -18,6 +19,7 @@ function InterviewExperiences() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reportingId, setReportingId] = useState(null);
 
   // New experience state
   const [company, setCompany] = useState('');
@@ -108,22 +110,20 @@ function InterviewExperiences() {
     }
   };
 
-  const handleReport = async (expId) => {
-    const reason = prompt('Why are you reporting this experience?');
-    if (!reason) return;
-    try {
-      await axiosClient.post(`/interview-experiences/${expId}/report`, { reason });
-      toast.success('Experience reported successfully');
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to report experience');
-    }
+  const handleReport = (expId) => {
+    setReportingId(expId);
+  };
+
+  const submitReport = async (reason) => {
+    await axiosClient.post(`/interview-experiences/${reportingId}/report`, { reason });
+    toast.success('Experience reported successfully');
   };
 
   const handleUpvote = async (expId) => {
     try {
       const { data } = await axiosClient.post(`/interview-experiences/${expId}/upvote`);
-      setExperiences(experiences.map(exp => 
-        exp._id === expId ? { ...exp, upvotes: Array(data.upvoteCount).fill('placeholder') } : exp
+      setExperiences(experiences.map(exp =>
+        exp._id === expId ? { ...exp, upvotesCount: data.upvoteCount } : exp
       ));
     } catch (err) {
       console.error(err);
@@ -135,7 +135,7 @@ function InterviewExperiences() {
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <h1>Interview Experiences</h1>
-        <p style={{ marginBottom: '2rem', fontSize: '1.1em' }}>Read and share detailed interview experiences to help your peers prepare.</p>
+        <p style={{ marginBottom: 'var(--space-8)', fontSize: 'var(--text-lg)' }}>Read and share detailed interview experiences to help your peers prepare.</p>
         
         <SearchFilterBar 
           filters={filters} 
@@ -148,10 +148,10 @@ function InterviewExperiences() {
           showRole={true}
         />
 
-        <Card style={{ marginTop: '2rem' }}>
+        <Card style={{ marginTop: 'var(--space-8)' }}>
           <form onSubmit={handleCreateExperience}>
             <h3 style={{ marginTop: 0 }}>Share Your Experience</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '15px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
               <Input 
                 placeholder="Company (e.g. Google)" 
                 value={company} 
@@ -179,9 +179,9 @@ function InterviewExperiences() {
               </Select>
             </div>
             
-            <h4 style={{ marginBottom: '10px' }}>Interview Rounds</h4>
+            <h4 style={{ marginBottom: 'var(--space-3)' }}>Interview Rounds</h4>
             {rounds.map((round, index) => (
-              <div key={`round-${index}`} style={{ marginBottom: '15px', padding: '15px', border: '1px dashed var(--border)', borderRadius: '6px' }}>
+              <div key={`round-${index}`} style={{ marginBottom: 'var(--space-4)', padding: 'var(--space-4)', border: '1px dashed var(--border)', borderRadius: 'var(--radius-sm)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <strong>Round {index + 1}</strong>
                   {rounds.length > 1 && (
@@ -267,14 +267,14 @@ function InterviewExperiences() {
                         <strong style={{ color: 'var(--text-primary)' }}>Round {idx + 1}: {round.roundName}</strong>
                         <Badge variant="secondary">Difficulty: {round.difficulty}/5</Badge>
                       </div>
-                      <p style={{ margin: 0, color: 'var(--text)', whiteSpace: 'pre-wrap' }}>
+                      <p style={{ margin: 0, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>
                         {round.description}
                       </p>
                     </div>
                   ))}
                 </div>
                 
-                <div style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '15px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     By: {exp.isAnonymous ? 'Anonymous' : (
                       <>
@@ -293,11 +293,11 @@ function InterviewExperiences() {
                   <span>• {new Date(exp.createdAt).toLocaleString()}</span>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <Button variant="secondary" onClick={() => handleUpvote(exp._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
-                    ▲ Upvote ({exp.upvotes?.length || 0})
+                <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+                  <Button variant="secondary" size="sm" onClick={() => handleUpvote(exp._id)}>
+                    ▲ Upvote ({exp.upvotesCount || 0})
                   </Button>
-                  <Button variant="secondary" onClick={() => handleReport(exp._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
+                  <Button variant="secondary" size="sm" onClick={() => handleReport(exp._id)}>
                     ⚑ Report
                   </Button>
                 </div>
@@ -306,6 +306,14 @@ function InterviewExperiences() {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={!!reportingId}
+        onClose={() => setReportingId(null)}
+        onSubmit={submitReport}
+        title="Report Experience"
+        placeholder="Why are you reporting this experience?"
+      />
     </div>
   );
 }

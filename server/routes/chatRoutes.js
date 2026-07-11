@@ -115,7 +115,11 @@ router.post('/:userId/message', chatCreationLimiter, async (req, res, next) => {
       type: 'message',
       refId: req.user._id,
       isAnonymousSender: false,
-      content: text
+      content: text,
+      targetPath: `/chat/${req.user._id}`,
+      actorName: req.user.handle ? `@${req.user.handle}` : req.user.name,
+      contextTitle: '1:1 chat',
+      contextType: 'chat message'
     });
 
     // Populate just the new message sender info to return

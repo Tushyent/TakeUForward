@@ -248,9 +248,12 @@ app) and follow that exact pattern — per AGENTS.md rule 5.
 - Alumni whitelist/invite-token verification happens server-side against
   the `approvedAlumniEmails` collection — never trust a client-asserted
   "I am alumni" claim.
-- Role checks (`student` / `alumni` / `club_admin` / `isPlatformAdmin`)
-  must be read from the authenticated session/user document server-side,
-  never from a client-supplied role field in the request body.
+- Role checks (`student` / `alumni` / `club_admin` / fixed `platform_admin`)
+  must treat `takeuforwardssn@gmail.com` as the only system admin. Use
+  `requireSystemAdmin` for global admin actions; do not trust `role:
+  platform_admin` by itself. All role and admin checks must be read from
+  the authenticated session/user document server-side, never from a
+  client-supplied role field in the request body.
 - Club-admin scoping is per-`clubId`, not a blanket "is club admin"
   check — verify every club-admin-gated route checks the specific `clubId`
   the admin is authorized for, not just the boolean role flag (this

@@ -33,10 +33,10 @@ describe('Production Safety Tests', () => {
       const hasTestSession = routes.some(r => r.path === '/test-session' && r.methods.post);
       
       if (hasTestSession) {
-        console.error('FAIL: /test-session route is registered in production!');
+        process.stderr.write('FAIL: /test-session route is registered in production!\\n');
         process.exit(1);
       } else {
-        console.log('PASS: Route absent');
+        process.stdout.write('PASS: Route absent\\n');
         process.exit(0);
       }
     `;
@@ -71,10 +71,10 @@ describe('Production Safety Tests', () => {
       const hasTestSession = routes.some(r => r.path === '/test-session' && r.methods.post);
       
       if (hasTestSession) {
-        console.error('FAIL: /test-session route is registered!');
+        process.stderr.write('FAIL: /test-session route is registered!\\n');
         process.exit(1);
       } else {
-        console.log('PASS: Route absent');
+        process.stdout.write('PASS: Route absent\\n');
         process.exit(0);
       }
     `;

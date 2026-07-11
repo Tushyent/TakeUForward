@@ -20,7 +20,7 @@ function About() {
           }}>
             <Zap size={32} color="white" fill="white" />
           </div>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: 'var(--space-2)' }}>About TakeUForward</h1>
+          <h1 style={{ marginBottom: 'var(--space-2)' }}>About TakeUForward</h1>
           <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
             The single place a student needs to survive and thrive in college — connecting juniors with seniors and alumni for mentorship, and centralizing academic and placement knowledge.
           </p>

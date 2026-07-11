@@ -2,7 +2,9 @@ import express from 'express';
 import Club from '../models/Club.js';
 import Post from '../models/Post.js';
 import Community from '../models/Community.js';
+import User from '../models/User.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { createNotification } from '../services/notificationService.js';
 
 const router = express.Router();
 
@@ -49,7 +51,16 @@ router.post('/:id/posts', postCreationLimiter, async (req, res, next) => {
 
   try {
     const clubId = req.params.id;
-    const { content, title } = req.body;
+    const { content, title, category } = req.body;
+    const allowedCategories = ['event', 'placement', 'hackathon', 'workshop'];
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ error: { message: 'Announcement content is required' } });
+    }
+
+    if (category && !allowedCategories.includes(category)) {
+      return res.status(400).json({ error: { message: 'Invalid announcement category' } });
+    }
 
     const club = await Club.findById(clubId);
     if (!club) {
@@ -72,8 +83,37 @@ router.post('/:id/posts', postCreationLimiter, async (req, res, next) => {
       communityId: generalCommunity._id,
       clubId: club._id,
       type: 'announcement',
+      ...(category && { category }),
       content: title ? `**${title}**\n\n${content}` : content, // Optional title combined with content
     });
+
+    const mentionRegex = /@([\w.-]+)/g;
+    const matches = [...post.content.matchAll(mentionRegex)].map(m => m[1]);
+    if (matches.length > 0) {
+      const mentionedUsers = await User.find({ $or: [{ handle: { $in: matches } }, { username: { $in: matches } }] });
+      const mentionedIds = mentionedUsers.map(user => user._id);
+
+      if (mentionedIds.length > 0) {
+        post.mentions = mentionedIds;
+        await post.save();
+
+        for (const userId of mentionedIds) {
+          if (userId.toString() !== req.user._id.toString()) {
+            await createNotification({
+              userId,
+              type: 'mention',
+              refId: post._id,
+              isAnonymousSender: false,
+              content: post.content,
+              targetPath: `/community/${generalCommunity._id}?post=${post._id}`,
+              actorName: req.user.handle ? `@${req.user.handle}` : req.user.name,
+              contextTitle: club.name,
+              contextType: 'club announcement'
+            });
+          }
+        }
+      }
+    }
 
     res.status(201).json(post);
   } catch (err) {

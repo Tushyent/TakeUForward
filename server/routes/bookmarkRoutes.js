@@ -23,8 +23,8 @@ router.get('/', async (req, res, next) => {
       .populate({
         path: 'itemId',
         populate: [
-          { path: 'authorId', select: 'name dept role handle isVerifiedAlumni username' },
-          { path: 'clubId', select: 'name' }
+          { path: 'authorId', select: 'name dept role handle isVerifiedAlumni username', strictPopulate: false },
+          { path: 'clubId', select: 'name', strictPopulate: false }
         ]
       })
       .sort({ createdAt: -1 })

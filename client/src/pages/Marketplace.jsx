@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import ReportModal from '../components/ui/ReportModal';
 import Badge from '../components/ui/Badge';
 import { Store, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -15,6 +15,7 @@ function Marketplace() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reportingId, setReportingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   
   // Filters
@@ -22,6 +23,7 @@ function Marketplace() {
   const [filterStatus, setFilterStatus] = useState('available');
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   
   // Form state
   const [showForm, setShowForm] = useState(false);
@@ -37,6 +39,7 @@ function Marketplace() {
 
   const fetchItems = async (isNewPage = false) => {
     try {
+      if (isNewPage) setLoadingMore(true);
       const params = new URLSearchParams({
         page: isNewPage ? page : 1,
         limit: 12
@@ -60,6 +63,7 @@ function Marketplace() {
       toast.error('Failed to load items');
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -96,15 +100,13 @@ function Marketplace() {
     }
   };
 
-  const handleReport = async (id) => {
-    const reason = window.prompt('Please describe why you are reporting this item:');
-    if (!reason || !reason.trim()) return;
-    try {
-      await axiosClient.post(`/marketplace/${id}/report`, { reason });
-      toast.success('Item reported successfully');
-    } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to report item');
-    }
+  const handleReport = (id) => {
+    setReportingId(id);
+  };
+
+  const submitReport = async (reason) => {
+    await axiosClient.post(`/marketplace/${reportingId}/report`, { reason });
+    toast.success('Item reported successfully');
   };
 
   const handleMarkSold = async (id) => {
@@ -235,19 +237,22 @@ function Marketplace() {
                   <Badge variant="secondary">Condition: {item.condition.replace('_', ' ')}</Badge>
                 </div>
                 
-                <p style={{ color: 'var(--text)', flexGrow: 1, whiteSpace: 'pre-wrap', marginBottom: '15px' }}>
+                <p style={{ color: 'var(--text-secondary)', flexGrow: 1, whiteSpace: 'pre-wrap', marginBottom: '15px' }}>
                   {item.description}
                 </p>
 
-                <p style={{ margin: '0 0 15px 0', fontSize: '0.85em', color: 'var(--text)' }}>
+                <p style={{ margin: '0 0 15px 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
                   Posted by {item.sellerId?.name} • {new Date(item.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </p>
                 
                 <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
                   {currentUser && item.sellerId && currentUser._id !== item.sellerId._id && item.status === 'available' && (
-                    <Link to={`/chat/${item.sellerId._id}`} style={{ flex: 1, textDecoration: 'none' }}>
-                      <Button style={{ width: '100%' }}>Message Seller</Button>
-                    </Link>
+                    <Button
+                      style={{ flex: 1 }}
+                      onClick={() => { window.location.href = `/chat/${item.sellerId._id}`; }}
+                    >
+                      Message Seller
+                    </Button>
                   )}
                   
                   {currentUser && item.sellerId && currentUser._id === item.sellerId._id && item.status === 'available' && (
@@ -269,12 +274,20 @@ function Marketplace() {
         
         {hasMore && !loading && items.length > 0 && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <Button variant="secondary" onClick={() => setPage(p => p + 1)}>
-              Load More
+            <Button variant="secondary" onClick={() => setPage(p => p + 1)} disabled={loadingMore}>
+              {loadingMore ? 'Loading...' : 'Load More'}
             </Button>
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={!!reportingId}
+        onClose={() => setReportingId(null)}
+        onSubmit={submitReport}
+        title="Report Item"
+        placeholder="Please describe why you are reporting this item:"
+      />
     </div>
   );
 }

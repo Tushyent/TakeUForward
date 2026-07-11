@@ -57,11 +57,11 @@ function Chats() {
                       {otherUser?.isVerifiedAlumni && <VerifiedAlumniBadge isVerifiedAlumni={otherUser.isVerifiedAlumni} />}
                     </strong>
                     {lastMsg ? (
-                      <p style={{ margin: '8px 0 0 0', color: 'var(--text)', fontSize: '0.95em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <p style={{ margin: '8px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.95em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {lastMsg.text}
                       </p>
                     ) : (
-                      <p style={{ margin: '8px 0 0 0', color: 'var(--text)', fontSize: '0.9em', fontStyle: 'italic' }}>
+                      <p style={{ margin: '8px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9em', fontStyle: 'italic' }}>
                         No messages yet
                       </p>
                     )}

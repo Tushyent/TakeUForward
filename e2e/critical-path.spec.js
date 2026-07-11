@@ -18,7 +18,8 @@
  *      make the test non-deterministic
  *
  * This test uses a test-only session-seeding endpoint (POST /api/auth/test-session)
- * that is only mounted on the backend when PLAYWRIGHT_TEST=true. That endpoint:
+ * that is only mounted on the backend when ALLOW_TEST_SESSION=true and
+ * NODE_ENV !== 'production'. That endpoint:
  *   - Accepts an email address
  *   - Finds or creates a User in the DB with that email
  *   - Calls req.login() to establish a real Passport session (identical to
@@ -27,15 +28,16 @@
  *
  * This is the conventional approach used in production-grade test suites
  * (Next.js, Remix, and major OSS projects) for bypassing provider OAuth in E2E.
- * The endpoint is 100% unreachable in production because PLAYWRIGHT_TEST is
- * never set on Render.
+ * The endpoint is 100% unreachable in production because NODE_ENV=production
+ * structurally prevents route registration.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
 import { test, expect } from '@playwright/test';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = process.env.PLAYWRIGHT_API_BASE || 'http://127.0.0.1:5000/api';
+const API_HOST = new URL(API_BASE).hostname;
 
 /**
  * Seeds an authenticated session for the given email address by calling
@@ -50,7 +52,7 @@ async function seedSession(email) {
   // Extract the Set-Cookie header to inject into the browser context
   const setCookieHeader = response.headers['set-cookie'];
   if (!setCookieHeader) {
-    throw new Error('No session cookie returned from test-session endpoint. Is PLAYWRIGHT_TEST=true set on the server?');
+    throw new Error('No session cookie returned from test-session endpoint. Is ALLOW_TEST_SESSION=true set on the server?');
   }
   return setCookieHeader;
 }
@@ -67,7 +69,7 @@ async function injectCookies(page, setCookieHeaders) {
     return {
       name: name.trim(),
       value: value.trim(),
-      domain: 'localhost',
+      domain: API_HOST,
       path: '/',
       httpOnly: cookieStr.toLowerCase().includes('httponly'),
       secure: cookieStr.toLowerCase().includes('secure'),
@@ -84,7 +86,7 @@ test.describe('Critical Path E2E', () => {
     try {
       await axios.get(`${API_BASE}/health`);
     } catch {
-      throw new Error('Backend server not running at http://localhost:5000. Start with: PLAYWRIGHT_TEST=true npm run dev');
+      throw new Error(`Backend server not running at ${API_BASE}. Start the backend with ALLOW_TEST_SESSION=true npm run dev`);
     }
   });
 
@@ -92,7 +94,6 @@ test.describe('Critical Path E2E', () => {
     // ── STEP 1: Login as User A via test session seeding ─────────────────────
     const userAEmail = 'playwright_user_a@ssn.edu.in';
     const setCookieHeaders = await seedSession(userAEmail);
-    await page.goto('/');
     await injectCookies(page, setCookieHeaders);
 
     // Navigate to home page — should be authenticated now
@@ -137,7 +138,6 @@ test.describe('Critical Path E2E', () => {
 
     // Seed User B session
     const setCookieHeadersB = await seedSession(userBEmail);
-    await userBPage.goto('/');
     await injectCookies(userBPage, setCookieHeadersB);
     // Navigate directly to the community feed where the post was created
     await userBPage.goto(`/community/${targetCommunity._id}`);
@@ -155,7 +155,11 @@ test.describe('Critical Path E2E', () => {
     if (await commentInput.count() > 0) {
       await commentInput.fill('I recommend Striver\'s SDE Sheet!');
       const commentSubmit = postCardB.locator('button', { hasText: /Reply|Post|Comment|Send/i }).first();
-      await commentSubmit.click();
+      await Promise.all([
+        userBPage.waitForResponse(response => response.url().includes('/posts/') && response.url().includes('/comment') && response.request().method() === 'POST'),
+        commentSubmit.click()
+      ]);
+      await expect(postCardB.getByText('I recommend Striver\'s SDE Sheet!')).toBeVisible({ timeout: 10000 });
     }
 
     await userBContext.close();

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import { useParams, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import toast from 'react-hot-toast';
@@ -36,7 +36,7 @@ function ClubPage() {
       setClub(clubRes.data.club);
       setAnnouncements(clubRes.data.announcements);
 
-      const isClubAdmin = clubRes.data.club.adminIds.includes(user?._id) || user?.clubId === clubRes.data.club._id;
+      const isClubAdmin = clubRes.data.club.adminIds?.includes(user?._id) || user?.clubId === clubRes.data.club._id;
 
       if (isClubAdmin) {
         try {
@@ -90,25 +90,25 @@ function ClubPage() {
   if (loading) return <div><Spinner text="Loading club details..." /></div>;
   if (error || !club) return <div><EmptyState icon={AlertCircle} title="Error" message={error || 'Club not found'} action={{ label: 'Retry', onClick: fetchData }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
 
-  const isAdmin = club.adminIds.includes(user?._id) || user?.clubId === club._id;
+  const isAdmin = club.adminIds?.includes(user?._id) || user?.clubId === club._id;
 
   return (
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
-        <Link to="/clubs" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: '20px', display: 'inline-block' }}>
+        <Link to="/clubs" style={{ textDecoration: 'none', color: 'var(--text-secondary)', marginBottom: 'var(--space-5)', display: 'inline-block' }}>
           ← Back to Clubs
         </Link>
 
         <Card style={{ backgroundColor: 'var(--bg-surface)' }}>
           <h1 style={{ marginTop: 0 }}>{club.name}</h1>
-          <p style={{ fontSize: '1.1rem', marginBottom: isAdmin ? '15px' : 0 }}>{club.description}</p>
+          <p style={{ fontSize: 'var(--text-lg)', marginBottom: isAdmin ? 'var(--space-4)' : 0 }}>{club.description}</p>
           {isAdmin && (
             <Badge variant="primary">You are a Club Admin</Badge>
           )}
         </Card>
 
         {isAdmin && (
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-5)' }}>
             <Button 
               variant={activeTab === 'announcements' ? 'primary' : 'secondary'} 
               onClick={() => setActiveTab('announcements')}
@@ -129,7 +129,7 @@ function ClubPage() {
             {isAdmin && (
           <Card style={{ borderColor: 'var(--primary)' }}>
             <h3 style={{ marginTop: 0 }}>Post an Announcement</h3>
-            <form onSubmit={handlePostAnnouncement} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <form onSubmit={handlePostAnnouncement} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
               <Input
                 type="text"
                 placeholder="Optional Title (e.g. Upcoming Hackathon!)"
@@ -159,15 +159,15 @@ function ClubPage() {
           </Card>
         )}
 
-        <h2 style={{ marginTop: '3rem' }}>Club Announcements</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <h2 style={{ marginTop: 'var(--space-12)' }}>Club Announcements</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
           {announcements.length === 0 ? (
             <EmptyState icon={BellOff} message="No announcements posted yet." />
           ) : (
             announcements.map(post => (
               <Card key={post._id} style={{ marginBottom: 0 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
-                  <span style={{ fontSize: '0.9em', color: 'var(--text)' }}>
+                  <span style={{ fontSize: '0.9em', color: 'var(--text-secondary)' }}>
                     Posted by {post.authorId?.name} • {new Date(post.createdAt).toLocaleDateString()}
                   </span>
                   {post.category && (
@@ -190,15 +190,15 @@ function ClubPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
               <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{analytics.totalPosts}</div>
-                <div style={{ color: 'var(--text)' }}>Total Posts</div>
+                <div style={{ color: 'var(--text-secondary)' }}>Total Posts</div>
               </div>
               <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)' }}>{analytics.totalUpvotes}</div>
-                <div style={{ color: 'var(--text)' }}>Total Upvotes</div>
+                <div style={{ color: 'var(--text-secondary)' }}>Total Upvotes</div>
               </div>
               <div style={{ background: 'var(--bg-surface)', padding: '20px', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--info)' }}>{analytics.totalComments}</div>
-                <div style={{ color: 'var(--text)' }}>Total Comments</div>
+                <div style={{ color: 'var(--text-secondary)' }}>Total Comments</div>
               </div>
             </div>
 

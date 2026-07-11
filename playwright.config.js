@@ -20,7 +20,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   timeout: 30000,
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -30,6 +30,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // No webServer block intentionally — requires running `npm run dev` manually first.
-  // The Vite dev server and Express server must both be up.
+  webServer: {
+    command: 'npm run dev -- --host 127.0.0.1 --strictPort --port 5173',
+    cwd: './client',
+    env: {
+      ...process.env,
+      VITE_API_URL: 'http://127.0.0.1:5000/api'
+    },
+    url: 'http://127.0.0.1:5173',
+    reuseExistingServer: true,
+    timeout: 30000
+  },
+  // The Express server must be up separately on port 5000 with ALLOW_TEST_SESSION=true.
 });

@@ -1,10 +1,12 @@
 import express from 'express';
 import Resource from '../models/Resource.js';
-import { generatePresignedUrl, validateObjectSize } from '../config/s3.js';
+import Bookmark from '../models/Bookmark.js';
+import { deletePublicObjectByUrl, generatePresignedUrl, validateObjectSize } from '../config/s3.js';
 import { summarizeResource } from '../services/geminiService.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { logger } from '../utils/logger.js';
+import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
 
 const router = express.Router();
 
@@ -121,6 +123,25 @@ router.get('/:id', async (req, res, next) => {
     logger.error('Error fetching resource:', err);
     if (err.name === 'CastError') {
       return res.status(404).json({ error: 'Resource not found' });
+    }
+    next(err);
+  }
+});
+
+// DELETE /api/resources/:id
+router.delete('/:id', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const resource = await Resource.findById(req.params.id);
+    if (!resource) return res.status(404).json({ error: { message: 'Resource not found' } });
+
+    await deletePublicObjectByUrl(resource.fileUrl);
+    await Resource.findByIdAndDelete(req.params.id);
+    await Bookmark.deleteMany({ itemType: 'resource', itemId: req.params.id });
+    res.status(200).json({ message: 'Resource deleted successfully' });
+  } catch (err) {
+    logger.error('Error deleting resource:', err);
+    if (err.name === 'CastError') {
+      return res.status(404).json({ error: { message: 'Resource not found' } });
     }
     next(err);
   }

@@ -1,14 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#7C6AF7" />
-      <stop offset="100%" stop-color="#5B45F2" />
-    </linearGradient>
-  </defs>
-
-  <!-- Background -->
-  <rect width="512" height="512" rx="120" fill="url(#bg)" />
-
-  <!-- Text -->
-  <text x="256" y="340" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="240" font-weight="bold" fill="#FFFFFF" text-anchor="middle" letter-spacing="-5">TUF</text>
+  <rect width="512" height="512" rx="120" fill="#7C6AF7" />
+  <svg x="96" y="96" width="320" height="320" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+  </svg>
 </svg>

@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from '../models/User.js';
 import { logger } from '../utils/logger.js';
+import { syncUserIdentity } from '../utils/userIdentity.js';
 
 dotenv.config();
 
@@ -21,7 +22,8 @@ const deptMapping = {
 
 async function migrate() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev');
+    const dbName = process.env.MONGODB_DB_NAME || (process.env.NODE_ENV === 'production' ? 'takeuforward' : 'takeuforward_dev');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev', { dbName });
     logger.info('Connected to DB');
 
     const users = await User.find({});
@@ -40,24 +42,7 @@ async function migrate() {
         }
       }
 
-      // 2. Backfill Username
-      if (!user.username) {
-        let usernameBase = user.email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-        let username = usernameBase;
-        let counter = 1;
-        
-        // Check for collisions inside the loop, though script is sequential so it's safe
-        let collision = await User.findOne({ username, _id: { $ne: user._id } });
-        while (collision) {
-          username = `${usernameBase}${counter}`;
-          counter++;
-          collision = await User.findOne({ username, _id: { $ne: user._id } });
-        }
-        
-        logger.info(`Setting username for ${user.email}: ${username}`);
-        user.username = username;
-        updated = true;
-      }
+      updated = (await syncUserIdentity(User, user)) || updated;
 
       // 3. Ensure profileVisibility exists
       if (!user.profileVisibility) {

@@ -10,7 +10,7 @@
     "seed:communities": "node scripts/seedCommunities.js",
     "seed:clubs": "node scripts/seedClubs.js",
     "assign:admin": "node scripts/assignClubAdmin.js",
-    "assign:platform-admin": "node scripts/assignPlatformAdmin.js"
+    "seed:admin": "node scripts/ensureSystemAdmin.js"
   },
   "keywords": [],
   "author": "",

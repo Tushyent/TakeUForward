@@ -4,7 +4,7 @@ const APPROVED_PATHS = [
 ];
 
 export const requireApprovedUser = (req, res, next) => {
-  if (req.isAuthenticated && req.isAuthenticated() && req.user.role === 'alumni' && !req.user.isVerifiedAlumni) {
+  if (req.isAuthenticated && req.isAuthenticated() && req.user.role === 'alumni' && !req.user.isVerifiedAlumni && !req.user.isPlatformAdmin) {
     const path = req.baseUrl + (req.route ? req.route.path : '');
     if (APPROVED_PATHS.some(p => req.originalUrl.startsWith(p) || path.startsWith(p))) {
       return next();

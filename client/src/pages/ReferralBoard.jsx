@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Spinner from '../components/ui/Spinner';
@@ -123,7 +123,7 @@ function ReferralBoard() {
             <h2>My Requests</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
               {myRequests.map(req => (
-                <Card key={req._id} style={{ display: 'flex', flexDirection: 'column', marginBottom: 0, backgroundColor: req.status === 'matched' ? 'var(--success-bg, rgba(52, 211, 153, 0.05))' : 'var(--bg-surface)' }}>
+                <Card key={req._id} style={{ height: '100%', display: 'flex', flexDirection: 'column', marginBottom: 0, backgroundColor: req.status === 'matched' ? 'var(--success-bg)' : 'var(--bg-surface)', borderColor: req.status === 'matched' ? 'var(--success)' : 'var(--border)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                     <h3 style={{ margin: 0 }}>{req.targetCompany}</h3>
                     <Badge variant={req.status === 'open' ? 'primary' : req.status === 'matched' ? 'success' : 'secondary'}>
@@ -183,7 +183,7 @@ function ReferralBoard() {
               const matchesMyCompany = isAlumni && user?.currentCompany?.toLowerCase() === req.targetCompany.toLowerCase();
               
               return (
-                <Card key={req._id} style={{ display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
+                <Card key={req._id} style={{ height: '100%', display: 'flex', flexDirection: 'column', marginBottom: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                     <h3 style={{ margin: 0 }}>{req.targetCompany}</h3>
                     <Badge variant="primary">OPEN</Badge>

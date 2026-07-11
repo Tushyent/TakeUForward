@@ -1,10 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import Spinner from '../components/ui/Spinner';
-
-const AuthContext = createContext();
-
-export const useAuth = () => useContext(AuthContext);
+import { AuthContext } from './auth-context';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -37,10 +34,24 @@ export const AuthProvider = ({ children }) => {
 
   if (errorMsg) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column', gap: 'var(--space-4)' }}>
         <h2>Connection Error</h2>
         <p style={{ color: 'var(--danger)', marginTop: '10px' }}>{errorMsg}</p>
-        <p style={{ marginTop: '20px', color: 'var(--text-secondary)' }}>Please check your internet connection or try again later.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>Please check your internet connection or try again later.</p>
+        <button
+          onClick={fetchAuth}
+          style={{
+            padding: '10px 20px',
+            background: 'var(--primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 'var(--radius-sm)',
+            cursor: 'pointer',
+            fontWeight: 600,
+          }}
+        >
+          Retry Connection
+        </button>
       </div>
     );
   }

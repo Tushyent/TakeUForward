@@ -27,8 +27,14 @@ app.use('/api/notifications', notificationRoutes);
 
 describe('1:1 Chat Messaging & Notifications', () => {
   let userA, userB;
+  const originalNotificationEnv = {};
 
   beforeAll(async () => {
+    for (const key of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT']) {
+      originalNotificationEnv[key] = process.env[key];
+      delete process.env[key];
+    }
+
     await mongoose.connect('mongodb://localhost:27017/takeuforward_test_chats');
     await User.deleteMany({});
     await Chat.deleteMany({});
@@ -51,6 +57,13 @@ describe('1:1 Chat Messaging & Notifications', () => {
 
   afterAll(async () => {
     await mongoose.connection.close();
+    for (const [key, value] of Object.entries(originalNotificationEnv)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
   });
 
   beforeEach(async () => {
@@ -76,6 +89,8 @@ describe('1:1 Chat Messaging & Notifications', () => {
     expect(notifsForB.length).toBe(1);
     expect(notifsForB[0].type).toBe('message');
     expect(notifsForB[0].refId.toString()).toBe(userA._id.toString());
+    expect(notifsForB[0].targetPath).toBe(`/chat/${userA._id}`);
+    expect(notifsForB[0].contentPreview).toBe('Hello User B!');
 
     // 2. Authenticate as User B
     mockUser = userB;
@@ -100,5 +115,7 @@ describe('1:1 Chat Messaging & Notifications', () => {
     expect(notifsForA.length).toBe(1);
     expect(notifsForA[0].type).toBe('message');
     expect(notifsForA[0].refId.toString()).toBe(userB._id.toString());
+    expect(notifsForA[0].targetPath).toBe(`/chat/${userB._id}`);
+    expect(notifsForA[0].contentPreview).toBe('Hey User A, got your message!');
   });
 });

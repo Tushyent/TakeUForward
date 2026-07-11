@@ -169,9 +169,11 @@ describe('Anonymity Engine (Moderation Queue — Admin View)', () => {
 
     adminUser = await User.create({
       name: 'Platform Admin',
-      email: 'admin@ssn.edu.in',
+      email: 'takeuforwardssn@gmail.com',
       googleId: 'google-admin-1',
-      role: 'student',
+      role: 'platform_admin',
+      username: 'admin',
+      handle: 'admin',
       isPlatformAdmin: true,
     });
     mockUser = adminUser;

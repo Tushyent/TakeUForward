@@ -332,6 +332,38 @@ function Login() {
               Request Access
             </button>
           </p>
+
+          {/* Mobile-only Features */}
+          <div className="login-mobile-features" style={{ flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-8)' }}>
+            <h3 style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>Platform Features</h3>
+            {FEATURES.map(({ icon: Icon, text }) => (
+              <div key={text} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-3)',
+                padding: 'var(--space-3) var(--space-4)',
+                background: 'rgba(124,106,247,0.07)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid rgba(124,106,247,0.15)',
+              }}>
+                <div style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 'var(--radius-xs)',
+                  background: 'rgba(124,106,247,0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <Icon size={14} color="var(--primary)" />
+                </div>
+                <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>
+                  {text}
+                </span>
+              </div>
+            ))}
+          </div>
           </>
           )}
 

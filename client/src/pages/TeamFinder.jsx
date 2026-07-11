@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import SearchFilterBar from '../components/SearchFilterBar';
@@ -217,14 +217,14 @@ function TeamFinder() {
 
                 {req.skillsNeeded && req.skillsNeeded.length > 0 && (
                   <div style={{ marginBottom: '15px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    <strong style={{ alignSelf: 'center', color: 'var(--text)' }}>Skills:</strong>
+                    <strong style={{ alignSelf: 'center', color: 'var(--text-secondary)' }}>Skills:</strong>
                     {req.skillsNeeded.map((skill, idx) => (
                       <Badge key={`skill-${idx}`} variant="secondary">{skill}</Badge>
                     ))}
                   </div>
                 )}
                 
-                <div style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '20px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '20px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     Posted By: {req.authorId ? (
                       <>
@@ -286,7 +286,7 @@ function TeamFinder() {
                                 {applicant.userId?.name} (@{applicant.userId?.handle})
                               </Link>
                             </div>
-                            <div style={{ fontSize: '0.9em', color: 'var(--text)', fontStyle: 'italic' }}>
+                            <div style={{ fontSize: '0.9em', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                               {applicant.message || 'No message provided'}
                             </div>
                           </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';

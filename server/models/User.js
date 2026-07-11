@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     username: { type: String, unique: true, sparse: true, index: true },
     role: {
       type: String,
-      enum: ['student', 'alumni', 'club_admin'],
+      enum: ['student', 'alumni', 'club_admin', 'platform_admin'],
       default: 'student',
     },
     year: { type: Number, min: 2000, max: 2029 },

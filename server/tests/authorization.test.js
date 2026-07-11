@@ -105,9 +105,11 @@ describe('Authorization Tests — Mutating Routes', () => {
 
     adminUser = await User.create({
       name: 'Admin User',
-      email: 'admin@ssn.edu.in',
+      email: 'takeuforwardssn@gmail.com',
       googleId: 'google-admin-authz-1',
-      role: 'student',
+      role: 'platform_admin',
+      username: 'admin',
+      handle: 'admin',
       isPlatformAdmin: true,
     });
   });

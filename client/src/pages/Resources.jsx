@@ -139,7 +139,7 @@ function Resources() {
             <Input type="number" placeholder="Semester (e.g. 1-8)" value={semester} onChange={e => setSemester(e.target.value)} required min="1" max="8" />
             <Input type="text" placeholder="Tags (comma separated)" value={tags} onChange={e => setTags(e.target.value)} />
             
-            <input type="file" onChange={e => setFile(e.target.files[0])} required style={{ color: 'var(--text)', margin: '10px 0' }} />
+            <input type="file" onChange={e => setFile(e.target.files[0])} required style={{ color: 'var(--text-secondary)', margin: '10px 0' }} />
 
             <Button type="submit" disabled={isUploading}>
               {isUploading ? 'Uploading...' : 'Upload Resource'}
@@ -183,7 +183,7 @@ function Resources() {
                   </div>
                 )}
 
-                <p style={{ fontSize: '0.85em', color: 'var(--text)', marginBottom: '15px' }}>
+                <p style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '15px' }}>
                   Uploaded by: {res.uploaderId?.name || 'Unknown'}
                 </p>
                 
