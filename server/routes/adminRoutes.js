@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import User from '../models/User.js';
 import Post from '../models/Post.js';
 import Resource from '../models/Resource.js';
+import Club from '../models/Club.js';
+import Community from '../models/Community.js';
 import Bookmark from '../models/Bookmark.js';
 import Chat from '../models/Chat.js';
 import PrivateFile from '../models/PrivateFile.js';
@@ -203,6 +205,183 @@ router.delete('/users/:id', requireSystemAdmin, async (req, res, next) => {
       deletedResources,
       deletedPrivateFiles
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ──────────────────────────────────────────────
+// Club CRUD
+// ──────────────────────────────────────────────
+
+router.get('/clubs', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { limit, skip } = getPaginationParams(req.query.page, req.query.limit);
+    const { q } = req.query;
+    const query = {};
+    if (q) {
+      query.name = new RegExp(escapeRegex(q), 'i');
+    }
+    const [clubs, totalCount] = await Promise.all([
+      Club.find(query).sort({ name: 1 }).skip(skip).limit(limit).lean(),
+      Club.countDocuments(query)
+    ]);
+    res.json({ clubs, totalCount, hasMore: skip + clubs.length < totalCount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/clubs', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { name, description } = req.body;
+    if (!name || !description) {
+      return res.status(400).json({ error: { message: 'Name and description are required' } });
+    }
+    const existing = await Club.findOne({ name });
+    if (existing) {
+      return res.status(409).json({ error: { message: 'A club with that name already exists' } });
+    }
+    const club = await Club.create({ name, description });
+    res.status(201).json(club);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/clubs/:id', requireSystemAdmin, async (req, res, next) => {
+  if (!validateObjectId(req.params.id, res)) return;
+  try {
+    const { name, description } = req.body;
+    const club = await Club.findById(req.params.id);
+    if (!club) return res.status(404).json({ error: { message: 'Club not found' } });
+    if (name) club.name = name;
+    if (description) club.description = description;
+    await club.save();
+    res.json(club);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/clubs/:id', requireSystemAdmin, async (req, res, next) => {
+  if (!validateObjectId(req.params.id, res)) return;
+  try {
+    const club = await Club.findByIdAndDelete(req.params.id);
+    if (!club) return res.status(404).json({ error: { message: 'Club not found' } });
+    await Post.updateMany({ clubId: req.params.id }, { clubId: null });
+    res.json({ message: 'Club deleted' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ──────────────────────────────────────────────
+// Community CRUD
+// ──────────────────────────────────────────────
+
+router.get('/communities', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { limit, skip } = getPaginationParams(req.query.page, req.query.limit, 100);
+    const { q } = req.query;
+    const query = {};
+    if (q) {
+      query.name = new RegExp(escapeRegex(q), 'i');
+    }
+    const [communities, totalCount] = await Promise.all([
+      Community.find(query).sort({ name: 1 }).skip(skip).limit(limit).lean(),
+      Community.countDocuments(query)
+    ]);
+    res.json({ communities, totalCount, hasMore: skip + communities.length < totalCount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/communities', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { name, type, description } = req.body;
+    if (!name || !type) {
+      return res.status(400).json({ error: { message: 'Name and type are required' } });
+    }
+    const validTypes = ['dept', 'batch', 'general', 'topic'];
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({ error: { message: `Type must be one of: ${validTypes.join(', ')}` } });
+    }
+    const existing = await Community.findOne({ name });
+    if (existing) {
+      return res.status(409).json({ error: { message: 'A community with that name already exists' } });
+    }
+    const community = await Community.create({ name, type, description: description || '' });
+    res.status(201).json(community);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/communities/:id', requireSystemAdmin, async (req, res, next) => {
+  if (!validateObjectId(req.params.id, res)) return;
+  try {
+    const { name, description } = req.body;
+    const community = await Community.findById(req.params.id);
+    if (!community) return res.status(404).json({ error: { message: 'Community not found' } });
+    if (name) community.name = name;
+    if (description !== undefined) community.description = description;
+    await community.save();
+    res.json(community);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/communities/:id', requireSystemAdmin, async (req, res, next) => {
+  if (!validateObjectId(req.params.id, res)) return;
+  try {
+    const community = await Community.findByIdAndDelete(req.params.id);
+    if (!community) return res.status(404).json({ error: { message: 'Community not found' } });
+    await Post.updateMany({ communityId: req.params.id }, { $set: { communityId: null } });
+    res.json({ message: 'Community deleted' });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ──────────────────────────────────────────────
+// Posts — list and delete for admin
+// ──────────────────────────────────────────────
+
+router.get('/posts', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { limit, skip } = getPaginationParams(req.query.page, req.query.limit);
+    const { q } = req.query;
+    const query = {};
+    if (q) {
+      query.content = new RegExp(escapeRegex(q), 'i');
+    }
+    const [posts, totalCount] = await Promise.all([
+      Post.find(query)
+        .populate('authorId', 'name email username handle')
+        .populate('communityId', 'name')
+        .populate('clubId', 'name')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Post.countDocuments(query)
+    ]);
+    res.json({ posts, totalCount, hasMore: skip + posts.length < totalCount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/posts/:id', requireSystemAdmin, async (req, res, next) => {
+  if (!validateObjectId(req.params.id, res)) return;
+  try {
+    const post = await Post.findByIdAndDelete(req.params.id);
+    if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
+    await Bookmark.deleteMany({ itemType: 'post', itemId: req.params.id });
+    res.json({ message: 'Post deleted' });
   } catch (err) {
     next(err);
   }

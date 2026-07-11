@@ -10,6 +10,12 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ### Security
 - **[Deployment] Standardized email addresses across the platform:** Replaced all hardcoded `noreply@takeuforward.com` and `noreply@takeuforward-ssn.com` fallbacks in `mailer.js` with `takeuforwardssn@gmail.com`. Updated `.env.example` and `DEPLOYMENT.md` to reflect the canonical support/admin email. Added `REPLY_TO_EMAIL` env var to the deployment reference.
 
+### Added
+- **[Admin] Full platform CRUD management UI:** Expanded the System Admin Dashboard (`/admin`) with four management tabs — Overview, Clubs, Communities, and Posts. Admins can now create, edit, and delete clubs and communities directly from the UI, and search + delete any post on the platform. All operations are gated by the `requireSystemAdmin` middleware.
+- **[Seed] 42 SSN clubs:** Replaced the previous 3-club seed with complete data for all 42 official SSN clubs (ACM, IEEE chapters, Coding Club, GDG, Lakshya, cultural clubs, etc.).
+- **[Seed] 36 batch communities:** Added communities for all 9 departments × 4 graduating batches (2026–2029) using the short-name format (e.g. `CSE'28`, `MTECH-CSE'28`) plus `General` and `Placements`.
+- **[UI] Shared Modal component:** Added `client/src/components/ui/Modal.jsx` for reuse across admin and future features.
+
 ### Changed
 - **[Refactor] Eliminated duplicate S3 client in personal drive routes:** `privateFileRoutes.js` was instantiating its own `S3Client` and `DeleteObjectCommand` instead of reusing the already-exported `deleteObjectByKey` from `config/s3.js`. This prevented S3 config changes (region, credentials) from being picked up by the delete path. Route now imports and uses the shared utility.
 - **[Refactor] Centralized report auto-hide threshold:** Extracted the hardcoded `3` in four report endpoints (posts, interview experiences, elective suggestions, career roadmaps) into a shared `REPORT_THRESHOLD` constant in `server/utils/constants.js`. Changing the threshold now requires editing one file instead of four.
