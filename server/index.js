@@ -37,6 +37,8 @@ import pushRoutes from './routes/pushRoutes.js';
 import lostFoundRoutes from './routes/lostFoundRoutes.js';
 import marketplaceRoutes from './routes/marketplaceRoutes.js';
 import privateFileRoutes from './routes/privateFileRoutes.js';
+import supportRoutes from './routes/supportRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -63,8 +65,8 @@ app.use(pinoHttp({
     ignore: (req) => req.url === '/health' || req.url === '/api/health',
   }
 }));
-// Trust proxy is required for secure cookies behind Render's load balancer
-app.set('trust proxy', true);
+// Trust the known Vercel/Render proxy chain without allowing spoofed X-Forwarded-For values.
+app.set('trust proxy', 2);
 
 const clientUrl = process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/+$/, '') : 'http://localhost:5173';
 
@@ -104,12 +106,13 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev',
+    dbName: process.env.MONGODB_DB_NAME || (process.env.NODE_ENV === 'production' ? 'takeuforward' : 'takeuforward_dev'),
     collectionName: 'sessions'
   }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 1 day
     secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' until VITE_API_URL is removed from Vercel and all API calls go through the proxy; then switch to 'lax'
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     httpOnly: true,
   }
 }));
@@ -150,6 +153,8 @@ app.use('/api/push', pushRoutes);
 app.use('/api/lost-found', lostFoundRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 app.use('/api/drive', privateFileRoutes);
+app.use('/api/support', supportRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Error Handling
 app.get('/', (req, res) => {
