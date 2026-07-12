@@ -1,74 +1,115 @@
-# TakeUForward
+<div align="center">
+  <img src="https://takeuforward-ssn.vercel.app/favicon.svg" alt="TakeUForward Logo" width="120" />
+  <h1>TakeUForward</h1>
+  <p><strong>The Ultimate SSN Campus Mentorship, Utility, & Networking Platform</strong></p>
 
-A full-stack, secure campus mentorship and utility platform designed for students and alumni. Built with the MERN stack (MongoDB, Express, React, Node.js), Vite, and Tailwind CSS (Vanilla UI Tokens).
+  [![Vercel Deployment](https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://takeuforward-ssn.vercel.app)
+  [![Render Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://takeuforward-ssn.onrender.com)
+  [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
+  [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](#)
+</div>
 
-## 🚀 Features
+---
 
-The platform is designed in phases and includes comprehensive features for campus communication, professional networking, and academic growth.
+TakeUForward is a highly secure, full-stack campus platform exclusively designed for SSN students and alumni. It bridges the gap between academics, placements, and campus utilities—combining an **Anonymity Engine** for safe discussions, an **Alumni Mentorship Board**, and **Real-Time Campus Utilities** (like Lost & Found and Marketplaces).
 
-### Phase 1: MVP & Core Systems
-- **Secure Auth**: Google OAuth restricted to the campus domain, with an exclusive invite-only whitelist for verified Alumni.
-- **Anonymity Engine**: Robust server-side identity stripping guarantees true anonymity for sensitive questions and confessions.
-- **Academic Resources**: S3-backed storage for sharing notes and PYQs, featuring automatic **Gemini AI Summarization** of uploaded PDFs.
-- **Sub-Community Feeds**: Dynamic sorting by Department, Year, and customized topic tags.
-- **Club Pages & Announcements**: Admin-managed announcement spaces for official clubs and societies.
-- **Moderation Queue**: A centralized dashboard for platform admins to review and resolve reported posts.
-- **1:1 Real-Time Chat**: Secure polling-based messaging system for verified identities.
+## ✨ Key Features
 
-### Phase 2: Professional Networking
-- **Verified Alumni Directory**: Browse and connect with alumni by department and current company.
-- **Referral & Mock Interview Boards**: Directly request mock interviews or job referrals from verified professionals.
-- **Teammate Finder**: Securely find teammates for hackathons, projects, and competitions without leaking identities prematurely.
-- **Course & Professor Reviews**: Share and upvote anonymous feedback on courses.
-- **Personalized Weekly Digest**: Automated weekly emails aggregating top trending posts and resources using Nodemailer and Cron.
-- **Web Push Notifications**: Service Worker and VAPID-powered browser push notifications for mentions and replies.
+### 🔒 Privacy & Security First
+- **SSN Domain Restriction**: Only `@ssn.edu.in` accounts can access the platform via Google OAuth.
+- **Verified Alumni Gating**: External alumni accounts must be manually vetted and approved by System Admins before gaining platform access.
+- **Server-Side Anonymity**: Unlike basic platforms that hide names on the frontend, our Anonymity Engine strictly strips user identities at the database level before data ever reaches the client.
 
-### Phase 3: Campus Utility Expansion
-- **Lost & Found Board**: Track missing items securely with direct messaging claims.
-- **Secondhand Marketplace**: Buy, sell, or exchange books and electronics with peer-to-peer messaging.
+### 📚 Academic Hub
+- **Resource Repository**: Share notes, PYQs, and textbooks (AWS S3 integration).
+- **Course & Professor Reviews**: Read and write anonymous feedback to make informed elective choices.
+- **Department & Batch Feeds**: Find discussions specific to your year and branch instantly.
 
-## 🛠 Tech Stack
-- **Frontend**: React.js (Vite), React Router v6, Axios, Vanilla CSS Custom Properties (Design System).
+### 💼 Professional Networking
+- **Alumni Directory**: Browse verified alumni, their current companies, and roles.
+- **Referrals & Mock Interviews**: Directly request 1:1 mentorship, mock interviews, or job referrals from seniors.
+- **Interview Experiences**: A dedicated repository of placement experiences.
+
+### 🏫 Campus Utilities
+- **Marketplace**: Buy, sell, or exchange items with peers.
+- **Lost & Found**: Report missing items and find them securely.
+- **Teammate Finder**: Discover partners for hackathons and academic projects.
+- **Club Announcements**: Follow official SSN clubs for the latest events and updates.
+
+---
+
+## 🛠 Tech Stack & Architecture
+
+- **Frontend**: React.js, Vite, React Router, Custom CSS Design System (Glassmorphism & Dark-Mode first).
 - **Backend**: Node.js, Express.js (ES Modules).
-- **Database**: MongoDB Atlas, Mongoose (`connect-mongo` for persistent sessions).
-- **Auth**: Passport.js (Google OAuth 2.0).
-- **Cloud/3rd Party**: AWS S3 / Supabase Storage (Presigned URLs), Google Gemini AI, Nodemailer, Web-Push.
-- **Deployment**: Vercel (Frontend SPA), Render (Backend API).
+- **Database**: MongoDB Atlas, Mongoose (with `connect-mongo` for persistent sessions).
+- **Cloud & AI**: 
+  - AWS S3 (Presigned URLs for direct uploads)
+  - Twilio SendGrid (Email Notifications)
+  - Google Gemini AI (PDF Summarizations)
+- **Deployment**: Vercel (Frontend SPA) + Render (Node.js Backend).
 
-## 💻 Local Development Setup
+---
 
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
-   *(This will run `npm install` concurrently in both the `/client` and `/server` directories via the root package.json).*
+## 🚀 Quick Start (Local Development)
 
-2. **Environment Variables**
-   - Copy `/server/.env.example` to `/server/.env` and fill in the required variables (MongoDB URI, Google OAuth credentials, AWS keys, Gemini API).
-   - Copy `/client/.env.example` to `/client/.env` and configure `VITE_API_BASE_URL` and `VITE_VAPID_PUBLIC_KEY`.
+### Prerequisites
+- Node.js (v18+)
+- MongoDB (Local or Atlas URL)
+- Google Cloud Console (OAuth Client ID)
 
-3. **Database Seeding**
-   Ensure you seed the initial sub-communities before starting:
-   ```bash
-   cd server
-   npm run seed:communities
-   npm run seed:clubs
-   ```
+### 1. Installation
+Clone the repository and install dependencies for both the frontend and backend:
+```bash
+git clone https://github.com/your-username/TakeUForward.git
+cd TakeUForward
+npm install  # Concurrently installs client and server dependencies
+```
 
-4. **Run the App Locally**
-   ```bash
-   npm run dev
-   ```
-   *(This starts both the React frontend and the Express backend concurrently).*
+### 2. Environment Variables
+You must configure the `.env` files. **Never commit these files to version control.**
 
-## 🧪 Testing and Linting
-- **Linting**: `npm run lint` inside `/client` or `/server`.
-- **Backend Tests**: `npm run test` inside `/server`.
-- **E2E Tests**: `npx playwright test` at root for E2E tests.
+**Backend (`server/.env`)**
+Copy the template:
+```bash
+cp server/.env.example server/.env
+```
+Fill in the required values: `MONGODB_URI`, `SESSION_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `AWS_ACCESS_KEY_ID`.
 
-## 📚 Documentation
-For more details on the architecture, data models, and deployment configurations, refer to the `/docs` directory:
-- [Master Plan](./docs/MASTER_PLAN.md): Full feature specifications and database schema.
-- [Deployment Guide](./docs/DEPLOYMENT.md): Detailed runbook for deploying to Render, Vercel, and Atlas.
-- [Changelog](./docs/CHANGELOG.md): Version history and audit patches.
-- [Feature Tracker](./docs/FEATURE_TRACKER.md): Live status of implemented features.
+**Frontend (`client/.env`)**
+Copy the template:
+```bash
+cp client/.env.example client/.env
+```
+Set `VITE_VAPID_PUBLIC_KEY` if you wish to test push notifications.
+
+### 3. Database Seeding (First Run Only)
+Populate the database with the initial communities and clubs:
+```bash
+cd server
+npm run seed:communities
+npm run seed:clubs
+```
+
+### 4. Run the Development Servers
+Start both the React frontend and Express backend concurrently:
+```bash
+npm run dev
+```
+- **Frontend**: `http://localhost:5173`
+- **Backend**: `http://localhost:5000`
+
+---
+
+## 🧪 Testing
+
+We ensure platform stability through rigorous automated testing:
+- **Unit & Integration Tests**: Run `npm test` inside the `/server` directory (powered by Jest).
+- **Linting**: Run `npm run lint` at the root to check both client and server code.
+- **E2E Testing**: Run `npx playwright test` to execute Critical Path E2E tests.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ for the SSN Community by Tushyent N P</sub>
+</div>

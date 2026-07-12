@@ -6,7 +6,7 @@ import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
 import CareerRoadmap from '../models/CareerRoadmap.js';
 import crypto from 'crypto';
 import { applyAnonymity } from '../utils/anonymity.js';
-import { sendEmail } from '../config/mailer.js';
+import { sendEmail, buildEmailFooter } from '../config/mailer.js';
 import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
 import { logActivity } from '../services/activityLogger.js';
 
@@ -170,7 +170,20 @@ router.post('/alumni-requests/:id/approve', requireSystemAdmin, async (req, res,
 
     // 4. Send email
     const loginLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?token=${inviteToken}`;
-    await sendEmail({ to: request.email, subject: 'Your Alumni Request is Approved', html: `<p>Click here to login: <a href="${loginLink}">${loginLink}</a></p>` });
+    await sendEmail({
+      to: request.email,
+      subject: 'Your Alumni Request is Approved',
+      html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+        <h1 style="color:#7C6AF7;font-size:22px;">Alumni Status Approved!</h1>
+        <p>Hi ${request.name || 'there'},</p>
+        <p>Your alumni registration request has been <strong style="color:#28a745;">approved</strong>! You now have full access to the TakeUForward platform.</p>
+        <p>You can now connect with juniors, share interview experiences, post referrals, and help shape the next generation of SSN engineers.</p>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="${loginLink}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:12px 24px;border-radius:8px;font-weight:600;">Log in to TakeUForward</a>
+        </div>
+        ${buildEmailFooter()}
+      </div>`
+    });
 
     await logActivity({ action: 'approve', resource: 'AlumniRegistrationRequest', resourceId: req.params.id, description: 'Approved alumni verification request', req });
     res.json({ message: 'Request approved and invite sent' });

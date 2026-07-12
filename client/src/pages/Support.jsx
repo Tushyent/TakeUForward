@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Upload, MapPin } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Button from '../components/ui/Button';
@@ -7,6 +7,7 @@ import { Input, Select } from '../components/ui/Input';
 import axiosClient from '../api/axiosClient';
 
 const Support = () => {
+  const screenshotInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -173,14 +174,25 @@ const Support = () => {
               <Upload size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: 6 }} />
               Screenshot <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>(Optional)</span>
             </label>
-            <Input
+            <input
+              ref={screenshotInputRef}
               id="screenshot-upload"
               type="file"
               accept="image/jpeg, image/png, image/webp"
               onChange={handleScreenshotUpload}
               disabled={isUploading || isSubmitting}
-              style={{ width: '100%' }}
+              style={{ display: 'none' }}
             />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => screenshotInputRef.current?.click()}
+              disabled={isUploading || isSubmitting}
+              style={{ width: '100%', justifyContent: 'flex-start' }}
+            >
+              <Upload size={15} />
+              {formData.screenshotUrl ? 'Screenshot attached' : 'Choose screenshot...'}
+            </Button>
             {isUploading && (
               <div style={{ fontSize: 'var(--text-xs)', color: 'var(--primary)', marginTop: 'var(--space-2)' }}>
                 Uploading screenshot...

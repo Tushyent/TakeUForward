@@ -17,6 +17,14 @@ const buildAbsoluteUrl = (targetPath = '/home') => {
   return `${clientUrl}${safePath}`;
 };
 
+const buildEmailFooter = () => `
+<hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
+<p style="font-size:13px;color:#777;line-height:1.5;margin:0 0 4px;">— Tushyent &amp; the TakeUForward Team</p>
+<p style="font-size:13px;color:#777;margin:0 0 2px;"><a href="mailto:takeuforwardssn@gmail.com" style="color:#7C6AF7;text-decoration:none;">takeuforwardssn@gmail.com</a></p>
+<p style="font-size:11px;color:#aaa;margin:12px 0 0;">If this email landed in your Spam folder, please mark it as "Not Spam" for future deliveries.</p>
+<p style="font-size:11px;color:#aaa;margin:4px 0 0;">Received this in error? Report to <a href="mailto:takeuforwardssn@gmail.com" style="color:#7C6AF7;">takeuforwardssn@gmail.com</a></p>
+`;
+
 export const buildNotificationEmail = (user, type, isAnonymousSender, content = '', options = {}) => {
   const { targetPath = '/home', actorName, contextTitle, contextType } = options;
 
@@ -34,24 +42,26 @@ export const buildNotificationEmail = (user, type, isAnonymousSender, content = 
     ? `<p style="margin:0 0 12px;color:#555;">Context: ${escapedContextType} in ${escapedContextTitle}</p>`
     : `<p style="margin:0 0 12px;color:#555;">Context: ${escapedContextType}</p>`;
 
+  const footer = buildEmailFooter();
+
   if (type === 'mention') {
     return {
       subject: 'You were mentioned on TakeUForward',
-      html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} mentioned you on TakeUForward.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">View it here</a></p><p style="color:#777;font-size:12px;">If the content was posted anonymously, TakeUForward does not reveal the author's identity.</p>`
+      html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} mentioned you on TakeUForward.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">View it here</a></p><p style="color:#777;font-size:12px;">If the content was posted anonymously, TakeUForward does not reveal the author's identity.</p>${footer}`
     };
   }
 
   if (type === 'reply' || type === 'comment') {
     return {
       subject: 'New reply on TakeUForward',
-      html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} replied to your post.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">View it here</a></p><p style="color:#777;font-size:12px;">Replies from anonymous users stay anonymous in this email and in the app.</p>`
+      html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} replied to your post.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">View it here</a></p><p style="color:#777;font-size:12px;">Replies from anonymous users stay anonymous in this email and in the app.</p>${footer}`
     };
   }
 
   if (type === 'message') {
     return {
       subject: 'New message on TakeUForward',
-      html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} sent you a message.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">Open the chat</a></p>`
+      html: `<p>Hi ${escapedRecipient},</p><p>${escapedSender} sent you a message.</p>${contextLine}${htmlContent}<p><a href="${targetUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:10px 14px;border-radius:8px;">Open the chat</a></p>${footer}`
     };
   }
 
@@ -62,25 +72,30 @@ export const buildWelcomeEmailHtml = (name, memberCount) => {
   const safeName = escapeHtml(name || 'there');
   const clientUrl = (process.env.CLIENT_URL || 'https://takeuforward-ssn.vercel.app').replace(/\/+$/, '');
   return [
-    `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;">`,
-    `<h1 style="color:#7C6AF7;">Welcome to TakeUForward!</h1>`,
-    `<p>Hi ${safeName},</p>`,
-    memberCount ? `<p>You are our <strong>#${memberCount}</strong>th member — share it with your peers!</p>` : '',
-    `<p>Welcome to <strong>TakeUForward</strong> — the single place a student needs to survive and thrive in college. We built this platform right here at SSN to connect juniors with seniors and alumni for mentorship, centralize academic and placement knowledge that would otherwise be lost year after year, and create an anonymous-safe space for honest questions.</p>`,
-    `<p>It means no more fragmented WhatsApp groups, no more losing senior knowledge the day they graduate, and no more having to rely on being in the 'right' group to get ahead.</p>`,
-    `<p><strong>Here is what you can do here:</strong></p>`,
-    `<ul>`,
-    `<li>Ask questions anonymously — no fear of judgment</li>`,
-    `<li>Share notes, PYQs, and resources with your batch and department</li>`,
-    `<li>Find seniors and alumni for referrals and company-specific guidance</li>`,
-    `<li>Discover club events, hackathons, and workshops in one feed</li>`,
-    `<li>Join your batch and department communities</li>`,
-    `</ul>`,
-    `<p>Everything is organized by community — your batch, your department, or topic-based spaces. You can also find clubs and teams looking for members.</p>`,
-    `<p>Your journey starts here:</p>`,
-    `<a href="${clientUrl}/home" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Go to Your Dashboard</a>`,
-    `<p style="margin-top:24px;color:#777;font-size:12px;">Have questions? Drop them in the General community or any batch community. Your seniors and alumni are here to help.</p>`,
-    `<p style="color:#777;font-size:12px;">— The TakeUForward Team</p>`,
+    `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;">`,
+    `<div style="text-align:center;padding:30px 0 24px;">`,
+    `<h1 style="color:#7C6AF7;font-size:26px;margin:0 0 10px;">Welcome to TakeUForward!</h1>`,
+    memberCount ? `<p style="color:#555;font-size:15px;margin:0;">You are our <strong style="color:#7C6AF7;">#${memberCount}</strong> member — share it with your peers!</p>` : '',
+    `</div>`,
+    `<p style="font-size:15px;color:#333;line-height:1.7;">Hi ${safeName},</p>`,
+    `<p style="font-size:15px;color:#333;line-height:1.7;">College can feel overwhelming. There is always that nagging feeling — <em>Am I missing out on something? Is everyone else ahead of me? What should I even be doing right now?</em> We have all been there, wishing someone had told us earlier what actually matters, where to find resources, who to reach out to.</p>`,
+    `<p style="font-size:15px;color:#333;line-height:1.7;"><strong>TakeUForward</strong> is here to close that gap. Built for SSN students, by SSN students, it is a single place to connect with seniors and alumni, access academic resources and placement insights that usually disappear after graduation, ask questions without hesitation, and stay in the loop — so you never have to say <em>"I wish I knew this sooner."</em></p>`,
+    `<p style="font-size:15px;color:#333;line-height:1.7;">No more fragmented WhatsApp groups. No more losing years of senior knowledge overnight. No more relying on being in the right circle to get ahead.</p>`,
+    `<div style="background:#f7f5ff;border-radius:12px;padding:18px 22px;margin:24px 0;">`,
+    `<p style="font-size:14px;color:#444;margin:0 0 8px;"><strong>Here is what you can do here:</strong></p>`,
+    `<table style="font-size:14px;color:#444;line-height:1.8;">`,
+    `<tr><td style="padding:2px 12px 2px 0;color:#7C6AF7;font-weight:600;">\u2022</td><td style="padding:2px 0;">Ask questions anonymously — no fear of judgment</td></tr>`,
+    `<tr><td style="padding:2px 12px 2px 0;color:#7C6AF7;font-weight:600;">\u2022</td><td style="padding:2px 0;">Share notes, PYQs, and resources with your batch and department</td></tr>`,
+    `<tr><td style="padding:2px 12px 2px 0;color:#7C6AF7;font-weight:600;">\u2022</td><td style="padding:2px 0;">Find seniors and alumni for referrals and company guidance</td></tr>`,
+    `<tr><td style="padding:2px 12px 2px 0;color:#7C6AF7;font-weight:600;">\u2022</td><td style="padding:2px 0;">Discover club events, hackathons, and workshops in one feed</td></tr>`,
+    `<tr><td style="padding:2px 12px 2px 0;color:#7C6AF7;font-weight:600;">\u2022</td><td style="padding:2px 0;">Join your batch and department communities</td></tr>`,
+    `</table>`,
+    `</div>`,
+    `<div style="text-align:center;margin:28px 0;">`,
+    `<a href="${clientUrl}/home" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;">Go to Your Dashboard</a>`,
+    `</div>`,
+    `<p style="font-size:14px;color:#555;line-height:1.6;">Have a thought, suggestion, or just want to talk? Reply to this email or drop your feedback in the <a href="${clientUrl}/support" style="color:#7C6AF7;">Support &amp; Feedback</a> section on the website — it all goes straight to us and helps make the platform better for everyone.</p>`,
+    buildEmailFooter(),
     `</div>`
   ].filter(Boolean).join('\n');
 };
@@ -187,4 +202,4 @@ export const verifyTransporter = async () => {
   }
 };
 
-export { SendGridError };
+export { SendGridError, buildEmailFooter };

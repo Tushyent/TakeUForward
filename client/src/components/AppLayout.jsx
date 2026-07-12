@@ -25,7 +25,7 @@ const AppLayout = ({ children }) => {
             }}>
               <Zap size={13} color="white" fill="white" />
             </div>
-            <div style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
+            <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
               TakeUForward
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import axios from 'axios';
@@ -12,7 +12,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
-import { Search, AlertTriangle, Trash2 } from 'lucide-react';
+import { Search, AlertTriangle, Trash2, Upload } from 'lucide-react';
 
 function Resources() {
   const { user } = useAuth();
@@ -22,6 +22,7 @@ function Resources() {
   const [semester, setSemester] = useState('');
   const [tags, setTags] = useState('');
   const [file, setFile] = useState(null);
+  const fileInputRef = useRef(null);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -145,7 +146,7 @@ function Resources() {
         </Link>
         <h1>Academic Resources</h1>
 
-        <Card style={{ maxWidth: '600px' }}>
+        <Card variant="elevated" style={{ maxWidth: '600px' }}>
           <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <h3 style={{ marginTop: 0 }}>Upload a Resource</h3>
             
@@ -154,7 +155,24 @@ function Resources() {
             <Input type="number" placeholder="Semester (e.g. 1-8)" value={semester} onChange={e => setSemester(e.target.value)} required min="1" max="8" />
             <Input type="text" placeholder="Tags (comma separated)" value={tags} onChange={e => setTags(e.target.value)} />
             
-            <input type="file" onChange={e => setFile(e.target.files[0])} required style={{ color: 'var(--text-secondary)', margin: '10px 0' }} />
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={e => setFile(e.target.files[0])}
+                required
+                style={{ display: 'none' }}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+                style={{ width: '100%', justifyContent: 'flex-start' }}
+              >
+                <Upload size={15} />
+                {file ? file.name : 'Choose File...'}
+              </Button>
+            </div>
 
             <Button type="submit" disabled={isUploading}>
               {isUploading ? 'Uploading...' : 'Upload Resource'}

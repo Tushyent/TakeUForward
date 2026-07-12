@@ -132,7 +132,7 @@ function Marketplace() {
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h1 style={{ margin: 0 }}>Secondhand Marketplace</h1>
+          <h1 style={{ margin: 0 }}>Buy &amp; Sell</h1>
           <Button onClick={() => setShowForm(!showForm)}>
             {showForm ? 'Cancel' : 'Post an Item'}
           </Button>

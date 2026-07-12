@@ -396,7 +396,7 @@ function ProfileSettings() {
               Toggle which sections of your profile are visible to other students.
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2)' }}>
+            <div className="vis-grid">
               {Object.entries(profile.profileVisibility).map(([key, value]) => {
                 const label = key.replace(/([A-Z])/g, ' $1').replace(/^show/i, '').trim();
                 return (

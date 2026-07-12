@@ -6,6 +6,9 @@ import { sendDigestEmail } from '../config/mailer.js';
 import { logger } from '../utils/logger.js';
 
 export const generateAndSendWeeklyDigests = async () => {
+  logger.info('Weekly digest is currently on hold — not sending.');
+  return { sentCount: 0, skippedCount: 0, errorCount: 0 };
+
   try {
     const generalCommunity = await Community.findOne({ type: 'general' });
     const globalCommunityIds = generalCommunity ? [generalCommunity._id] : [];

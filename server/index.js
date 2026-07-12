@@ -2,6 +2,8 @@ import express from 'express';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import passport from 'passport';
 import { connectDB } from './config/db.js';
@@ -46,6 +48,8 @@ dotenv.config();
 const app = express();
 
 // Middleware
+app.use(helmet()); // Sets robust HTTP security headers
+app.use(compression()); // GZIP compression for faster API responses
 app.use(express.json());
 app.use(pinoHttp({
   logger,
@@ -170,11 +174,11 @@ let server;
 
 // Connect to DB and start server
 connectDB().then(async () => {
-  const smtpStatus = await verifyTransporter();
-  if (!smtpStatus.configured) {
+  const emailStatus = await verifyTransporter();
+  if (!emailStatus.configured) {
     logger.warn('SendGrid not configured — welcome emails and notifications will be silently skipped. Set SENDGRID_API_KEY in environment.');
-  } else if (!smtpStatus.verified) {
-    logger.error(`SendGrid verification FAILED: ${smtpStatus.message}. Welcome emails and notifications will NOT be sent.`);
+  } else if (!emailStatus.verified) {
+    logger.error(`SendGrid verification FAILED: ${emailStatus.message}. Welcome emails and notifications will NOT be sent.`);
   } else {
     logger.info('SendGrid configured and verified — email sending is active.');
   }

@@ -430,39 +430,38 @@ code, .counter {
 .grid-card-icon {
   transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
-.card:hover .grid-card-icon {
-  transform: scale(1.08);
+.card-lift:hover .grid-card-icon {
+  transform: scale(1.1) rotate(-2deg);
 }
 
 /* --- Card base + variants --- */
 .card {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   padding: var(--space-6);
   margin-bottom: var(--space-6);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.15);
   transition:
     box-shadow var(--transition-base),
     transform var(--transition-base),
-    border-color var(--transition-base);
+    border-color var(--transition-base),
+    background var(--transition-base);
 }
 
 .card-default {
-  background: var(--glass-surface);
+  background:
+    radial-gradient(ellipse 120% 80% at 0% 0%, color-mix(in srgb, var(--card-accent, transparent) 10%, transparent) 0%, transparent 70%),
+    var(--glass-surface);
   backdrop-filter: blur(var(--glass-surface-blur));
   -webkit-backdrop-filter: blur(var(--glass-surface-blur));
-  box-shadow: var(--shadow-sm);
-  border-color: var(--glass-border);
-}
-
-.card-default:hover {
-  border-color: var(--border);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  border-color: color-mix(in srgb, var(--card-accent, var(--border-light)) 50%, transparent);
 }
 
 .card-elevated {
   background: var(--glass-surface-hover);
   backdrop-filter: blur(var(--glass-surface-blur));
   -webkit-backdrop-filter: blur(var(--glass-surface-blur));
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45), 0 2px 4px rgba(0,0,0,0.3);
   border-color: var(--glass-border-strong);
 }
 
@@ -474,26 +473,31 @@ code, .counter {
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
-  box-shadow: var(--shadow-md);
-  border-color: rgba(255,255,255,0.06);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  border-color: rgba(255,255,255,0.12);
 }
 
 .card-highlight {
   background: var(--bg-surface);
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 0 0 1px var(--primary-glow), 0 4px 20px var(--primary-glow);
   border-color: var(--primary);
 }
 
 .card-lift {
-  transition:
-    box-shadow var(--transition-base),
-    transform var(--transition-base),
-    border-color var(--transition-base);
+  cursor: pointer;
 }
 .card-lift:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-  border-color: var(--border-strong);
+  box-shadow:
+    0 8px 28px rgba(0,0,0,0.35),
+    0 0 40px color-mix(in srgb, var(--card-accent, transparent) 10%, transparent);
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--card-accent, var(--border-strong)) 40%, transparent);
+}
+
+.card-no-hover.card-lift:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
 }
 
 /* --- Shared Input / Textarea / Select styles --- */
@@ -570,6 +574,19 @@ code, .counter {
 /* ============================================================
    RESPONSIVE UTILITIES
    ============================================================ */
+
+/* Profile visibility toggle grid */
+.vis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+@media (max-width: 480px) {
+  .vis-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .grid-auto-fill {
   display: grid;
@@ -965,6 +982,9 @@ code, .counter {
   font-weight: 500;
   text-decoration: none;
   transition: background var(--transition-fast), color var(--transition-fast);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sidebar-link:hover {
@@ -1078,8 +1098,8 @@ code, .counter {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
-  width: 1px;
   min-width: 0;
+  overflow-x: hidden;
 }
 
 .mobile-header {
@@ -1192,17 +1212,52 @@ code, .counter {
     min-width: 44px;
   }
 
-  /* Ensure all inputs and selects are full-width on mobile */
-  input, select, textarea {
+  /* Ensure all text-like inputs and selects are full-width on mobile */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select, textarea {
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box;
+  }
+
+  /* Checkbox/radio: explicit fixed size so they never blow up */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    flex-shrink: 0;
   }
 
   /* Prevent text overflow on small screens */
   .page-col h1, .page-col h2, .page-col h3 {
     word-break: break-word;
     overflow-wrap: break-word;
+  }
+
+  /* Larger navbar on mobile — brand, icons, controls */
+  .navbar-brand-name {
+    font-size: var(--text-lg);
+  }
+  .home-brand-name {
+    font-size: var(--text-base);
+  }
+  .navbar-logo {
+    width: 40px;
+    height: 40px;
+  }
+  .navbar-logo svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .navbar-actions svg,
+  .hamburger-btn svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .hamburger-btn {
+    width: 40px;
+    height: 40px;
   }
 }
 

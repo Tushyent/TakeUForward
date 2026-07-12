@@ -39,6 +39,30 @@ router.get('/search', async (req, res, next) => {
   }
 });
 
+// @route   GET /api/users/contacts
+// @desc    Get all SSN users + admin for direct messaging
+// @access  Private
+router.get('/contacts', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+
+  try {
+    const users = await User.find({
+      _id: { $ne: req.user._id },
+      $or: [
+        { email: { $regex: /@ssn\.edu\.in$/i } },
+        { isPlatformAdmin: true }
+      ]
+    })
+      .select('name handle email dept role isVerifiedAlumni isPlatformAdmin')
+      .sort({ isPlatformAdmin: -1, name: 1 })
+      .lean();
+
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // @route   GET /api/users/:username
 // @desc    Get public profile
 // @access  Public (or Private depending on if we want guests to see it, I'll make it authenticated for now)

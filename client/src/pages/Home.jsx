@@ -46,49 +46,34 @@ const renderGrid = (title, items, icon) => (
     </div>
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(165px, 1fr))',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
       gap: 'var(--space-4)',
     }}>
-      {items.map(({ to, icon: Icon, label, desc, color, glow }) => (
+      {items.map(({ to, icon: Icon, label, desc, color }) => (
         <Link to={to} key={label} style={{ textDecoration: 'none' }}>
           <Card
+            lift
+            accent={color}
             style={{
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
-              padding: 'var(--space-5)',
-              borderTop: `3px solid ${color}`,
-              background: `linear-gradient(180deg, ${glow}08 0%, transparent 100%)`,
-              transition: 'box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease, background 0.25s ease',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.boxShadow = `0 0 0 1px ${color}44, 0 0 24px ${color}22, 0 8px 32px rgba(0,0,0,0.3)`;
-              e.currentTarget.style.transform = 'translateY(-3px)';
-              e.currentTarget.style.borderColor = `${color}88`;
-              e.currentTarget.style.background = `linear-gradient(180deg, ${glow}14 0%, ${glow}04 100%)`;
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.boxShadow = 'none';
-              e.currentTarget.style.transform = 'none';
-              e.currentTarget.style.borderColor = 'var(--border)';
-              e.currentTarget.style.background = `linear-gradient(180deg, ${glow}08 0%, transparent 100%)`;
             }}
           >
             <div style={{
-              width: 40,
-              height: 40,
+              width: 44,
+              height: 44,
               borderRadius: 'var(--radius-md)',
-              background: `linear-gradient(135deg, ${color}22 0%, ${color}08 100%)`,
-              border: `1px solid ${color}44`,
+              background: `${color}28`,
+              border: `1px solid ${color}55`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 'var(--space-4)',
-              transition: 'background 0.25s ease, border-color 0.25s ease, transform 0.25s ease',
+              marginBottom: 'var(--space-5)',
             }}
             className="grid-card-icon"
             >
-              <Icon size={18} color={color} />
+              <Icon size={24} color={color} />
             </div>
             <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
               {label}
@@ -298,7 +283,7 @@ function Home() {
               margin: 0,
               lineHeight: 1.7,
             }}>
-              Welcome back to <strong style={{ color: 'var(--text-primary)' }}>TakeUForward</strong> — your campus community for academics, placements, and everything in between.
+              Welcome back to <strong style={{ color: 'var(--text-primary)' }} className="home-brand-name">TakeUForward</strong> — your campus community for academics, placements, and everything in between.
             </p>
           </div>
         </div>

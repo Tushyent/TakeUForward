@@ -1,5 +1,8 @@
+import dotenv from 'dotenv';
 import sgMail from '@sendgrid/mail';
 import { logger } from '../utils/logger.js';
+
+dotenv.config();
 
 export class SendGridError extends Error {
   constructor(message, code, statusCode) {
@@ -158,7 +161,7 @@ class SendGridService {
     info.apiKeyPresent = true;
 
     if (!this.from) {
-      info.message = 'EMAIL_FROM not set';
+      info.message = 'SENDGRID_FROM_EMAIL not set';
       return info;
     }
 

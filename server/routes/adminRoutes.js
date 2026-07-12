@@ -467,7 +467,7 @@ router.get('/activity', requireSystemAdmin, async (req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// Email Status — verify Resend configuration
+// Email Status — verify SendGrid configuration
 // ──────────────────────────────────────────────
 
 router.get('/email-status', requireSystemAdmin, async (req, res, next) => {
@@ -485,7 +485,7 @@ router.get('/email-status', requireSystemAdmin, async (req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// Email Test — send a real email and return Resend response
+// Email Test — send a real email and return SendGrid response
 // ──────────────────────────────────────────────
 
 router.post('/test-email', requireSystemAdmin, async (req, res) => {

@@ -57,6 +57,7 @@ function App() {
           <Suspense fallback={<Spinner text="Loading page..." />}>
             <Routes>
               {/* Public Routes */}
+              <Route path="/about" element={<About />} />
               <Route path="/login" element={<Login />} />
               <Route path="/pending-approval" element={<PendingApproval />} />
               <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
@@ -66,7 +67,6 @@ function App() {
                 <ProtectedRoute>
                   <AppLayout>
                     <Routes>
-                      <Route path="/about" element={<About />} />
                       <Route path="/complete-profile" element={<CompleteProfile />} />
                       <Route path="/community" element={<CommunityBrowse />} />
                       <Route path="/community/:id" element={<CommunityPosts />} />

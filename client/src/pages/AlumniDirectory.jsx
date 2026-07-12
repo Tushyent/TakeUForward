@@ -28,7 +28,11 @@ function AlumniDirectory() {
       const response = await axiosClient.get(`/alumni?${queryParams.toString()}`);
       setAlumniList(response.data.alumni);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load alumni directory');
+      if (err.code === 'ERR_NETWORK') {
+        setError('Cannot reach the server. Make sure the backend is running.');
+      } else {
+        setError(err.response?.data?.error || err.message || 'Failed to load alumni directory');
+      }
     } finally {
       setLoading(false);
     }

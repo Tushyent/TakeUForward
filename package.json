@@ -1,6 +1,8 @@
 {
   "name": "takeuforward",
   "version": "1.0.0",
+  "description": "The Ultimate SSN Campus Mentorship, Utility, & Networking Platform",
+  "author": "Tushyent N P",
   "main": "index.js",
   "directories": {
     "doc": "docs"

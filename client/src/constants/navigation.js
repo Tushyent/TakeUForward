@@ -27,7 +27,7 @@ export const NAV_CAREERS = [
 export const NAV_COMMUNITY = [
   { to: '/team-finder',   icon: UserCheck,    label: 'Team Finder' },
   { to: '/lost-found',    icon: Package,      label: 'Lost & Found' },
-  { to: '/marketplace',   icon: ShoppingBag,  label: 'Marketplace' },
+  { to: '/marketplace',   icon: ShoppingBag,  label: 'Buy & Sell' },
   { to: '/bookmarks',     icon: Bookmark,     label: 'Saved' },
   { to: '/chats',         icon: MessageSquare,label: 'Inbox' },
 ];

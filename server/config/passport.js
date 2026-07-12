@@ -5,8 +5,6 @@ import User from '../models/User.js';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
 import { isSystemAdminEmail, syncUserIdentity } from '../utils/userIdentity.js';
-import { logger } from '../utils/logger.js';
-import { sendWelcomeEmail } from '../config/mailer.js';
 
 dotenv.config();
 
@@ -73,14 +71,8 @@ passport.use(
           const changed = await syncUserIdentity(User, user);
           if (changed) await user.save();
 
-          if (isApproved) {
-            try {
-              const memberCount = await User.countDocuments({ isApproved: true });
-              await sendWelcomeEmail(user, memberCount);
-            } catch (err) {
-              logger.error({ err }, 'Failed to send welcome email on registration');
-            }
-          }
+          // Welcome email is sent after profile completion in authRoutes.js (isFirstCompletion)
+          // to avoid sending twice.
         } else {
           if (user.googleId !== profile.id) {
             user.googleId = profile.id;

@@ -26,3 +26,6 @@ tmp-*.log
 .DS_Store
 .vscode/
 .idea/
+
+# Others
+docs/

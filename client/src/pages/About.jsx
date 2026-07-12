@@ -1,8 +1,39 @@
 import React from 'react';
 import Card from '../components/ui/Card';
-import { Zap, MessageSquare, Users, GraduationCap, Shield, ArrowUpRight } from 'lucide-react';
+import { Users, Shield, Search, Heart, Sparkles, BookOpen } from 'lucide-react';
 
 function About() {
+  const features = [
+    {
+      icon: Shield,
+      color: 'var(--danger)',
+      bg: 'var(--danger-bg)',
+      feature: 'Server-Side Anonymity Engine',
+      why: 'Students were afraid to ask "dumb" questions or share sensitive confessions because their identities were tied to their profiles. We built an anonymity engine that strips your identity at the database level so you can ask anything without fear of judgment.'
+    },
+    {
+      icon: Users,
+      color: 'var(--success)',
+      bg: 'var(--success-bg)',
+      feature: 'Verified Alumni Directory & Mentorship',
+      why: 'Juniors had no structured way to find seniors for mock interviews, career guidance, or referrals. They relied on blind LinkedIn connections. We built a vetted directory to seamlessly bridge the gap between students and working professionals.'
+    },
+    {
+      icon: BookOpen,
+      color: 'var(--primary)',
+      bg: 'var(--primary-glow)',
+      feature: 'Centralized Academic Repository & AI Summaries',
+      why: 'Crucial study materials, PYQs, and notes were scattered across fragmented WhatsApp groups and expiring Google Drive links. We centralized all academic resources and integrated Gemini AI to summarize complex PDFs instantly.'
+    },
+    {
+      icon: Search,
+      color: 'var(--accent)',
+      bg: 'var(--accent-bg)',
+      feature: 'Campus Marketplace & Lost/Found',
+      why: 'Students had to spam official batch WhatsApp groups to sell second-hand textbooks or find lost ID cards, which cluttered academic channels. We created dedicated, peer-to-peer utility boards to handle campus life efficiently.'
+    }
+  ];
+
   return (
     <div className="page-transition">
       <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-6) var(--space-8)' }}>
@@ -12,12 +43,17 @@ function About() {
           position: 'relative',
           borderRadius: 'var(--radius-xl)',
           padding: 'var(--space-8) var(--space-6)',
-          marginBottom: 'var(--space-6)',
+          marginBottom: 'var(--space-8)',
           background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
           border: '1px solid rgba(124,106,247,0.2)',
           boxShadow: '0 0 40px rgba(124,106,247,0.08)',
           overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center'
         }}>
+          {/* Decorative Gradients */}
           <div style={{
             position: 'absolute', top: -50, right: -50,
             width: 200, height: 200, borderRadius: '50%',
@@ -31,101 +67,68 @@ function About() {
             pointerEvents: 'none',
           }} />
 
+          {/* Logo & Heading */}
           <div style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-            <div style={{
-              width: 56, height: 56,
-              borderRadius: 'var(--radius-lg)',
-              background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 20px var(--primary-glow)',
-              marginBottom: 'var(--space-4)',
-            }}>
-              <Zap size={28} color="white" fill="white" />
-            </div>
-            <h1 style={{ margin: '0 0 var(--space-2) 0' }}>About TakeUForward</h1>
+            <img 
+              src="/favicon.svg" 
+              alt="TakeUForward Logo" 
+              style={{ width: 80, height: 80, marginBottom: 'var(--space-4)', filter: 'drop-shadow(0 0 20px var(--primary-glow))' }} 
+            />
+            <h1 style={{ margin: '0 0 var(--space-3) 0', fontSize: '2.5rem', background: 'linear-gradient(to right, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              TakeUForward SSN
+            </h1>
+            
             <p style={{
-              fontSize: 'var(--text-base)', color: 'var(--text-secondary)',
-              lineHeight: 1.7, margin: 0,
+              fontSize: 'var(--text-lg)', color: 'var(--text-secondary)',
+              lineHeight: 1.7, margin: '0 auto', maxWidth: '700px'
             }}>
-              The single place a student needs to survive and thrive in college — connecting juniors with seniors
-              and alumni for mentorship, centralizing academic and placement knowledge that would otherwise be lost
-              year after year.
+              The ultimate platform connecting juniors, seniors, and alumni. 
+              We are centralizing academic knowledge, standardizing mentorship, and building a secure, thriving campus community for SSN College of Engineering.
             </p>
           </div>
         </div>
 
-        {/* ── WHY WE BUILT THIS ── */}
-        <Card style={{
-          marginBottom: 'var(--space-6)',
-          borderLeft: '3px solid var(--primary)',
-          padding: 'var(--space-5)',
-        }}>
-          <h2 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <MessageSquare size={18} color="var(--primary)" />
-            Why we built this
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
-              At SSN, information flows through a fragmented mix of WhatsApp groups, Instagram DMs, and word of mouth.
-              Notes and PYQs get passed down through Google Drive links that expire the moment a senior graduates.
-              Interview experiences live in people's memories, undocumented. Asking a "dumb" question requires
-              finding the right person to ask privately — and if you don't know who that is, you simply don't ask.
-            </p>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
-              Every incoming batch re-discovers the same mistakes. Seniors who want to mentor have no structured
-              way to give back — the same questions get asked in DMs, individually, over and over. Alumni who could
-              offer referrals are invisible to the juniors who need them. And none of this knowledge survives
-              beyond a 4-year cycle.
-            </p>
-            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.7, margin: 0 }}>
-              TakeUForward exists to fix that — by making knowledge persistent, searchable, and role-aware;
-              by giving students a safe way to ask anonymously; and by building the single trusted place for
-              everything campus-related.
-            </p>
-          </div>
-        </Card>
+        {/* ── FEATURES & WHY ── */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'var(--space-6)' }}>
+          <Sparkles size={24} color="var(--primary)" />
+          <h2 style={{ margin: 0, fontSize: '1.8rem' }}>Why We Built This</h2>
+        </div>
 
-        {/* ── WHAT WE OFFER ── */}
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-4)' }}>
-          <Zap size={18} color="var(--accent)" />
-          What we offer
-        </h2>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-          gap: 'var(--space-4)',
-          marginBottom: 'var(--space-6)',
-        }}>
-          {[
-            { icon: MessageSquare, color: 'var(--primary)', bg: 'var(--primary-glow)', title: 'Knowledge that lasts',
-              desc: 'Notes, PYQs, interview experiences, and career guidance stored persistently — not lost when a batch graduates. Searchable by course, company, or role.' },
-            { icon: Users, color: 'var(--success)', bg: 'var(--success-bg)', title: 'Peer mentorship, structured',
-              desc: 'Seniors and alumni become discoverable for referrals, mock interviews, and resume reviews — replacing cold DMs with a structured matching layer.' },
-            { icon: GraduationCap, color: 'var(--accent)', bg: 'var(--accent-bg)', title: 'Community-driven',
-              desc: 'Built by students, for students. Clubs get an owned publishing channel, batch communities auto-assign, and the platform only works because of what the community puts into it.' },
-            { icon: Shield, color: 'var(--danger)', bg: 'var(--danger-bg)', title: 'Safe to ask',
-              desc: 'Anonymity is a first-class option — ask anything without fear of judgment. Server-side identity stripping means even we cannot accidentally expose who you are.' },
-          ].map(({ icon: Icon, color, bg, title, desc }) => (
-            <Card key={title} style={{
-              padding: 'var(--space-5)',
-              borderTop: `3px solid ${color}`,
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)', marginBottom: 'var(--space-8)' }}>
+          {features.map((item, idx) => (
+            <Card key={idx} style={{
+              padding: 'var(--space-6)',
+              borderLeft: `4px solid ${item.color}`,
               display: 'flex',
               flexDirection: 'column',
+              gap: 'var(--space-4)',
+              background: 'var(--bg-surface)'
             }}>
-              <div style={{
-                width: 40, height: 40,
-                borderRadius: 'var(--radius-md)',
-                background: `${bg}88`,
-                border: `1px solid ${color}44`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: 'var(--space-4)',
-              }}>
-                <Icon size={20} color={color} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+                <div style={{
+                  width: 48, height: 48,
+                  borderRadius: 'var(--radius-md)',
+                  background: `${item.bg}88`,
+                  border: `1px solid ${item.color}44`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <item.icon size={24} color={item.color} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-primary)' }}>
+                  <span style={{ color: item.color, fontWeight: 700 }}>Feature:</span> {item.feature}
+                </h3>
               </div>
-              <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-base)' }}>{title}</h3>
-              <p style={{ color: 'var(--text-secondary)', margin: 0, lineHeight: 1.7, fontSize: 'var(--text-sm)' }}>
-                {desc}
-              </p>
+              
+              <div style={{ 
+                background: 'rgba(255,255,255,0.03)', 
+                padding: 'var(--space-4)', 
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid rgba(255,255,255,0.05)'
+              }}>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: 'var(--text-base)' }}>
+                  <strong style={{ color: 'var(--text-primary)' }}>Why:</strong> {item.why}
+                </p>
+              </div>
             </Card>
           ))}
         </div>
@@ -133,20 +136,22 @@ function About() {
         {/* ── FOOTER ── */}
         <Card style={{
           textAlign: 'center',
-          padding: 'var(--space-6)',
+          padding: 'var(--space-8) var(--space-6)',
           borderStyle: 'dashed',
+          borderColor: 'rgba(255,255,255,0.1)',
+          background: 'transparent'
         }}>
-          <ArrowUpRight size={20} color="var(--primary)" style={{ marginBottom: 'var(--space-3)' }} />
-          <p style={{
-            color: 'var(--text-secondary)',
-            lineHeight: 1.7,
-            fontSize: 'var(--text-sm)',
-            margin: 0,
-          }}>
-            TakeUForward is a student-built, community-driven platform for SSN College of Engineering.
-            This is a community-driven platform — don't be shy to start. Let's grow this together.
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 'var(--space-4)' }}>
+            <Heart size={24} color="var(--danger)" fill="var(--danger)" className="animate-pulse" />
+          </div>
+          <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: '1.5rem', color: 'var(--text-primary)' }}>
+            Built with <span style={{ color: 'var(--danger)' }}>&lt;3</span> for SSN
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
+            by <strong>Tushyent N P</strong>
           </p>
         </Card>
+
       </div>
     </div>
   );

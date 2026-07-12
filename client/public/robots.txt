@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Do not index internal dashboard routes behind authentication
+Disallow: /home
+Disallow: /profile
+Disallow: /chat
+Disallow: /admin
+Disallow: /resources
+Disallow: /referrals
+Disallow: /api/
+
+Sitemap: https://takeuforward-ssn.vercel.app/sitemap.xml

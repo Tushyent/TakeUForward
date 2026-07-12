@@ -147,7 +147,9 @@ router.patch('/profile', async (req, res, next) => {
     const totalUsers = await mongoose.model('User').countDocuments({ isApproved: true });
 
     if (isFirstCompletion) {
-      sendWelcomeEmail(req.user, totalUsers);
+      sendWelcomeEmail(req.user, totalUsers).catch((err) => {
+        logger.warn({ err, to: req.user.email }, 'sendWelcomeEmail: failed (non-blocking)');
+      });
     }
 
     res.status(200).json({ message: 'Profile updated', user: req.user, profileComplete: true, totalUsers });

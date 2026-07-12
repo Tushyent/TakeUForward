@@ -245,7 +245,7 @@ Render's free tier spins a service down after roughly 15 minutes without traffic
  | chats, reviews |      +--------------------+       +--------------------+
  +----------------+
          |
-         +---- Nodemailer -> SMTP/Resend -> [Email notifications]
+          +---- SendGrid (@sendgrid/mail) -> [Email notifications]
          |
          +---- (Phase 2) Socket.io -> persistent WS connections -> [Instant chat/comments]
 ```
@@ -425,9 +425,9 @@ If the app ever runs on multiple backend server instances, a plain in-memory `us
 
 # 12. Notifications
 
-## 12.1 Email — Nodemailer (build now)
+## 12.1 Email — SendGrid (build now)
 
-Straightforward given the Node backend: Nodemailer sends email via SMTP — Gmail SMTP is fine for low volume during development, with a transactional provider (Resend, SendGrid) as a more reliable option if volume grows. Triggers: reply to your post, comment on your thread, @mention, weekly digest (Phase 2).
+Uses `@sendgrid/mail` via `server/services/SendGridService.js` — an HTTP API (no SMTP ports blocked on Render). Triggers: reply to your post, comment on your thread, @mention, welcome email, weekly digest (Phase 2). Requires a verified sender identity or authenticated domain in SendGrid dashboard.
 
 ## 12.2 WhatsApp notifications — correctly identified as a good idea, but deferred, and here's precisely why
 
