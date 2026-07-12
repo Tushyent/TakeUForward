@@ -22,7 +22,7 @@ class SendGridService {
 
   _init() {
     this.apiKey = process.env.SENDGRID_API_KEY || null;
-    this.from = process.env.EMAIL_FROM || null;
+    this.from = process.env.SENDGRID_FROM_EMAIL || null;
 
     if (!this.apiKey) {
       logger.warn('SendGridService: SENDGRID_API_KEY not set — all email sending disabled.');
@@ -31,7 +31,7 @@ class SendGridService {
 
     if (!this.from) {
       logger.warn(
-        'SendGridService: EMAIL_FROM not set — you must set EMAIL_FROM to a verified sender in SendGrid.'
+        'SendGridService: SENDGRID_FROM_EMAIL not set — you must set SENDGRID_FROM_EMAIL to a verified sender in SendGrid.'
       );
     }
 
