@@ -25,7 +25,7 @@ Status values: Not Started / In Progress / Done / Blocked
 | 1:1 Direct Messaging (polling) | 1 | Done | | server/models/Chat.js, server/routes/chatRoutes.js, client/src/pages/Chats.jsx | 2026-07-05 |
 | Report/Moderation Queue | 1 | Done (System Admin Only) | | server/routes/moderationRoutes.js, server/middleware/requireSystemAdmin.js, client/src/pages/ModerationQueue.jsx | 2026-07-11 |
 | Search & Filter | 1 | Done | | client/src/components/SearchFilterBar.jsx, server/routes/postRoutes.js | 2026-07-05 |
-| Email Notifications | 1 | Done (Deep Links) | | server/config/mailer.js, server/services/notificationService.js, server/models/Notification.js | 2026-07-11 |
+| Email Notifications | 1 | Done (SendGrid) | | server/config/mailer.js, server/services/SendGridService.js, server/services/notificationService.js, server/models/Notification.js | 2026-07-12 |
 | @Mentions | 1 | Done (Email Handle Based, Deep Linked) | | server/models/Notification.js, server/routes/postRoutes.js, server/routes/clubRoutes.js, server/routes/userRoutes.js, server/utils/userIdentity.js | 2026-07-11 |
 
 ## Phase 2: Professional Networking & Growth

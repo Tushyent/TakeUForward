@@ -30,7 +30,7 @@ describe('1:1 Chat Messaging & Notifications', () => {
   const originalNotificationEnv = {};
 
   beforeAll(async () => {
-    for (const key of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'RESEND_API_KEY', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT']) {
+    for (const key of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS', 'RESEND_API_KEY', 'SENDGRID_API_KEY', 'SENDGRID_FROM_EMAIL', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT']) {
       originalNotificationEnv[key] = process.env[key];
       delete process.env[key];
     }

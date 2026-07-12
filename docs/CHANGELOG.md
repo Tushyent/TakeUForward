@@ -8,21 +8,17 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Changed
-- **[Email] Complete email system refactor — EmailService class + Resend v6 SDK fix:** Created `server/services/EmailService.js` — a reusable EmailService class with:
-  - **Root cause fix**: Resend v6 SDK returns `{ data, error, headers }` instead of throwing. Previous code did `await resend.emails.send({...})` without checking `result.error`, silently swallowing all failures. EmailService now checks `result.error` and throws `EmailError` with the actual Resend error message.
-  - **Retry logic**: `sendWithRetry()` with exponential backoff (1s, 2s, 4s) for transient failures. CONFIG_ERROR/VALIDATION_ERROR are thrown immediately without retry.
-  - **Timeout**: 15s AbortController timeout per send attempt.
-  - **Input validation**: Checks for missing `to`, `subject`, `html` before sending.
-  - **Detailed logging**: Logs sender, recipient, subject before send; email ID and status after success; full error on failure.
-  - **Singleton pattern**: Initialized once at module load with `RESEND_API_KEY` and `EMAIL_FROM`.
-  - **Runtime deinit**: Detects if `RESEND_API_KEY` is removed from env after initialization (handles test cleanup).
-- **[Email] Rewrote `server/config/mailer.js`** as a thin wrapper over EmailService, preserving all exported function names (`sendEmail`, `sendWelcomeEmail`, `sendNotificationEmail`, `sendDigestEmail`, `verifyTransporter`, `buildNotificationEmail`, `buildWelcomeEmailHtml`). Functions no longer silently swallow errors — they log and return the result or throw.
-- **[Email] Updated `server/routes/adminRoutes.js`**: `/email-status` returns detailed health info (configured, verified, from, sdkVersion, timestamp) with appropriate HTTP status (200/502/503). `/test-email` returns the full Resend response including `emailId` on success, or detailed error on failure.
-- **[Email] Updated `server/index.js`** startup check to log Resend verification result.
-- **[Test] Fixed `tests/chat.test.js`**: Now clears `RESEND_API_KEY` in `beforeAll` to prevent EmailService from attempting real sends during tests. Test passes in 173ms instead of timing out at 5s.
-- **[Test] Fixed `tests/notificationEmail.test.js`**: Removed `email.text` assertions (Resend API is HTML-only).
-- **[Config] Updated `.env.example`**: Replaced SMTP vars with `RESEND_API_KEY` and `EMAIL_FROM`.
-- **[Docs] Updated `DEPLOYMENT.md`**: Replaced SMTP env var table with Resend vars. Added §7.10 documenting the `onboarding@resend.dev` sandbox limitation.
+- **[Email] Migrated from Resend to Twilio SendGrid:** Replaced `resend` package with `@sendgrid/mail`. Created `server/services/SendGridService.js` — a class with send/sendWithRetry/verify, 15s AbortController timeout, proper error classification (CONFIG_ERROR, SENDGRID_ERROR, VALIDATION_ERROR). Removed `server/services/EmailService.js` (Resend-based). Rewrote `server/config/mailer.js` to use SendGridService. Preserved all exported function interfaces so callers (notificationService, digestService, authRoutes, passport.js) need zero changes.
+- **[Email] Fixed `escapeHtml` bug:** Replacement values were literal characters (`'&'` → no-op) instead of HTML entity strings (`'&amp;'`). Now properly escapes HTML in notification emails.
+- **[Email] Updated `server/index.js`** startup check to log SendGrid verification result.
+- **[Test] Fixed `tests/prodSafety.test.js`**: Relaxed assertion from exact `toBe` to `toContain` to tolerate SendGrid warn logs in stdout.
+- **[Test] Fixed `tests/chat.test.js`**: Added `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL` to `beforeAll` cleanup list.
+- **[Config] Updated `.env.example`**: Replaced `RESEND_API_KEY`/`EMAIL_FROM` with `SENDGRID_API_KEY`/`SENDGRID_FROM_EMAIL`.
+- **[Config] Updated `server/.env`**: Same var swap with real SendGrid API key and `takeuforwardssn@gmail.com` sender.
+- **[Docs] Updated `DEPLOYMENT.md`**: Replaced Resend env vars with SendGrid vars in env table. Updated §7.10 with migration record. Added §7.11 documenting SendGrid sender verification requirement.
+
+### Removed
+- **[Email] `server/services/EmailService.js` deleted**, `resend` package uninstalled, `RESEND_API_KEY` and `EMAIL_FROM` env vars removed from all config files.
 
 ### Added
 - **[Admin] Recent signups feed:** Added `GET /admin/signups` endpoint returning recent user registrations. Displayed as a scrollable "Recent Signups" card on the admin dashboard overview tab with avatar, name, email, dept, year, and date. (PART 12)

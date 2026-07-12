@@ -105,8 +105,8 @@ across the project so far.
 | `AWS_BUCKET_NAME` | Yes | bucket name | Uploads fail / 404 on file access |
 | `AWS_REGION` | Yes | e.g. `ap-south-1` | Presigned URL generation fails or points to wrong region |
 | `GEMINI_API_KEY` | Yes | from Google AI Studio | Resource summarization silently falls back (should degrade gracefully — see §8) |
-| `RESEND_API_KEY` | Yes | `re_...` from Resend dashboard | All transactional email (welcome, notifications, digest) uses Resend. No email sent if missing. |
-| `EMAIL_FROM` | Yes | `onboarding@resend.dev` (sandbox) or verified domain | Sender address. With sandbox, can only send to your own verified email. Verify a domain in Resend for production. |
+| `SENDGRID_API_KEY` | Yes | from SendGrid dashboard (Settings → API Keys) | All transactional email (welcome, notifications, digest) uses SendGrid. No email sent if missing. |
+| `SENDGRID_FROM_EMAIL` | Yes | `notifications@yourdomain.com` | A verified single sender or verified domain in SendGrid. Must match what was verified in SendGrid dashboard. |
 | `CRON_SECRET` | Yes (for Weekly Digest) | long random string | Weekly Digest endpoint `/api/jobs/weekly-digest` will reject external triggers |
 | `VAPID_PUBLIC_KEY` | Yes (for Web Push) | Web Push public key | Generated via `npx web-push generate-vapid-keys` |
 | `VAPID_PRIVATE_KEY`| Yes (for Web Push) | Web Push private key | Generated via `npx web-push generate-vapid-keys` |
@@ -360,7 +360,14 @@ the recommendation.
 ### 7.10 Resend sandbox domain — only sends to verified emails
 - **Symptom:** `verifyTransporter()` passes at startup and `POST /api/admin/test-email` returns success for the admin's email, but notification emails (mentions, replies, comments) to other users never arrive.
 - **Root cause:** Resend's default `onboarding@resend.dev` sandbox sender can only deliver to the email address that created the Resend account. Sending to any other address succeeds (no API error) but the email is silently dropped.
-- **Fix:** Verify a domain in Resend dashboard (Settings → Domains → Add Domain), update DNS TXT records, then set `EMAIL_FROM="TakeUForward SSN" <notifications@yourdomain.com>` and `RESEND_API_KEY=re_...` in Render env vars.
+- **Fix (original):** Verify a domain in Resend dashboard (Settings → Domains → Add Domain), update DNS TXT records, then set `EMAIL_FROM="TakeUForward SSN" <notifications@yourdomain.com>` and `RESEND_API_KEY=re_...` in Render env vars.
+- **Fix (2026-07-12):** Migrated from Resend to Twilio SendGrid. SendGrid uses HTTP API (no SMTP ports blocked on Render) and requires sender verification. See §7 entry 5.
+
+### 7.11 SendGrid migration — Resend replaced
+- **Symptom:** N/A — proactive migration after discovering Resend sandbox limitations. Resend's `onboarding@resend.dev` sender could only deliver to the account owner's email, making notification emails (mention/reply/digest) to other users silently fail.
+- **Root cause:** Resend API worked correctly for `verifyTransporter()` (sends to `test@resend.dev`) but delivery to real users was silently dropped due to sandbox restrictions. Render also blocks outbound SMTP, so nodemailer/SMTP was not a fallback option.
+- **Fix:** Replaced Resend with Twilio SendGrid (`@sendgrid/mail`). Created `server/services/SendGridService.js` with identical interface: send(), sendWithRetry(), verify(). Rewrote `server/config/mailer.js` to use SendGridService. Removed `resend` package, `EmailService.js`, and all Resend env vars. New env vars: `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL`. Added 15s AbortController timeout, detailed error extraction for SendGrid-specific errors, and proper error classification (CONFIG_ERROR, SENDGRID_ERROR, VALIDATION_ERROR).
+- **Requirement:** SendGrid requires a verified single sender or verified domain before sending. You must set up sender verification in SendGrid dashboard (Settings → Sender Authentication → Verify Single Sender) using a real email address, then set `SENDGRID_FROM_EMAIL` to that address.
 
 ## 7. Known Issues & Operational Runbook
 

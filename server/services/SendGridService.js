@@ -1,112 +1,103 @@
-import { Resend } from 'resend';
+import sgMail from '@sendgrid/mail';
 import { logger } from '../utils/logger.js';
 
-export class EmailError extends Error {
+export class SendGridError extends Error {
   constructor(message, code, statusCode) {
     super(message);
-    this.name = 'EmailError';
+    this.name = 'SendGridError';
     this.code = code || 'UNKNOWN';
     this.statusCode = statusCode || null;
   }
 }
 
-class EmailService {
+class SendGridService {
   constructor() {
-    this.resend = null;
-    this.from = null;
     this.apiKey = null;
+    this.from = null;
     this.ready = false;
-    this.sdkVersion = '6.17.2';
+    this.sdkVersion = '8.1.0';
 
     this._init();
   }
 
   _init() {
-    this.apiKey = process.env.RESEND_API_KEY || null;
+    this.apiKey = process.env.SENDGRID_API_KEY || null;
     this.from = process.env.EMAIL_FROM || null;
 
     if (!this.apiKey) {
-      logger.warn('EmailService: RESEND_API_KEY not set — all email sending disabled.');
+      logger.warn('SendGridService: SENDGRID_API_KEY not set — all email sending disabled.');
       return;
     }
 
     if (!this.from) {
-      this.from = 'onboarding@resend.dev';
       logger.warn(
-        'EmailService: EMAIL_FROM not set — using %s. '
-        + 'Resend sandbox only delivers to the verified account email. '
-        + 'Set EMAIL_FROM to a verified domain for production.',
-        this.from
+        'SendGridService: EMAIL_FROM not set — you must set EMAIL_FROM to a verified sender in SendGrid.'
       );
     }
 
     try {
-      this.resend = new Resend(this.apiKey);
+      sgMail.setApiKey(this.apiKey);
       this.ready = true;
-      logger.info('EmailService: initialized (from=%s, sdk=%s)', this.from, this.sdkVersion);
+      logger.info('SendGridService: initialized (from=%s, sdk=%s)', this.from, this.sdkVersion);
     } catch (err) {
-      logger.error({ err }, 'EmailService: failed to initialize Resend client');
+      logger.error({ err }, 'SendGridService: failed to initialize SendGrid client');
     }
   }
 
   async send({ to, subject, html }) {
-    if (this.ready && !process.env.RESEND_API_KEY) {
+    if (this.ready && !process.env.SENDGRID_API_KEY) {
       this.ready = false;
-      this.resend = null;
-      logger.warn('EmailService: RESEND_API_KEY was removed from environment — deinitialized.');
+      logger.warn('SendGridService: SENDGRID_API_KEY was removed from environment — deinitialized.');
     }
 
     if (!this.ready) {
-      throw new EmailError(
-        'EmailService not initialized — set RESEND_API_KEY environment variable',
+      throw new SendGridError(
+        'SendGridService not initialized — set SENDGRID_API_KEY environment variable',
         'CONFIG_ERROR'
       );
     }
 
     if (!to) {
-      throw new EmailError('Recipient email (to) is required', 'VALIDATION_ERROR', 400);
+      throw new SendGridError('Recipient email (to) is required', 'VALIDATION_ERROR', 400);
     }
 
     if (!subject) {
-      throw new EmailError('Email subject is required', 'VALIDATION_ERROR', 400);
+      throw new SendGridError('Email subject is required', 'VALIDATION_ERROR', 400);
     }
 
     if (!html) {
-      throw new EmailError('Email HTML body is required', 'VALIDATION_ERROR', 400);
+      throw new SendGridError('Email HTML body is required', 'VALIDATION_ERROR', 400);
     }
 
-    const payload = { from: this.from, to, subject, html };
+    const payload = { to, from: this.from, subject, html };
 
     logger.info(
       { from: this.from, to, subject },
-      'EmailService.send: sending email'
+      'SendGridService.send: sending email'
     );
 
     let result;
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
-      result = await this.resend.emails.send(payload, { signal: controller.signal });
+      const response = await sgMail.send(payload);
       clearTimeout(timeoutId);
+      result = response;
     } catch (err) {
       if (err.name === 'AbortError') {
-        throw new EmailError('Email send timed out after 15s', 'TIMEOUT');
+        throw new SendGridError('Email send timed out after 15s', 'TIMEOUT');
       }
-      throw new EmailError(err.message, err.code || 'NETWORK_ERROR');
+      if (err.response?.body?.errors) {
+        const messages = err.response.body.errors.map(e => e.message).join('; ');
+        throw new SendGridError(messages, 'SENDGRID_ERROR', err.response.statusCode || 500);
+      }
+      throw new SendGridError(err.message, err.code || 'NETWORK_ERROR');
     }
 
-    if (result.error) {
-      throw new EmailError(
-        result.error.message || 'Unknown Resend error',
-        result.error.name || 'RESEND_ERROR',
-        result.error.statusCode || null
-      );
-    }
-
-    const emailId = result.data?.id || null;
+    const emailId = result[0]?.headers?.['x-message-id'] || null;
     logger.info(
       { emailId, to, subject, status: 'delivered' },
-      'EmailService.send: email sent successfully'
+      'SendGridService.send: email sent successfully'
     );
 
     return { id: emailId, raw: result };
@@ -119,7 +110,7 @@ class EmailService {
       try {
         const result = await this.send({ to, subject, html });
         if (attempt > 0) {
-          logger.info({ attempt, emailId: result.id }, 'EmailService: succeeded on retry');
+          logger.info({ attempt, emailId: result.id }, 'SendGridService: succeeded on retry');
         }
         return result;
       } catch (err) {
@@ -133,7 +124,7 @@ class EmailService {
           const backoff = Math.pow(2, attempt) * 1000;
           logger.warn(
             { attempt, maxRetries, backoffMs: backoff, errMsg: err.message },
-            'EmailService.sendWithRetry: retrying after error'
+            'SendGridService.sendWithRetry: retrying after error'
           );
           await new Promise(resolve => setTimeout(resolve, backoff));
         }
@@ -141,7 +132,7 @@ class EmailService {
     }
 
     const lastErr = errors[errors.length - 1];
-    throw new EmailError(
+    throw new SendGridError(
       `Failed after ${maxRetries + 1} attempts: ${lastErr.message}`,
       lastErr.code || 'RETRY_EXHAUSTED',
       lastErr.statusCode
@@ -160,7 +151,7 @@ class EmailService {
     };
 
     if (!this.apiKey) {
-      info.message = 'RESEND_API_KEY not set';
+      info.message = 'SENDGRID_API_KEY not set';
       return info;
     }
 
@@ -173,14 +164,14 @@ class EmailService {
 
     info.fromConfigured = true;
 
-    if (!this.ready || !this.resend) {
-      info.message = 'Resend client failed to initialize';
+    if (!this.ready) {
+      info.message = 'SendGrid client failed to initialize';
       return info;
     }
 
     try {
       const result = await this.send({
-        to: 'test@resend.dev',
+        to: 'test@sendgrid.com',
         subject: 'TakeUForward Email Health Check',
         html: `<p>Health check from TakeUForward server at ${new Date().toISOString()}.</p>`
       });
@@ -199,6 +190,6 @@ class EmailService {
   }
 }
 
-const emailService = new EmailService();
+const sendGridService = new SendGridService();
 
-export default emailService;
+export default sendGridService;

@@ -50,7 +50,7 @@ describe('Production Safety Tests', () => {
         env: { ...process.env, NODE_ENV: 'production', ALLOW_TEST_SESSION: 'true' },
         encoding: 'utf-8'
       });
-      expect(output.trim()).toBe('PASS: Route absent');
+      expect(output).toContain('PASS: Route absent');
     } finally {
       if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
     }
@@ -87,7 +87,7 @@ describe('Production Safety Tests', () => {
         env: { ...process.env, NODE_ENV: 'development', ALLOW_TEST_SESSION: 'false' },
         encoding: 'utf-8'
       });
-      expect(output.trim()).toBe('PASS: Route absent');
+      expect(output).toContain('PASS: Route absent');
     } finally {
       if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile);
     }

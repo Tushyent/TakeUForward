@@ -1,12 +1,8 @@
 import dotenv from 'dotenv';
 import { logger } from '../utils/logger.js';
-import emailService, { EmailError } from '../services/EmailService.js';
+import sendGridService, { SendGridError } from '../services/SendGridService.js';
 
 dotenv.config();
-
-// ──────────────────────────────────────────
-// Pure helpers — no side effects
-// ──────────────────────────────────────────
 
 const escapeHtml = (value = '') => String(value)
   .replace(/&/g, '&amp;')
@@ -20,10 +16,6 @@ const buildAbsoluteUrl = (targetPath = '/home') => {
   const safePath = targetPath.startsWith('/') ? targetPath : `/${targetPath}`;
   return `${clientUrl}${safePath}`;
 };
-
-// ──────────────────────────────────────────
-// Email builders
-// ──────────────────────────────────────────
 
 export const buildNotificationEmail = (user, type, isAnonymousSender, content = '', options = {}) => {
   const { targetPath = '/home', actorName, contextTitle, contextType } = options;
@@ -93,13 +85,9 @@ export const buildWelcomeEmailHtml = (name, memberCount) => {
   ].filter(Boolean).join('\n');
 };
 
-// ──────────────────────────────────────────
-// Email senders — thin wrappers
-// ──────────────────────────────────────────
-
 export const sendEmail = async ({ to, subject, html }) => {
   try {
-    const result = await emailService.sendWithRetry({ to, subject, html });
+    const result = await sendGridService.sendWithRetry({ to, subject, html });
     logger.info({ emailId: result.id, to, subject }, 'sendEmail: delivered');
     return { success: true, emailId: result.id };
   } catch (err) {
@@ -128,7 +116,7 @@ export const sendWelcomeEmail = async (user, memberCount) => {
   logger.info({ to: user.email, subject }, 'sendWelcomeEmail: sending welcome email');
 
   try {
-    const result = await emailService.sendWithRetry({ to: user.email, subject, html });
+    const result = await sendGridService.sendWithRetry({ to: user.email, subject, html });
     logger.info({ emailId: result.id, to: user.email }, 'sendWelcomeEmail: delivered');
     return { success: true, emailId: result.id };
   } catch (err) {
@@ -152,7 +140,7 @@ export const sendNotificationEmail = async (user, type, isAnonymousSender, conte
   }
 
   try {
-    const result = await emailService.sendWithRetry({ to: user.email, subject: email.subject, html: email.html });
+    const result = await sendGridService.sendWithRetry({ to: user.email, subject: email.subject, html: email.html });
     logger.info({ emailId: result.id, to: user.email, type }, 'sendNotificationEmail: delivered');
     return { success: true, emailId: result.id };
   } catch (err) {
@@ -172,7 +160,7 @@ export const sendDigestEmail = async (user, htmlContent) => {
   }
 
   try {
-    const result = await emailService.sendWithRetry({
+    const result = await sendGridService.sendWithRetry({
       to: user.email,
       subject: 'Your Weekly TakeUForward Digest',
       html: htmlContent
@@ -190,7 +178,7 @@ export const sendDigestEmail = async (user, htmlContent) => {
 
 export const verifyTransporter = async () => {
   try {
-    const status = await emailService.verify();
+    const status = await sendGridService.verify();
     logger.info({ status }, 'verifyTransporter: result');
     return status;
   } catch (err) {
@@ -199,4 +187,4 @@ export const verifyTransporter = async () => {
   }
 };
 
-export { EmailError };
+export { SendGridError };

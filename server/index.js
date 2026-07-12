@@ -172,11 +172,11 @@ let server;
 connectDB().then(async () => {
   const smtpStatus = await verifyTransporter();
   if (!smtpStatus.configured) {
-    logger.warn('Resend API not configured — welcome emails and notifications will be silently skipped. Set RESEND_API_KEY in environment.');
+    logger.warn('SendGrid not configured — welcome emails and notifications will be silently skipped. Set SENDGRID_API_KEY in environment.');
   } else if (!smtpStatus.verified) {
-    logger.error(`Resend verification FAILED: ${smtpStatus.message}. Welcome emails and notifications will NOT be sent.`);
+    logger.error(`SendGrid verification FAILED: ${smtpStatus.message}. Welcome emails and notifications will NOT be sent.`);
   } else {
-    logger.info('Resend configured and verified — email sending is active.');
+    logger.info('SendGrid configured and verified — email sending is active.');
   }
 
   server = app.listen(PORT, () => {
