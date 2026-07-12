@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
 import { LogOut, Zap, X, Settings } from 'lucide-react';
@@ -21,7 +21,6 @@ const SidebarItem = ({ to, icon: Icon, label, isActive, onClick }) => {
 };
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
 
@@ -29,7 +28,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const handleLogout = async () => {
     try { await axiosClient.get('/auth/logout'); } catch { /* silent */ }
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   const sections = [

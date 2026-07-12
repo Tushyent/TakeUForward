@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/auth-context';
-import { useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -27,7 +26,6 @@ function CompleteProfile() {
   const { fetchAuth } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMe = async () => {
@@ -68,7 +66,7 @@ function CompleteProfile() {
       }
       // Refresh global auth state so ProtectedRoute sees profileComplete: true
       await fetchAuth();
-      navigate('/home');
+      window.location.href = '/home'; // Hard reload to clear any stale PWA cache chunks
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to update profile');
       toast.error(err.response?.data?.error || 'Failed to update profile');

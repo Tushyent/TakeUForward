@@ -1,19 +1,17 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { LogOut, Clock, Mail } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import Button from '../components/ui/Button';
 
 const PendingApproval = () => {
-  const navigate = useNavigate();
   const handleLogout = async () => {
     try {
       await axiosClient.get('/auth/logout');
-      navigate('/login');
     } catch (err) {
       console.error(err);
-      navigate('/login');
     }
+    window.location.href = '/login';
   };
 
   return (

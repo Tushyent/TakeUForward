@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
 import { LogOut, Zap, Menu, X, Settings } from 'lucide-react';
@@ -31,7 +31,6 @@ const DrawerItem = ({ to, icon: Icon, label, isActive, onClick }) => (
 );
 
 const Navbar = () => {
-  const navigate = useNavigate();
   const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -39,7 +38,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try { await axiosClient.get('/auth/logout'); } catch { /* silent */ }
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   const closeDrawer = () => setDrawerOpen(false);

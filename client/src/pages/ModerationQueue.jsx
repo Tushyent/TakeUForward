@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosClient from '../api/axiosClient';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Spinner from '../components/ui/Spinner';
 import Card from '../components/ui/Card';
@@ -16,7 +16,6 @@ const ModerationQueue = () => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   const fetchQueue = React.useCallback(async () => {
     try {
@@ -29,7 +28,7 @@ const ModerationQueue = () => {
       setAlumniRequests(alumniData);
     } catch (err) {
       if (err.response?.status === 401) {
-        navigate('/login');
+        window.location.href = '/login';
       } else if (err.response?.status === 403) {
         setError('You are not authorized to view this page. Platform Admins only.');
       } else {
@@ -38,7 +37,7 @@ const ModerationQueue = () => {
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     fetchQueue();
