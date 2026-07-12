@@ -48,7 +48,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(helmet()); // Sets robust HTTP security headers
+app.use(helmet({ contentSecurityPolicy: false })); // Sets robust HTTP security headers, but allows our inline auth script
 app.use(compression()); // GZIP compression for faster API responses
 app.use(express.json());
 app.use(pinoHttp({
