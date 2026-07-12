@@ -26,7 +26,7 @@ import { isSystemAdminUser } from '../utils/userIdentity.js';
 import { logActivity } from '../services/activityLogger.js';
 import ActivityLog from '../models/ActivityLog.js';
 import { verifyTransporter } from '../config/mailer.js';
-import emailService from '../services/EmailService.js';
+import sendGridService from '../services/SendGridService.js';
 
 const router = express.Router();
 
@@ -495,7 +495,7 @@ router.post('/test-email', requireSystemAdmin, async (req, res) => {
   }
 
   try {
-    const result = await emailService.sendWithRetry({
+    const result = await sendGridService.sendWithRetry({
       to,
       subject: 'TakeUForward Email Test',
       html: `<p>This is a test email from TakeUForward.</p><p>If you received this, the email system is working correctly.</p><p>Sent at: ${new Date().toISOString()}</p>`
