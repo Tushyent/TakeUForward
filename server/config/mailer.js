@@ -1,10 +1,12 @@
-import { Resend } from 'resend';
 import dotenv from 'dotenv';
 import { logger } from '../utils/logger.js';
+import emailService, { EmailError } from '../services/EmailService.js';
 
 dotenv.config();
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_missing');
+// ──────────────────────────────────────────
+// Pure helpers — no side effects
+// ──────────────────────────────────────────
 
 const escapeHtml = (value = '') => String(value)
   .replace(/&/g, '&amp;')
@@ -19,13 +21,12 @@ const buildAbsoluteUrl = (targetPath = '/home') => {
   return `${clientUrl}${safePath}`;
 };
 
+// ──────────────────────────────────────────
+// Email builders
+// ──────────────────────────────────────────
+
 export const buildNotificationEmail = (user, type, isAnonymousSender, content = '', options = {}) => {
-  const {
-    targetPath = '/home',
-    actorName,
-    contextTitle,
-    contextType
-  } = options;
+  const { targetPath = '/home', actorName, contextTitle, contextType } = options;
 
   const targetUrl = buildAbsoluteUrl(targetPath);
   const senderLabel = isAnonymousSender ? 'An anonymous user' : (actorName || 'Someone');
@@ -65,67 +66,6 @@ export const buildNotificationEmail = (user, type, isAnonymousSender, content = 
   return null;
 };
 
-export const sendNotificationEmail = async (user, type, isAnonymousSender, content = '', options = {}) => {
-  if (!process.env.RESEND_API_KEY) {
-    logger.warn('RESEND_API_KEY not configured. Skipping email notification.');
-    return;
-  }
-
-  const email = buildNotificationEmail(user, type, isAnonymousSender, content, options);
-  if (!email) {
-    return;
-  }
-
-  try {
-    const fromAddr = process.env.EMAIL_FROM || 'onboarding@resend.dev';
-    await resend.emails.send({
-      from: fromAddr,
-      to: user.email,
-      subject: email.subject,
-      html: email.html,
-    });
-  } catch (err) {
-    logger.error({ to: user.email, errMsg: err.message }, 'Error sending notification email');
-  }
-};
-
-export const sendDigestEmail = async (user, htmlContent) => {
-  if (!process.env.RESEND_API_KEY) {
-    return;
-  }
-
-  try {
-    const fromAddr = process.env.EMAIL_FROM || 'onboarding@resend.dev';
-    await resend.emails.send({
-      from: fromAddr,
-      to: user.email,
-      subject: 'Your Weekly TakeUForward Digest',
-      html: htmlContent,
-    });
-  } catch (err) {
-    logger.error({ to: user.email, errMsg: err.message }, 'Error sending digest email');
-  }
-};
-
-export const sendEmail = async ({ to, subject, html }) => {
-  if (!process.env.RESEND_API_KEY) {
-    logger.warn('RESEND_API_KEY not configured. Skipping email send.', { to, subject });
-    return;
-  }
-
-  try {
-    const fromAddr = process.env.EMAIL_FROM || 'onboarding@resend.dev';
-    await resend.emails.send({
-      from: fromAddr,
-      to,
-      subject,
-      html,
-    });
-  } catch (err) {
-    logger.error({ to, subject, errMsg: err.message }, 'Error sending email');
-  }
-};
-
 export const buildWelcomeEmailHtml = (name, memberCount) => {
   const safeName = escapeHtml(name || 'there');
   const clientUrl = (process.env.CLIENT_URL || 'https://takeuforward-ssn.vercel.app').replace(/\/+$/, '');
@@ -153,31 +93,110 @@ export const buildWelcomeEmailHtml = (name, memberCount) => {
   ].filter(Boolean).join('\n');
 };
 
+// ──────────────────────────────────────────
+// Email senders — thin wrappers
+// ──────────────────────────────────────────
+
+export const sendEmail = async ({ to, subject, html }) => {
+  try {
+    const result = await emailService.sendWithRetry({ to, subject, html });
+    logger.info({ emailId: result.id, to, subject }, 'sendEmail: delivered');
+    return { success: true, emailId: result.id };
+  } catch (err) {
+    logger.error({
+      to,
+      subject,
+      errMsg: err.message,
+      errCode: err.code,
+      errStatus: err.statusCode
+    }, 'sendEmail: failed');
+    throw err;
+  }
+};
+
 export const sendWelcomeEmail = async (user, memberCount) => {
-  if (!user.email) return;
+  if (!user?.email) {
+    logger.warn('sendWelcomeEmail: user has no email, skipping');
+    return;
+  }
+
   const html = buildWelcomeEmailHtml(user.name || user.email, memberCount);
-  await sendEmail({
-    to: user.email,
-    subject: memberCount
-      ? `Welcome to TakeUForward — You're member #${memberCount}!`
-      : 'Welcome to TakeUForward — Your Campus Community Awaits!',
-    html,
-  });
+  const subject = memberCount
+    ? `Welcome to TakeUForward — You're member #${memberCount}!`
+    : 'Welcome to TakeUForward — Your Campus Community Awaits!';
+
+  logger.info({ to: user.email, subject }, 'sendWelcomeEmail: sending welcome email');
+
+  try {
+    const result = await emailService.sendWithRetry({ to: user.email, subject, html });
+    logger.info({ emailId: result.id, to: user.email }, 'sendWelcomeEmail: delivered');
+    return { success: true, emailId: result.id };
+  } catch (err) {
+    logger.error({
+      to: user.email,
+      errMsg: err.message,
+      errCode: err.code
+    }, 'sendWelcomeEmail: failed');
+  }
+};
+
+export const sendNotificationEmail = async (user, type, isAnonymousSender, content = '', options = {}) => {
+  if (!user?.email) {
+    logger.warn('sendNotificationEmail: user has no email, skipping');
+    return;
+  }
+
+  const email = buildNotificationEmail(user, type, isAnonymousSender, content, options);
+  if (!email) {
+    return;
+  }
+
+  try {
+    const result = await emailService.sendWithRetry({ to: user.email, subject: email.subject, html: email.html });
+    logger.info({ emailId: result.id, to: user.email, type }, 'sendNotificationEmail: delivered');
+    return { success: true, emailId: result.id };
+  } catch (err) {
+    logger.error({
+      to: user.email,
+      type,
+      errMsg: err.message,
+      errCode: err.code
+    }, 'sendNotificationEmail: failed');
+  }
+};
+
+export const sendDigestEmail = async (user, htmlContent) => {
+  if (!user?.email) {
+    logger.warn('sendDigestEmail: user has no email, skipping');
+    return;
+  }
+
+  try {
+    const result = await emailService.sendWithRetry({
+      to: user.email,
+      subject: 'Your Weekly TakeUForward Digest',
+      html: htmlContent
+    });
+    logger.info({ emailId: result.id, to: user.email }, 'sendDigestEmail: delivered');
+    return { success: true, emailId: result.id };
+  } catch (err) {
+    logger.error({
+      to: user.email,
+      errMsg: err.message,
+      errCode: err.code
+    }, 'sendDigestEmail: failed');
+  }
 };
 
 export const verifyTransporter = async () => {
-  if (!process.env.RESEND_API_KEY) {
-    return { configured: false, message: 'RESEND_API_KEY not set' };
-  }
   try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM || 'onboarding@resend.dev',
-      to: 'test@resend.dev',
-      subject: 'TakeUForward SMTP Health Check',
-      html: '<p>Do not reply. This is an automated health check from the TakeUForward server.</p>'
-    });
-    return { configured: true, verified: true };
+    const status = await emailService.verify();
+    logger.info({ status }, 'verifyTransporter: result');
+    return status;
   } catch (err) {
-    return { configured: true, verified: false, message: err.message };
+    logger.error({ errMsg: err.message }, 'verifyTransporter: unexpected error');
+    return { configured: false, verified: false, message: err.message };
   }
 };
+
+export { EmailError };

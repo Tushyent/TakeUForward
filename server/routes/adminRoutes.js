@@ -25,7 +25,8 @@ import { getPaginationParams } from '../utils/paginationUtils.js';
 import { isSystemAdminUser } from '../utils/userIdentity.js';
 import { logActivity } from '../services/activityLogger.js';
 import ActivityLog from '../models/ActivityLog.js';
-import { sendEmail, verifyTransporter } from '../config/mailer.js';
+import { verifyTransporter } from '../config/mailer.js';
+import emailService from '../services/EmailService.js';
 
 const router = express.Router();
 
@@ -466,34 +467,55 @@ router.get('/activity', requireSystemAdmin, async (req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// Email Status — check if Resend is connected
+// Email Status — verify Resend configuration
 // ──────────────────────────────────────────────
 
 router.get('/email-status', requireSystemAdmin, async (req, res, next) => {
   try {
     const status = await verifyTransporter();
-    res.json(status);
+    const httpStatus = status.verified ? 200 : (status.configured ? 502 : 503);
+    res.status(httpStatus).json({
+      ...status,
+      nodeEnv: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString()
+    });
   } catch (err) {
     next(err);
   }
 });
 
 // ──────────────────────────────────────────────
-// Email Test — send a test email to yourself
+// Email Test — send a real email and return Resend response
 // ──────────────────────────────────────────────
 
-router.post('/test-email', requireSystemAdmin, async (req, res, next) => {
+router.post('/test-email', requireSystemAdmin, async (req, res) => {
   const { to } = req.body;
-  if (!to) return res.status(400).json({ error: { message: 'Recipient email (to) is required' } });
+  if (!to) {
+    return res.status(400).json({ error: { message: 'Recipient email (to) is required' } });
+  }
+
   try {
-    await sendEmail({
+    const result = await emailService.sendWithRetry({
       to,
-      subject: 'TakeUForward Resend Test',
-      html: `<p>This is a test email from TakeUForward via Resend. If you received this, email is working correctly.</p>`
+      subject: 'TakeUForward Email Test',
+      html: `<p>This is a test email from TakeUForward.</p><p>If you received this, the email system is working correctly.</p><p>Sent at: ${new Date().toISOString()}</p>`
     });
-    res.json({ message: `Test email sent to ${to}. Check inbox and spam folder.` });
+
+    res.json({
+      success: true,
+      message: `Test email sent to ${to}.`,
+      emailId: result.id,
+      timestamp: new Date().toISOString()
+    });
   } catch (err) {
-    next(err);
+    res.status(502).json({
+      success: false,
+      message: 'Email send failed',
+      error: err.message,
+      code: err.code,
+      statusCode: err.statusCode,
+      timestamp: new Date().toISOString()
+    });
   }
 });
 
