@@ -36,6 +36,7 @@ export const NAV_ADMIN = [
   { to: '/admin', icon: ShieldAlert, label: 'Admin' },
   { to: '/activity', icon: History, label: 'Activity Log' },
   { to: '/moderation', icon: ShieldAlert, label: 'Moderation' },
+  { to: '/admin/support', icon: HelpCircle, label: 'Support Queue' },
 ];
 
 export const ALL_NAV_ITEMS = [...NAV_PRIMARY, ...NAV_CAREERS, ...NAV_COMMUNITY];

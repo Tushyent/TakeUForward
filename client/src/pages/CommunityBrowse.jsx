@@ -48,6 +48,35 @@ function CommunityBrowse() {
 
   const suggestions = query.trim().length >= 1 ? filtered.slice(0, 10) : [];
 
+  const groupedCommunities = filtered.reduce((acc, comm) => {
+    if (comm.type === 'general' || comm.type === 'topic') {
+      if (!acc['General & Topics']) acc['General & Topics'] = [];
+      acc['General & Topics'].push(comm);
+    } else if (comm.type === 'batch') {
+      const yearMatch = comm.name.match(/'(\d{2})$/);
+      if (yearMatch) {
+        const year = `20${yearMatch[1]} Batch`;
+        if (!acc[year]) acc[year] = [];
+        acc[year].push(comm);
+      } else {
+        if (!acc['Other Batches']) acc['Other Batches'] = [];
+        acc['Other Batches'].push(comm);
+      }
+    } else {
+      if (!acc['Other']) acc['Other'] = [];
+      acc['Other'].push(comm);
+    }
+    return acc;
+  }, {});
+
+  const sortedGroupKeys = Object.keys(groupedCommunities).sort((a, b) => {
+    if (a === 'General & Topics') return -1;
+    if (b === 'General & Topics') return 1;
+    if (a === 'Other Batches' || a === 'Other') return 1;
+    if (b === 'Other Batches' || b === 'Other') return -1;
+    return b.localeCompare(a); // Descending year (e.g. 2029 Batch, 2028 Batch)
+  });
+
   if (loading) {
     return (
       <div className="page-transition">
@@ -140,44 +169,52 @@ function CommunityBrowse() {
             message="Try a different term."
           />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-            {filtered.map(comm => (
-              <Link
-                key={comm._id}
-                to={`/community/${comm._id}`}
-                style={{ textDecoration: 'none' }}
-              >
-                <div style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: 'var(--space-3) var(--space-4)',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--bg-elevated)',
-                  border: '1px solid var(--border-subtle)',
-                  transition: 'background var(--transition-fast), border-color var(--transition-fast)',
-                  cursor: 'pointer',
-                }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                    <div style={{
-                      width: 32, height: 32, borderRadius: 'var(--radius-sm)',
-                      background: 'rgba(124,106,247,0.12)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                    }}>
-                      <Hash size={14} color="var(--primary)" />
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{comm.name}</p>
-                      <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{comm.description}</p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                    <Badge variant={communityVariant(comm.type)} size="sm">{comm.type}</Badge>
-                    <ChevronRight size={14} color="var(--text-muted)" />
-                  </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+            {sortedGroupKeys.map(groupKey => (
+              <div key={groupKey}>
+                <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--space-3)' }}>{groupKey}</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--space-3)' }}>
+                  {groupedCommunities[groupKey].map(comm => (
+                    <Link
+                      key={comm._id}
+                      to={`/community/${comm._id}`}
+                      style={{ textDecoration: 'none' }}
+                    >
+                      <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: 'var(--space-3) var(--space-4)',
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-subtle)',
+                        transition: 'background var(--transition-fast), border-color var(--transition-fast)',
+                        cursor: 'pointer',
+                        height: '100%',
+                      }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                          <div style={{
+                            width: 32, height: 32, borderRadius: 'var(--radius-sm)',
+                            background: 'rgba(124,106,247,0.12)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                          }}>
+                            <Hash size={14} color="var(--primary)" />
+                          </div>
+                          <div>
+                            <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{comm.name}</p>
+                            <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{comm.description}</p>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexShrink: 0 }}>
+                          <Badge variant={communityVariant(comm.type)} size="sm">{comm.type}</Badge>
+                          <ChevronRight size={14} color="var(--text-muted)" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}

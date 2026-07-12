@@ -141,4 +141,69 @@ router.patch('/:id/status', requireSystemAdmin, async (req, res, next) => {
   }
 });
 
+// POST /api/support/:id/reply
+router.post('/:id/reply', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { replyText, updateStatusTo } = req.body;
+    
+    if (!replyText) {
+      return res.status(400).json({ error: 'replyText is required' });
+    }
+
+    const ticket = await SupportTicket.findById(req.params.id)
+      .populate('authorId', 'name email');
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    const recipientEmail = ticket.authorId?.email;
+    if (!recipientEmail) {
+      return res.status(400).json({ error: 'Ticket author has no email address' });
+    }
+
+    // Attempt to send in-app notification
+    const Notification = (await import('../models/Notification.js')).default;
+    
+    await Notification.create({
+      userId: ticket.authorId._id,
+      type: 'message',
+      refId: ticket._id,
+      targetPath: '/support',
+      contentPreview: `Admin reply to "${ticket.title}": ${replyText.slice(0, 100)}`
+    });
+
+    // Update ticket notes and status
+    const previousNotes = ticket.adminNotes ? ticket.adminNotes + '\n\n' : '';
+    const newNotes = previousNotes + `[In-App Notification Sent on ${new Date().toLocaleString()}]:\n${replyText}`;
+    
+    const updateData = { adminNotes: newNotes };
+    if (updateStatusTo) {
+      const validStatuses = ['open', 'in_progress', 'resolved', 'wont_fix'];
+      if (validStatuses.includes(updateStatusTo)) {
+        updateData.status = updateStatusTo;
+      }
+    }
+
+    const updatedTicket = await SupportTicket.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).populate('authorId', 'name username handle email role');
+
+    await logActivity({ 
+      action: 'update', 
+      resource: 'SupportTicket', 
+      resourceId: ticket._id, 
+      description: `Replied to ticket via in-app notification to ${ticket.authorId.email}`, 
+      req 
+    });
+
+    res.status(200).json({ message: 'Reply sent successfully via in-app notification', ticket: updatedTicket });
+  } catch (err) {
+    logger.error('Error replying to support ticket:', err);
+    next(err);
+  }
+});
+
 export default router;

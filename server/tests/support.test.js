@@ -169,4 +169,34 @@ describe('SupportTicket API', () => {
     expect(res.body.status).toBe('resolved');
     expect(res.body.adminNotes).toBe('Fixed the issue');
   });
+
+  it('allows admins to reply to a ticket and creates a notification', async () => {
+    const ticket = await SupportTicket.create({
+      authorId: regularUser._id,
+      title: 'Ticket for Reply',
+      description: 'Desc',
+      category: 'bug'
+    });
+
+    app.request.mockUser = adminUser;
+    
+    const res = await request(app)
+      .post(`/api/support/${ticket._id}/reply`)
+      .send({ 
+        replyText: 'We are working on this now.',
+        updateStatusTo: 'in_progress'
+      });
+    
+    expect(res.status).toBe(200);
+    expect(res.body.ticket.status).toBe('in_progress');
+    expect(res.body.ticket.adminNotes).toContain('In-App Notification Sent');
+    expect(res.body.ticket.adminNotes).toContain('We are working on this now.');
+    
+    const Notification = (await import('../models/Notification.js')).default;
+    const notifs = await Notification.find({ userId: regularUser._id });
+    expect(notifs.length).toBeGreaterThan(0);
+    const replyNotif = notifs.find(n => n.type === 'message' && n.targetPath === '/support');
+    expect(replyNotif).toBeDefined();
+    expect(replyNotif.contentPreview).toContain('We are working on this now.');
+  });
 });

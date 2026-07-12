@@ -27,6 +27,13 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **[Email] `server/services/EmailService.js` deleted**, `resend` package uninstalled, `RESEND_API_KEY` and `EMAIL_FROM` env vars removed from all config files.
 
 ### Added
+- **[Admin] Support Queue In-App Replies:** Added `POST /api/support/:id/reply` endpoint for admins to reply directly to user support tickets. This creates an in-app `Notification` of type `message` for the user and logs the reply locally in `adminNotes`. Added full frontend UI for this in `AdminSupportQueue.jsx`.
+- **[UI] Admin Sidebar Links:** Added a direct link to the Support Queue (`/admin/support`) under the Admin section in the global Sidebar navigation for easier access.
+
+### Changed
+- **[UI] Community Browse Grouping:** Updated `CommunityBrowse.jsx` to dynamically group batch communities by year (e.g., "2026 Batch", "2027 Batch") for better readability instead of a flat grid, sorting descending by year.
+
+### Added
 - **[Admin] Recent signups feed:** Added `GET /admin/signups` endpoint returning recent user registrations. Displayed as a scrollable "Recent Signups" card on the admin dashboard overview tab with avatar, name, email, dept, year, and date. (PART 12)
 - **[Seed] Welcome announcement:** `seedAnnouncement.js` creates a pinned announcement post in the General community authored by the system admin with the TakeUForward vision and an overview of platform features. (PART 4)
 - **[Seed] Career roadmaps:** `seedRoadmaps.js` seeds four structured career roadmaps (SDE, PM, Core Engineering, Higher Studies) authored by the system admin, each with 6 detailed steps. (PART 7)

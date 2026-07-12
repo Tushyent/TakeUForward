@@ -120,8 +120,12 @@ const AdminSupportQueue = () => {
 
 const TicketCard = ({ ticket, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isReplying, setIsReplying] = useState(false);
   const [status, setStatus] = useState(ticket.status);
   const [adminNotes, setAdminNotes] = useState(ticket.adminNotes || '');
+  const [replyText, setReplyText] = useState('');
+  const [replyStatus, setReplyStatus] = useState('resolved');
+  const [replying, setReplying] = useState(false);
 
   const handleSave = () => {
     onUpdate(ticket._id, status, adminNotes);
@@ -151,10 +155,15 @@ const TicketCard = ({ ticket, onUpdate }) => {
           </div>
           <h3 style={{ margin: '5px 0' }}>{ticket.title}</h3>
         </div>
-        {!isEditing && (
-          <Button variant="outline" size="small" onClick={() => setIsEditing(true)}>
-            Update Status
-          </Button>
+        {!isEditing && !isReplying && (
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <Button variant="outline" size="small" onClick={() => setIsReplying(true)}>
+              Reply (Notification)
+            </Button>
+            <Button variant="outline" size="small" onClick={() => setIsEditing(true)}>
+              Update Status
+            </Button>
+          </div>
         )}
       </div>
 
@@ -219,6 +228,63 @@ const TicketCard = ({ ticket, onUpdate }) => {
           <div style={{ display: 'flex', gap: '10px' }}>
             <Button onClick={handleSave}>Save Changes</Button>
             <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+          </div>
+        </div>
+      )}
+
+      {isReplying && (
+        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: 'var(--bg-card)', border: '1px solid var(--primary)', borderRadius: 'var(--radius)' }}>
+          <h4 style={{ margin: '0 0 15px 0', color: 'var(--primary)' }}>Reply to User via Notification</h4>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '15px' }}>
+            This will send an in-app notification to the user and append a log to the admin notes.
+          </p>
+          <div style={{ marginBottom: '15px' }}>
+            <textarea
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              placeholder="Type your reply to the user here..."
+              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}
+              rows={4}
+            />
+          </div>
+          <div style={{ marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <label style={{ fontSize: '0.9rem' }}>Also update status to:</label>
+            <select
+              value={replyStatus}
+              onChange={(e) => setReplyStatus(e.target.value)}
+              style={{ padding: '6px 12px', borderRadius: 'var(--radius)' }}
+            >
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="wont_fix">Won't Fix</option>
+            </select>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <Button 
+              onClick={async () => {
+                if (!replyText.trim()) return toast.error('Reply text cannot be empty');
+                setReplying(true);
+                try {
+                  const { data } = await axiosClient.post(`/support/${ticket._id}/reply`, {
+                    replyText,
+                    updateStatusTo: replyStatus
+                  });
+                  onUpdate(ticket._id, data.ticket.status, data.ticket.adminNotes);
+                  setIsReplying(false);
+                  setReplyText('');
+                  toast.success('Notification sent successfully!');
+                } catch (err) {
+                  toast.error(err.response?.data?.error || 'Failed to send reply');
+                } finally {
+                  setReplying(false);
+                }
+              }}
+              disabled={replying}
+            >
+              {replying ? 'Sending Notification...' : 'Send Reply'}
+            </Button>
+            <Button variant="outline" onClick={() => setIsReplying(false)} disabled={replying}>Cancel</Button>
           </div>
         </div>
       )}
