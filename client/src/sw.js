@@ -1,8 +1,12 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
+import { registerRoute, setCatchHandler } from 'workbox-routing';
 import { NetworkFirst, CacheFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
-import { setCatchHandler } from 'workbox-routing';
+import { clientsClaim } from 'workbox-core';
+
+// Instantly activate new service workers and claim all clients
+self.skipWaiting();
+clientsClaim();
 
 // Clean up old caches when a new SW is activated
 cleanupOutdatedCaches();
