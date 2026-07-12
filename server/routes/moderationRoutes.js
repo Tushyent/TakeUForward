@@ -164,7 +164,7 @@ router.post('/alumni-requests/:id/approve', requireSystemAdmin, async (req, res,
     // 3. Add to approved emails
     await ApprovedAlumniEmail.findOneAndUpdate(
       { email: request.email },
-      { email: request.email, inviteToken },
+      { email: request.email, inviteToken, status: 'verified' },
       { upsert: true, returnDocument: 'after' }
     );
 
