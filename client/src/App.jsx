@@ -40,6 +40,7 @@ const Support = lazy(() => import('./pages/Support'));
 const AdminSupportQueue = lazy(() => import('./pages/AdminSupportQueue'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ActivityLog = lazy(() => import('./pages/ActivityLog'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 const AdminOnly = ({ children }) => {
@@ -86,6 +87,7 @@ function App() {
                       <Route path="/drive" element={<PersonalDrive />} />
                       <Route path="/reviews" element={<Reviews />} />
                       <Route path="/bookmarks" element={<Bookmarks />} />
+                      <Route path="/notifications" element={<NotificationsPage />} />
                       <Route path="/moderation" element={<AdminOnly><ModerationQueue /></AdminOnly>} />
                       <Route path="/support" element={<Support />} />
                       <Route path="/activity" element={<AdminOnly><ActivityLog /></AdminOnly>} />

@@ -59,8 +59,7 @@ function ProfileSettings() {
         },
         weeklyDigestOptIn: u.weeklyDigestOptIn !== false
       });
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError('Failed to load profile settings');
       toast.error('Failed to load profile');
     } finally {
@@ -115,8 +114,7 @@ function ProfileSettings() {
         }
         setWebPushOptIn(false);
         toast.success('Unsubscribed from push notifications');
-      } catch (err) {
-        console.error(err);
+      } catch {
         toast.error('Failed to unsubscribe');
       }
     } else {
@@ -153,8 +151,7 @@ function ProfileSettings() {
         await axiosClient.post('/push/subscribe', sub);
         setWebPushOptIn(true);
         toast.success('Subscribed to push notifications');
-      } catch (err) {
-        console.error(err);
+      } catch {
         toast.error('Failed to subscribe');
       }
     }
@@ -178,8 +175,7 @@ function ProfileSettings() {
       await axiosClient.patch('/users/me/profile', payload);
       await fetchAuth(); // Update global state
       toast.success('Profile settings saved successfully');
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);

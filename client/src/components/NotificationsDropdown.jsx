@@ -96,7 +96,8 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
       {isOpen && (
         <div style={{
           position: 'absolute',
-          ...(placement === 'top-left' ? { bottom: 'calc(100% + 8px)', left: 0 } : { top: 'calc(100% + 8px)', right: 0 }),
+          ...(placement.startsWith('top') ? { bottom: 'calc(100% + 8px)' } : { top: 'calc(100% + 8px)' }),
+          ...(placement.endsWith('left') ? { left: 0 } : { right: 0 }),
           width: 'min(320px, calc(100vw - 32px))',
           maxWidth: 'calc(100vw - 32px)',
           background: 'var(--bg-surface)',
@@ -151,6 +152,16 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
               notifications.map(notif => {
                 const cfg = typeConfig[notif.type] || { icon: Info, color: 'var(--text-muted)', label: 'Notification' };
                 const IconComp = cfg.icon;
+
+                const displayName = notif.isAnonymousSender ? 'Someone' : (notif.actorName || 'Someone');
+                let dynamicLabel = <span>{cfg.label}</span>;
+                if (notif.actorName || notif.isAnonymousSender || notif.type === 'message') {
+                  if (notif.type === 'mention') dynamicLabel = <><strong style={{color:'var(--text-primary)'}}>{displayName}</strong> mentioned you</>;
+                  else if (notif.type === 'reply') dynamicLabel = <><strong style={{color:'var(--text-primary)'}}>{displayName}</strong> replied to you</>;
+                  else if (notif.type === 'comment') dynamicLabel = <><strong style={{color:'var(--text-primary)'}}>{displayName}</strong> commented on your post</>;
+                  else if (notif.type === 'message') dynamicLabel = <strong style={{color:'var(--text-primary)', fontSize: '13px'}}>{displayName}</strong>;
+                }
+
                 return (
                   <div
                     key={notif._id}
@@ -182,9 +193,24 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
                     </div>
                     <div>
                       <p style={{ margin: 0, fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--text-primary)' }}>
-                        {cfg.label}
+                        {dynamicLabel}
                       </p>
-                      <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {notif.contentPreview && (
+                        <p style={{ 
+                          margin: '4px 0 0 0', 
+                          fontSize: 'var(--text-xs)', 
+                          color: notif.type === 'message' ? 'var(--text-primary)' : 'var(--text-secondary)',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          fontStyle: notif.type === 'message' ? 'normal' : 'italic'
+                        }}>
+                          {notif.type === 'message' ? notif.contentPreview : `"${notif.contentPreview}"`}
+                        </p>
+                      )}
+                      <p style={{ margin: 0, fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
                         {new Date(notif.createdAt).toLocaleDateString()}
                       </p>
                     </div>
@@ -193,6 +219,34 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
               })
             )}
           </div>
+          
+          {/* Footer */}
+          {notifications.length > 0 && (
+            <div style={{
+              padding: 'var(--space-2)',
+              borderTop: '1px solid var(--border)',
+              textAlign: 'center'
+            }}>
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate('/notifications');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--primary)',
+                  fontSize: 'var(--text-xs)',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  width: '100%',
+                  padding: 'var(--space-2)'
+                }}
+              >
+                View all notifications
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

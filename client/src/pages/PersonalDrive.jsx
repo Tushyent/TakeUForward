@@ -18,8 +18,7 @@ function PersonalDrive() {
       const res = await axiosClient.get('/drive');
       setFiles(res.data);
       setError(null);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setError('Failed to load your private files');
       toast.error('Failed to load private files');
     } finally {
@@ -64,8 +63,7 @@ function PersonalDrive() {
 
       setFiles([confirmRes.data, ...files]);
       toast.success('File uploaded successfully');
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to upload file');
     } finally {
       setUploading(false);
@@ -84,8 +82,7 @@ function PersonalDrive() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to generate download link');
     }
   };
@@ -97,8 +94,7 @@ function PersonalDrive() {
       await axiosClient.delete(`/drive/${fileId}`);
       setFiles(files.filter(f => f._id !== fileId));
       toast.success('File deleted');
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to delete file');
     }
   };

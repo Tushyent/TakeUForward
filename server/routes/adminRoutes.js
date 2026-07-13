@@ -88,6 +88,38 @@ router.get('/overview', requireSystemAdmin, async (req, res, next) => {
     next(err);
   }
 });
+router.post('/marketing-email', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const { sendEmail, buildEmailFooter } = await import('../config/mailer.js');
+    const getClientUrl = () => (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
+    const clientUrl = getClientUrl();
+
+    const html = `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+        <h1 style="color:#7C6AF7;font-size:24px;">Welcome to TakeUForward!</h1>
+        <p style="font-size:16px;color:#333;line-height:1.6;">Hi there,</p>
+        <p style="font-size:16px;color:#333;line-height:1.6;">You have been invited to explore <strong>TakeUForward</strong> — the exclusive campus community for SSN students and alumni.</p>
+        <p style="font-size:16px;color:#333;line-height:1.6;">Connect with peers, access academic resources, discover placement insights, and guide your juniors. We would love to have you on board!</p>
+        <div style="text-align:center;margin:30px 0;">
+          <a href="${clientUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;">Explore TakeUForward</a>
+        </div>
+        <p style="font-size:14px;color:#555;">If you did not request this email, you can safely ignore it.</p>
+        ${buildEmailFooter()}
+      </div>
+    `;
+
+    await sendEmail({ to: email, subject: 'Welcome to TakeUForward!', html });
+    await logActivity({ action: 'custom', resource: 'Email', description: `Admin sent marketing email to ${email}`, req });
+    res.status(200).json({ message: 'Marketing email sent successfully.' });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/signups', requireSystemAdmin, async (req, res, next) => {
   try {

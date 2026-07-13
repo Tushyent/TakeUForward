@@ -29,3 +29,4 @@ tmp-*.log
 
 # Others
 docs/
+refactor_admin.js

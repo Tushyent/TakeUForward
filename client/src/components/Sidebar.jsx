@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
-import { LogOut, Zap, X, Settings } from 'lucide-react';
+import { LogOut, Zap, X, User } from 'lucide-react';
 import { NAV_PRIMARY, NAV_CAREERS, NAV_COMMUNITY, NAV_ADMIN } from '../constants/navigation';
 import { useAuth } from '../context/auth-context';
 
@@ -71,8 +71,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           onClick={onClose}
           className="sidebar-footer-link"
         >
-          <Settings size={16} />
-          Profile Settings
+          <User size={16} />
+          {user?.name && user.name.length <= 15 ? user.name : user?.email?.split('@')[0] || 'Profile'}
         </Link>
 
         <div className="sidebar-footer-actions">

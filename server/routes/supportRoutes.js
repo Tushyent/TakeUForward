@@ -36,20 +36,25 @@ router.post('/', supportTicketLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
 
   try {
-    const { title, description, category, pageContext, screenshotUrl, displayNamePublicly } = req.body;
+    const { title, description, category, pageContext, screenshotUrls, displayNamePublicly } = req.body;
     if (!title || !description || !category) {
       return res.status(400).json({ error: 'title, description, and category are required' });
     }
 
-    if (screenshotUrl) {
-      // Extract S3 key from fileUrl (assumes https://bucket.s3.region.amazonaws.com/key format)
-      const keyMatch = screenshotUrl.split('amazonaws.com/');
-      if (keyMatch.length === 2) {
-        const key = keyMatch[1];
-        const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit for screenshots
-        const sizeValidation = await validateObjectSize(key, MAX_SIZE);
-        if (!sizeValidation.valid) {
-          return res.status(400).json({ error: sizeValidation.error || 'File size exceeds 5MB limit. The uploaded file has been discarded.' });
+    if (screenshotUrls && Array.isArray(screenshotUrls) && screenshotUrls.length > 0) {
+      if (screenshotUrls.length > 4) {
+        return res.status(400).json({ error: 'Maximum 4 screenshots allowed.' });
+      }
+      for (const url of screenshotUrls) {
+        // Extract S3 key from fileUrl
+        const keyMatch = url.split('amazonaws.com/');
+        if (keyMatch.length === 2) {
+          const key = keyMatch[1];
+          const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit for screenshots
+          const sizeValidation = await validateObjectSize(key, MAX_SIZE);
+          if (!sizeValidation.valid) {
+            return res.status(400).json({ error: sizeValidation.error || 'A file size exceeds the 5MB limit. Upload discarded.' });
+          }
         }
       }
     }
@@ -60,7 +65,7 @@ router.post('/', supportTicketLimiter, async (req, res, next) => {
       description,
       category,
       pageContext,
-      screenshotUrl,
+      screenshotUrls: screenshotUrls || [],
       displayNamePublicly: Boolean(displayNamePublicly)
     });
 
@@ -69,6 +74,32 @@ router.post('/', supportTicketLimiter, async (req, res, next) => {
     res.status(201).json(ticket);
   } catch (err) {
     logger.error('Error creating support ticket:', err);
+    next(err);
+  }
+});
+
+// GET /api/support/my-tickets
+router.get('/my-tickets', supportTicketLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+
+  try {
+    const { limit, skip } = getPaginationParams(req.query.page, req.query.limit);
+
+    const tickets = await SupportTicket.find({ authorId: req.user._id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+      
+    const totalCount = await SupportTicket.countDocuments({ authorId: req.user._id });
+
+    res.status(200).json({
+      tickets,
+      totalCount,
+      hasMore: skip + tickets.length < totalCount
+    });
+  } catch (err) {
+    logger.error('Error fetching user support tickets:', err);
     next(err);
   }
 });
@@ -170,18 +201,18 @@ router.post('/:id/reply', requireSystemAdmin, async (req, res, next) => {
       type: 'message',
       refId: ticket._id,
       targetPath: '/support',
-      contentPreview: `Admin reply to "${ticket.title}": ${replyText.slice(0, 100)}`
+      actorName: 'Support Team',
+      contentPreview: `Reply to "${ticket.title}": ${replyText.slice(0, 100)}`
     });
 
-    // Update ticket notes and status
-    const previousNotes = ticket.adminNotes ? ticket.adminNotes + '\n\n' : '';
-    const newNotes = previousNotes + `[In-App Notification Sent on ${new Date().toLocaleString()}]:\n${replyText}`;
-    
-    const updateData = { adminNotes: newNotes };
+    // Update ticket status and adminReplies
+    const updateData = { 
+      $push: { adminReplies: { text: replyText } }
+    };
     if (updateStatusTo) {
       const validStatuses = ['open', 'in_progress', 'resolved', 'wont_fix'];
       if (validStatuses.includes(updateStatusTo)) {
-        updateData.status = updateStatusTo;
+        updateData.$set = { status: updateStatusTo };
       }
     }
 

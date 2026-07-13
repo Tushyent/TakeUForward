@@ -10,14 +10,21 @@ const supportTicketSchema = new mongoose.Schema({
     enum: ['bug', 'feature_request', 'other'],
     required: true
   },
-  screenshotUrl: { type: String },
+  screenshotUrls: [{ type: String }],
   status: { 
     type: String, 
     enum: ['open', 'in_progress', 'resolved', 'wont_fix'],
     default: 'open'
   },
   adminNotes: { type: String },
+  adminReplies: [{
+    text: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
   displayNamePublicly: { type: Boolean, default: false } // Option B model
 }, { timestamps: true });
+
+supportTicketSchema.index({ authorId: 1 });
+supportTicketSchema.index({ status: 1, createdAt: -1 });
 
 export default mongoose.model('SupportTicket', supportTicketSchema);

@@ -12,6 +12,7 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import FilePreview from '../components/ui/FilePreview';
 import { Search, AlertTriangle, Trash2, Upload } from 'lucide-react';
 
 function Resources() {
@@ -221,17 +222,19 @@ function Resources() {
                 </p>
                 
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  <a href={res.fileUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-                    <Button variant="secondary">Download / View File</Button>
-                  </a>
-                  <Button variant="secondary" onClick={() => handleBookmark(res._id)} style={{ color: bookmarkedIds.has(res._id) ? 'var(--primary)' : 'inherit' }}>
-                    {bookmarkedIds.has(res._id) ? '★ Saved' : '☆ Save'}
-                  </Button>
-                  {user?.isPlatformAdmin && (
-                    <Button variant="danger" size="sm" onClick={() => handleDeleteResource(res)}>
-                      <Trash2 size={13} /> Delete
+                  <div style={{ width: '100%', maxWidth: '400px', marginBottom: '10px' }}>
+                    <FilePreview fileUrl={res.fileUrl} fileName={res.title} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', width: '100%' }}>
+                    <Button variant="secondary" onClick={() => handleBookmark(res._id)} style={{ color: bookmarkedIds.has(res._id) ? 'var(--primary)' : 'inherit' }}>
+                      {bookmarkedIds.has(res._id) ? '★ Saved' : '☆ Save'}
                     </Button>
-                  )}
+                    {user?.isPlatformAdmin && (
+                      <Button variant="danger" size="sm" onClick={() => handleDeleteResource(res)}>
+                        <Trash2 size={13} /> Delete
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </Card>
             ))}

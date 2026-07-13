@@ -2,10 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../api/axiosClient';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, ExternalLink, Filter } from 'lucide-react';
+import { MessageSquare, Filter } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
+import FilePreview from '../components/ui/FilePreview';
 
 const AdminSupportQueue = () => {
   const [tickets, setTickets] = useState([]);
@@ -144,7 +145,7 @@ const TicketCard = ({ ticket, onUpdate }) => {
 
   return (
     <Card>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px', marginBottom: '15px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
             <Badge variant="primary">{ticket.category.replace('_', ' ').toUpperCase()}</Badge>
@@ -156,7 +157,7 @@ const TicketCard = ({ ticket, onUpdate }) => {
           <h3 style={{ margin: '5px 0' }}>{ticket.title}</h3>
         </div>
         {!isEditing && !isReplying && (
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             <Button variant="outline" size="small" onClick={() => setIsReplying(true)}>
               Reply (Notification)
             </Button>
@@ -181,13 +182,17 @@ const TicketCard = ({ ticket, onUpdate }) => {
           </div>
         )}
 
-        {ticket.screenshotUrl && (
+        {(ticket.screenshotUrls?.length > 0 || ticket.screenshotUrl) && (
           <div style={{ marginTop: '10px' }}>
-            <a href={ticket.screenshotUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.9rem', color: 'var(--primary)' }}>
-              <ExternalLink size={14} /> View Screenshot
-            </a>
-            <div style={{ marginTop: '10px', maxWidth: '300px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-              <img src={ticket.screenshotUrl} alt="Screenshot" style={{ width: '100%', display: 'block' }} />
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+              <strong>Attached Screenshots:</strong>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {(ticket.screenshotUrls?.length > 0 ? ticket.screenshotUrls : [ticket.screenshotUrl]).map((url, i) => (
+                <div key={i} style={{ width: '150px' }}>
+                  <FilePreview fileUrl={url} />
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -292,6 +297,28 @@ const TicketCard = ({ ticket, onUpdate }) => {
       {!isEditing && ticket.adminNotes && (
         <div style={{ marginTop: '15px', padding: '10px', backgroundColor: 'var(--warning-bg, rgba(245, 158, 11, 0.1))', borderLeft: '3px solid var(--warning, #f59e0b)', borderRadius: '0 var(--radius) var(--radius) 0' }}>
           <strong>Admin Notes:</strong> <span style={{ whiteSpace: 'pre-wrap' }}>{ticket.adminNotes}</span>
+        </div>
+      )}
+
+      {!isEditing && ticket.adminReplies && ticket.adminReplies.length > 0 && (
+        <div style={{ marginTop: '15px' }}>
+          <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Past Replies to User:</strong>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+            {ticket.adminReplies.map((reply, i) => (
+              <div key={i} style={{ 
+                padding: '10px', 
+                backgroundColor: 'var(--bg-main)', 
+                borderLeft: '3px solid var(--primary)', 
+                borderRadius: '0 var(--radius) var(--radius) 0',
+                fontSize: '0.9rem'
+              }}>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+                  {new Date(reply.createdAt).toLocaleString()}
+                </div>
+                <div style={{ whiteSpace: 'pre-wrap' }}>{reply.text}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </Card>

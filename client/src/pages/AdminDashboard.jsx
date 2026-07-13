@@ -14,6 +14,7 @@ import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import Spinner from '../components/ui/Spinner';
 import Modal from '../components/ui/Modal';
+import EmptyState from '../components/ui/EmptyState';
 
 const TABS = ['overview', 'clubs', 'communities', 'resources', 'posts', 'users', 'activity'];
 
@@ -476,7 +477,7 @@ const AdminDashboard = () => {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {clubs.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No clubs found.</p>
+          <EmptyState icon={Building2} title="No clubs found" description="There are no clubs matching your query." />
         ) : clubs.map(club => (
           <div key={club._id} style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)',
@@ -562,7 +563,7 @@ const AdminDashboard = () => {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {communities.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No communities found.</p>
+          <EmptyState icon={Users2} title="No communities found" description="There are no communities matching your query." />
         ) : communities.map(comm => (
           <div key={comm._id} style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)',
@@ -598,7 +599,7 @@ const AdminDashboard = () => {
         {resourcesLoading ? (
           <Spinner text="Loading resources..." />
         ) : resources.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No resources found.</p>
+          <EmptyState icon={BookOpen} title="No resources found" description="There are no resources matching your query." />
         ) : resources.map(res => (
           <div key={res._id} style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)',
@@ -639,7 +640,7 @@ const AdminDashboard = () => {
         {usersLoading ? (
           <Spinner text="Loading users..." />
         ) : adminUsers.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No users found.</p>
+          <EmptyState icon={UserPlus} title="No users found" description="There are no users matching your query." />
         ) : adminUsers.map(u => (
           <div key={u._id} style={{
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 'var(--space-3)',
@@ -686,7 +687,7 @@ const AdminDashboard = () => {
         {activityLoading ? (
           <Spinner text="Loading activity log..." />
         ) : activityLogs.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No activity recorded yet.</p>
+          <EmptyState icon={History} title="No activity recorded" description="No activity logs are available at this time." />
         ) : activityLogs.map(log => (
           <div key={log._id} style={{
             display: 'flex', alignItems: 'flex-start', gap: 'var(--space-3)',
@@ -739,7 +740,7 @@ const AdminDashboard = () => {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
         {posts.length === 0 ? (
-          <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 'var(--space-8)' }}>No posts found.</p>
+          <EmptyState icon={FileText} title="No posts found" description="There are no posts matching your query." />
         ) : posts.map(post => (
           <div key={post._id} style={{
             display: 'flex', justifyContent: 'space-between', gap: 'var(--space-3)',

@@ -19,6 +19,7 @@ const alumniRegistrationRequestSchema = new mongoose.Schema(
 );
 
 alumniRegistrationRequestSchema.index({ status: 1, createdAt: -1 });
+alumniRegistrationRequestSchema.index({ email: 1 });
 
 const AlumniRegistrationRequest = mongoose.model('AlumniRegistrationRequest', alumniRegistrationRequestSchema);
 export default AlumniRegistrationRequest;

@@ -8,6 +8,7 @@ import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import { Bookmark as BookmarkIcon, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import FilePreview from '../components/ui/FilePreview';
 
 function Bookmarks() {
   const [bookmarks, setBookmarks] = useState([]);
@@ -38,8 +39,7 @@ function Bookmarks() {
       await axiosClient.post('/bookmarks', { itemType, itemId });
       toast.success('Bookmark removed');
       fetchBookmarks(); // Refresh list
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to remove bookmark');
     }
   };
@@ -47,7 +47,7 @@ function Bookmarks() {
   return (
     <div className="page-transition">
             <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
-        <h1 style={{ marginBottom: '10px' }}>My Saved Items</h1>
+        <h1 style={{ marginBottom: '10px' }}>Saved</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Your personal tracker for posts and resources.</p>
 
         <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
@@ -57,7 +57,7 @@ function Bookmarks() {
         </div>
 
         {loading ? (
-          <Spinner text="Loading your bookmarks..." />
+          <Spinner text="Loading saved items..." />
         ) : error ? (
           <EmptyState
             icon={AlertTriangle}
@@ -67,7 +67,7 @@ function Bookmarks() {
             style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
           />
         ) : bookmarks.length === 0 ? (
-          <EmptyState icon={BookmarkIcon} title="No saved items yet" message="Start bookmarking posts and resources!" />
+          <EmptyState icon={BookmarkIcon} title="No saved items yet" message="Start saving posts and resources!" />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {bookmarks.map(bookmark => {
@@ -121,9 +121,9 @@ function Bookmarks() {
                       <Badge variant="secondary">Semester {item.semester}</Badge>
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
-                      <a href={item.fileUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
-                        <Button variant="secondary">Download / View File</Button>
-                      </a>
+                      <div style={{ width: '100%', maxWidth: '400px' }}>
+                        <FilePreview fileUrl={item.fileUrl} fileName={item.title} />
+                      </div>
                     </div>
                   </Card>
                 );

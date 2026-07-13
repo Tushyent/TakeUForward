@@ -17,18 +17,21 @@ router.get('/', async (req, res, next) => {
     const query = { isHidden: { $ne: true } };
     if (careerPath) query.careerPath = careerPath;
 
-    const roadmaps = await CareerRoadmap.aggregate([
-      { $match: query },
-      { $addFields: { upvotesCount: { $size: { $ifNull: ["$upvotes", []] } } } },
-      { $sort: { upvotesCount: -1, createdAt: -1 } },
-      { $skip: skip },
-      { $limit: limit }
-    ]);
+    const roadmapsData = await CareerRoadmap.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('authorId', 'name handle role currentCompany isVerifiedAlumni username')
+      .lean();
 
-    await CareerRoadmap.populate(roadmaps, { 
-      path: 'authorId', 
-      select: 'name handle role currentCompany isVerifiedAlumni username'
-    });
+    // Calculate upvotesCount locally instead of using $size in aggregate
+    const roadmaps = roadmapsData.map(r => ({
+      ...r,
+      upvotesCount: r.upvotes ? r.upvotes.length : 0
+    }));
+
+    // Sort locally by upvotes
+    roadmaps.sort((a, b) => b.upvotesCount - a.upvotesCount || new Date(b.createdAt) - new Date(a.createdAt));
 
     res.status(200).json(roadmaps);
   } catch (err) {

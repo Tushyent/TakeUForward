@@ -164,12 +164,17 @@ router.post('/alumni-requests/:id/approve', requireSystemAdmin, async (req, res,
     // 3. Add to approved emails
     await ApprovedAlumniEmail.findOneAndUpdate(
       { email: request.email },
-      { email: request.email, inviteToken, status: 'verified' },
+      { 
+        email: request.email, 
+        inviteToken, 
+        status: 'verified',
+        currentCompany: request.currentCompany 
+      },
       { upsert: true, returnDocument: 'after' }
     );
 
     // 4. Send email
-    const loginLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?token=${inviteToken}`;
+    const loginLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/login`;
     await sendEmail({
       to: request.email,
       subject: 'Your Alumni Request is Approved',

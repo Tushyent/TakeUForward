@@ -63,20 +63,21 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       uploaderId: req.user._id
     });
 
-    try {
-      const summary = await summarizeResource(title, courseCode, tags || [], fileUrl);
-      if (summary) {
-        resource.aiSummary = summary;
-        await resource.save();
-      }
-    } catch (summaryErr) {
-      logger.error('Failed to summarize resource (non-fatal):', summaryErr);
-      // We do not throw or fail the response here. The resource is still created.
-    }
-
     await logActivity({ action: 'create', resource: 'Resource', resourceId: resource._id, description: 'Uploaded a resource', req, details: { title: resource.title, courseCode: resource.courseCode } });
 
     res.status(201).json(resource);
+
+    // Run summarization asynchronously in the background so it doesn't block the frontend response
+    summarizeResource(title, courseCode, tags || [], fileUrl)
+      .then(async (summary) => {
+        if (summary) {
+          resource.aiSummary = summary;
+          await resource.save();
+        }
+      })
+      .catch((summaryErr) => {
+        logger.error('Failed to summarize resource (non-fatal):', summaryErr);
+      });
   } catch (err) {
     logger.error('Error creating resource:', err);
     next(err);

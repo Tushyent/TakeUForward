@@ -36,7 +36,9 @@ export const createNotification = async ({
       type,
       refId,
       targetPath,
-      contentPreview: content ? String(content).slice(0, 180) : undefined
+      contentPreview: content ? String(content).slice(0, 180) : undefined,
+      actorName,
+      isAnonymousSender
     });
 
     if (type === 'reply' || type === 'mention' || type === 'comment' || type === 'message') {

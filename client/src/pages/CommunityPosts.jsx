@@ -38,8 +38,7 @@ function CommunityPosts() {
       const response = await axiosClient.get(`/posts?${queryParams}`);
       setPosts(response.data);
       setError('');
-    } catch (err) {
-      console.error('Error fetching posts', err);
+    } catch {
       setError('Failed to load posts');
     }
   }, [id, filters]);
@@ -48,8 +47,8 @@ function CommunityPosts() {
     try {
       const response = await axiosClient.get('/bookmarks?type=post');
       setBookmarkedIds(new Set(response.data.map(b => typeof b.itemId === 'object' ? b.itemId._id : b.itemId)));
-    } catch (err) {
-      console.error('Error fetching bookmarks', err);
+    } catch {
+      // bookmarks are supplementary — skip silently
     }
   }, []);
 
@@ -59,8 +58,7 @@ function CommunityPosts() {
       setError('');
       const response = await axiosClient.get(`/communities/${id}`);
       setCommunity(response.data);
-    } catch (err) {
-      console.error('Error fetching community', err);
+    } catch {
       setError('Community not found');
     } finally {
       setLoading(false);
@@ -105,7 +103,6 @@ function CommunityPosts() {
       fetchPosts(); // Refresh list
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to create post');
-      console.error(err);
     } finally {
       setIsSubmitting(false);
     }
@@ -118,8 +115,7 @@ function CommunityPosts() {
     try {
       await axiosClient.post(`/posts/${postId}/upvote`);
       fetchPosts();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to upvote');
     }
   };
@@ -148,8 +144,7 @@ function CommunityPosts() {
       setCommentAnonymity(prev => ({ ...prev, [postId]: false }));
       toast.success('Comment posted!');
       fetchPosts();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to post comment');
     } finally {
       setIsSubmitting(false);
@@ -166,8 +161,7 @@ function CommunityPosts() {
         return next;
       });
       toast.success('Bookmark updated');
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to update bookmark');
     }
   };

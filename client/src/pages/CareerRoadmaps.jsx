@@ -39,10 +39,19 @@ function CareerRoadmaps() {
       if (careerPathFilter) queryParams.append('careerPath', careerPathFilter);
 
       const response = await axiosClient.get(`/career-roadmaps?${queryParams.toString()}`);
-      setRoadmaps(response.data);
+      
+      let fetchedRoadmaps = [];
+      if (Array.isArray(response.data)) {
+        fetchedRoadmaps = response.data;
+      } else if (response.data && Array.isArray(response.data.roadmaps)) {
+        fetchedRoadmaps = response.data.roadmaps;
+      } else if (response.data && Array.isArray(response.data.data)) {
+        fetchedRoadmaps = response.data.data;
+      }
+      
+      setRoadmaps(fetchedRoadmaps);
       setError(null);
-    } catch (err) {
-      console.error('Error fetching roadmaps', err);
+    } catch {
       setError('Failed to load career roadmaps');
       toast.error('Failed to load career roadmaps');
     } finally {
@@ -117,8 +126,7 @@ function CareerRoadmaps() {
       setRoadmaps(roadmaps.map(r => 
         r._id === id ? { ...r, upvotesCount: data.upvotesCount } : r
       ));
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error('Failed to upvote');
     }
   };

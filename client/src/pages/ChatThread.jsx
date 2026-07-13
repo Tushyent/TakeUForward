@@ -92,7 +92,9 @@ function ChatThread() {
                     borderRadius: '15px',
                     borderBottomRightRadius: isMine ? '2px' : '15px',
                     borderBottomLeftRadius: !isMine ? '2px' : '15px',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word'
                   }}>
                     {msg.text}
                   </div>

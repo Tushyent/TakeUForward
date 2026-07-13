@@ -145,7 +145,6 @@ function Home() {
   const [loading, setLoading] = useState(true);
   // Alumni invite (admin only)
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteLink, setInviteLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -177,19 +176,17 @@ function Home() {
     fetchCommunities();
   }, [user]);
 
-  const handleGenerateInvite = async () => {
+  const handleSendStudentWelcome = async () => {
     if (!inviteEmail) { toast.error('Please enter an email'); return; }
-    setInviteLink('');
     setIsSubmitting(true);
     try {
-      const response = await axiosClient.post('/auth/alumni/invite', {
+      const response = await axiosClient.post('/admin/marketing-email', {
         email: inviteEmail,
-        currentCompany: 'Test Company',
       });
-      setInviteLink(response.data.inviteLink);
-      toast.success('Invite generated!');
+      toast.success(response.data.message || 'Email sent successfully!');
+      setInviteEmail('');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to generate invite');
+      toast.error(err.response?.data?.error || 'Failed to send email');
     } finally {
       setIsSubmitting(false);
     }
@@ -214,8 +211,9 @@ function Home() {
       
       <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
 
-        {/* ── HERO GREETING CARD ── */}
-        <div style={{
+        <div 
+          onClick={() => navigate('/settings/profile')}
+          style={{
           position: 'relative',
           borderRadius: 'var(--radius-xl)',
           padding: 'var(--space-8)',
@@ -224,6 +222,7 @@ function Home() {
           border: '1px solid rgba(124,106,247,0.25)',
           boxShadow: '0 0 40px rgba(124,106,247,0.10)',
           overflow: 'hidden',
+          cursor: 'pointer',
         }}>
           {/* Decorative gradient blob */}
           <div style={{
@@ -325,43 +324,28 @@ function Home() {
           </Card>
         )}
 
-        {/* ── ALUMNI INVITE (platform admin only) ── */}
+        {/* ── STUDENT WELCOME EMAIL (platform admin only) ── */}
         {user?.isPlatformAdmin && (
           <Card style={{ marginBottom: 'var(--space-6)' }}>
             <h3 style={{ fontSize: 'var(--text-base)', marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Link2 size={16} color="var(--primary)" />
-              Generate Alumni Invite
+              Send Welcome Email to Student
             </h3>
             <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
               <Input
                 type="email"
-                placeholder="Alumnus email address"
+                placeholder="Student email address"
                 value={inviteEmail}
                 onChange={e => setInviteEmail(e.target.value)}
               />
               <Button
-                onClick={handleGenerateInvite}
+                onClick={handleSendStudentWelcome}
                 disabled={isSubmitting}
                 style={{ flexShrink: 0 }}
               >
-                {isSubmitting ? 'Generating…' : 'Generate'}
+                {isSubmitting ? 'Sending…' : 'Send'}
               </Button>
             </div>
-            {inviteLink && (
-              <div style={{
-                marginTop: 'var(--space-4)',
-                padding: 'var(--space-3) var(--space-4)',
-                background: 'var(--bg-input)',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border)',
-                wordBreak: 'break-all',
-                fontSize: 'var(--text-xs)',
-                color: 'var(--text-secondary)',
-              }}>
-                <span style={{ color: 'var(--text-muted)', fontWeight: 600, display: 'block', marginBottom: 4 }}>Invite link:</span>
-                <a href={inviteLink} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>{inviteLink}</a>
-              </div>
-            )}
           </Card>
         )}
 

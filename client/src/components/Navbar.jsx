@@ -129,7 +129,7 @@ const Navbar = () => {
             Profile Settings
           </Link>
           <div className="nav-drawer-account-actions">
-            <NotificationsDropdown placement="bottom-right" />
+            <NotificationsDropdown placement="top-right" />
             <button
               title="Logout"
               onClick={(e) => {

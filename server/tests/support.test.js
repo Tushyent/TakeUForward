@@ -189,8 +189,9 @@ describe('SupportTicket API', () => {
     
     expect(res.status).toBe(200);
     expect(res.body.ticket.status).toBe('in_progress');
-    expect(res.body.ticket.adminNotes).toContain('In-App Notification Sent');
-    expect(res.body.ticket.adminNotes).toContain('We are working on this now.');
+    expect(res.body.ticket.adminReplies).toBeDefined();
+    expect(res.body.ticket.adminReplies.length).toBe(1);
+    expect(res.body.ticket.adminReplies[0].text).toContain('We are working on this now.');
     
     const Notification = (await import('../models/Notification.js')).default;
     const notifs = await Notification.find({ userId: regularUser._id });
@@ -198,5 +199,29 @@ describe('SupportTicket API', () => {
     const replyNotif = notifs.find(n => n.type === 'message' && n.targetPath === '/support');
     expect(replyNotif).toBeDefined();
     expect(replyNotif.contentPreview).toContain('We are working on this now.');
+  });
+
+  it('allows users to get their own tickets', async () => {
+    app.request.mockUser = regularUser;
+
+    await SupportTicket.create({
+      authorId: regularUser._id,
+      title: 'Ticket 1',
+      description: 'Desc',
+      category: 'bug'
+    });
+    
+    await SupportTicket.create({
+      authorId: adminUser._id, // different user
+      title: 'Ticket 2',
+      description: 'Desc',
+      category: 'bug'
+    });
+    
+    const res = await request(app).get('/api/support/my-tickets');
+    
+    expect(res.status).toBe(200);
+    expect(res.body.tickets.length).toBe(1);
+    expect(res.body.tickets[0].title).toBe('Ticket 1');
   });
 });

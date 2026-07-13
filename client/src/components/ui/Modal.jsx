@@ -22,6 +22,7 @@ const Modal = ({ children, onClose }) => {
         background: 'var(--bg-surface-raised, var(--color-surface, #1e1e2e))',
         borderRadius: 'var(--radius-lg)', maxWidth: 520, width: '100%',
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        maxHeight: '90vh', overflowY: 'auto'
       }}>
         {children}
       </div>

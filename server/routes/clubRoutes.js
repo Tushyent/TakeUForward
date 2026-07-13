@@ -3,7 +3,7 @@ import Club from '../models/Club.js';
 import Post from '../models/Post.js';
 import Community from '../models/Community.js';
 import User from '../models/User.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, apiLimiter } from '../middleware/rateLimiter.js';
 import { createNotification } from '../services/notificationService.js';
 import { logActivity } from '../services/activityLogger.js';
 
@@ -37,6 +37,31 @@ router.get('/:id', async (req, res, next) => {
       .sort({ createdAt: -1 });
 
     res.json({ club, announcements });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// @route   PATCH /api/clubs/:id
+// @desc    Update a club (contact email, instagram)
+// @access  Private (Club Admin only)
+router.patch('/:id', apiLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: { message: 'Not authenticated' } });
+  }
+  try {
+    const club = await Club.findById(req.params.id);
+    if (!club) {
+      return res.status(404).json({ error: { message: 'Club not found' } });
+    }
+    if (!club.adminIds.some(adminId => adminId.toString() === req.user._id.toString()) && req.user.role !== 'platform_admin') {
+      return res.status(403).json({ error: { message: 'Not authorized' } });
+    }
+    const { contactEmail, instagramHandle } = req.body;
+    if (contactEmail !== undefined) club.contactEmail = contactEmail;
+    if (instagramHandle !== undefined) club.instagramHandle = instagramHandle;
+    await club.save();
+    res.json(club);
   } catch (err) {
     next(err);
   }

@@ -100,10 +100,48 @@ function ClubPage() {
         </Link>
 
         <Card style={{ backgroundColor: 'var(--bg-surface)' }}>
-          <h1 style={{ marginTop: 0 }}>{club.name}</h1>
-          <p style={{ fontSize: 'var(--text-lg)', marginBottom: isAdmin ? 'var(--space-4)' : 0 }}>{club.description}</p>
-          {isAdmin && (
-            <Badge variant="primary">You are a Club Admin</Badge>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px' }}>
+            <h1 style={{ marginTop: 0 }}>{club.name}</h1>
+            {isAdmin && (
+              <Badge variant="primary">You are a Club Admin</Badge>
+            )}
+          </div>
+          <p style={{ fontSize: 'var(--text-lg)', marginBottom: 'var(--space-4)' }}>{club.description}</p>
+          
+          {(club.contactEmail || club.instagramHandle || isAdmin) && (
+            <div style={{ marginTop: 'var(--space-4)', padding: 'var(--space-3)', background: 'var(--bg-base)', borderRadius: 'var(--radius-md)' }}>
+              <h4 style={{ margin: '0 0 var(--space-2) 0' }}>Contact Info</h4>
+              {club.contactEmail && <p style={{ margin: '0 0 4px 0', fontSize: '0.9em' }}>📧 <strong>Email:</strong> <a href={`mailto:${club.contactEmail}`} style={{ color: 'var(--primary)' }}>{club.contactEmail}</a></p>}
+              {club.instagramHandle && <p style={{ margin: '0 0 4px 0', fontSize: '0.9em' }}>📸 <strong>Instagram:</strong> <a href={`https://instagram.com/${club.instagramHandle.replace('@', '')}`} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)' }}>{club.instagramHandle}</a></p>}
+              
+              {isAdmin && (
+                <div style={{ marginTop: 'var(--space-3)', borderTop: '1px solid var(--border-subtle)', paddingTop: 'var(--space-3)' }}>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    try {
+                      await axiosClient.patch(`/clubs/${club._id}`, {
+                        contactEmail: e.target.contactEmail.value,
+                        instagramHandle: e.target.instagramHandle.value
+                      });
+                      toast.success('Club contact info updated');
+                      fetchData();
+                    } catch {
+                      toast.error('Failed to update club info');
+                    }
+                  }} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'flex-end' }}>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <label style={{ fontSize: '0.8em', marginBottom: '4px', display: 'block' }}>Contact Email</label>
+                      <Input name="contactEmail" defaultValue={club.contactEmail || ''} placeholder="e.g. hello@club.com" />
+                    </div>
+                    <div style={{ flex: 1, minWidth: '200px' }}>
+                      <label style={{ fontSize: '0.8em', marginBottom: '4px', display: 'block' }}>Instagram Handle</label>
+                      <Input name="instagramHandle" defaultValue={club.instagramHandle || ''} placeholder="e.g. @clubhandle" />
+                    </div>
+                    <Button type="submit" size="sm">Save</Button>
+                  </form>
+                </div>
+              )}
+            </div>
           )}
         </Card>
 

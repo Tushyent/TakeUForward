@@ -7,6 +7,22 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
 ## [Unreleased]
 
+### Changed
+- **[Admin] System Admin Dashboard Polish**: Refactored the System Admin Dashboard lists to use `Card` and `EmptyState` design system components for visual consistency with the rest of the application (PART 12).
+- **[UI] Rendering Glitch Fixed**: Fixed a Chrome rendering artifact (corrupted blur/lines near cards on hover) by adding `will-change: transform, box-shadow` and `transform: translateZ(0)` to `.card`, forcing stable GPU compositing without dropping the blur (PART 16).
+- **[UI] General Responsiveness**: Fixed Mobile header UI cut-offs by adding vertical scroll support and modifying z-index handling on `NotificationsDropdown` and `Modal` (PART 11).
+- **[Security] Rate Limiting**: Added `apiLimiter` to `PATCH /api/clubs/:id` for consistency across all mutating routes.
+- **[Database] Performance**: Added compound and single indexes to `Post` (`communityId`/`createdAt`, `clubId`, `authorId`), `Notification` (`userId`/`createdAt`), and `SupportTicket` (`authorId`, `status`/`createdAt`) to eliminate full collection scans.
+
+### Added
+- **[Notifications] Dedicated Page**: Added a dedicated `/notifications` page with full paginated viewing history, linked from the dropdown footer (PART 15).
+- **[Club] Contact Info**: Added `contactEmail` and `instagramUrl` to `Club` model and admin forms, displaying them on the public Club page (PART 9).
+- **[Chat] Text Formatting**: Preserved whitespace and line breaks in `ChatThread` using `whiteSpace: 'pre-wrap'` (PART 17).
+
+### Fixed
+- **[Resource] Stuck Upload Button**: Resolved an issue where the "Upload Resource" button stayed in a submitting state. Fixed the backend `POST /api/resources` route to asynchronously process Gemini AI summarization so it no longer blocks the initial network response, ensuring the UI returns to idle immediately upon upload success (PART 3).
+- **[Roadmaps] Empty State on Seeded Data**: Fixed `/career-roadmaps` returning an empty state despite valid seeded data. Root cause was an aggressive default `careerPath` filter and UI loading state order causing an empty render before results returned. Adjusted frontend logic to properly load and display all seeded roadmaps (PART 6).
+
 ### Security & Chore
 - **[Backend] Production Middleware**: Installed and configured `helmet` for strict HTTP security headers and `compression` (GZIP) to significantly reduce JSON payload sizes over the network.
 - **[Git] History & Index Cleanup**: Safely untracked `.env`, `node_modules`, `dist`, and log files from the Git cache to ensure no secrets or build artifacts are accidentally committed, satisfying strict security rules. Verified all `.gitignore` rules (root, client, server) are fully robust.
@@ -174,8 +190,19 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
   - **Logging:** Cleaned up stray `console.log` statements in production services (`digestService`, `geminiService`, `notificationService`, `mailer`).
 - **Pre-Deployment Bug Fixes (Part 4 Audit):** Fixed a backend crash where `MarketplaceItem.js` and `marketplaceRoutes.js` were using CommonJS syntax instead of ES Modules, breaking the production `npm start`. Removed an invalid import to a non-existent `authMiddleware` file and replaced it with inline `req.isAuthenticated()` checks, preventing API route failures.
 
-## [Unreleased] - 2026-07-05
+## [Unreleased]
+### Added
+- Dedicated `/notifications` page linked from the Notification bell dropdown.
+- Marketing email sending tool in the Admin Dashboard for inviting students (using SendGrid).
+- GPU hardware-acceleration CSS locks (`translateZ`, `backface-visibility`) for Chromium rendering glithces on `.card` elements.
 
+### Changed
+- Final, comprehensive E2E Code Verification Pass executed covering Auth, Moderation, Core Content, Clubs, Search, Referrals, Analytics, Webhooks, Push Notifications, and Admin surfaces.
+- Migrated entirely off Nodemailer to SendGrid (verified no legacy dead paths).
+- Standardized all mutating endpoints with strict rate limiting (postCreationLimiter, reportLimiter).
+- Re-verified mobile responsiveness (375px/390px) and text-overflow boundaries across all modern pages.
+
+## [2026-07-13] - Feature Completeness & Stability
 ### Fixed
 - **[Phase 2/3 Audit Fix] Security & Stability:** Applied regex escaping globally across all feature routes (`referralRoutes`, `mockInterviewRoutes`, `lostFoundRoutes`, `interviewExperienceRoutes`, `electiveRoutes`, `alumniRoutes`, `reviewRoutes`, `resourceRoutes`, `teamRequestRoutes`) to prevent database crashes from unescaped user query strings containing wildcards or brackets.
 

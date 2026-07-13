@@ -49,7 +49,7 @@ function Chats() {
   // Users already in a chat with me
   const chattedUserIds = new Set(
     chats.map(chat => {
-      const other = chat.participants.find(p => p._id !== myUserId);
+      const other = chat.participants?.find(p => p?._id !== myUserId);
       return other?._id;
     }).filter(Boolean)
   );
@@ -68,7 +68,7 @@ function Chats() {
 
   const filteredChats = debouncedSearch
     ? chats.filter(chat => {
-        const other = chat.participants.find(p => p._id !== myUserId);
+        const other = chat.participants?.find(p => p?._id !== myUserId);
         return other
           ? other.name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
             other.handle?.toLowerCase().includes(debouncedSearch.toLowerCase())
@@ -102,9 +102,9 @@ function Chats() {
             </h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '2rem' }}>
               {filteredChats.map(chat => {
-                const otherUser = chat.participants.find(p => p._id !== myUserId);
+                const otherUser = chat.participants?.find(p => p?._id !== myUserId);
                 const displayName = otherUser ? `${otherUser.name} (@${otherUser.handle})` : 'Unknown User';
-                const lastMsg = chat.messages[chat.messages.length - 1];
+                const lastMsg = chat.messages && chat.messages.length > 0 ? chat.messages[chat.messages.length - 1] : null;
 
                 return (
                   <Link key={chat._id} to={`/chat/${otherUser?._id}`} style={{ textDecoration: 'none' }}>

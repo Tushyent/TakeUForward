@@ -40,12 +40,14 @@ TakeUForward is a highly secure, full-stack campus platform exclusively designed
 
 ## 🛠 Tech Stack & Architecture
 
-- **Frontend**: React.js, Vite, React Router, Custom CSS Design System (Glassmorphism & Dark-Mode first).
-- **Backend**: Node.js, Express.js (ES Modules).
-- **Database**: MongoDB Atlas, Mongoose (with `connect-mongo` for persistent sessions).
-- **Cloud & AI**: 
-  - AWS S3 (Presigned URLs for direct uploads)
-  - Twilio SendGrid (Email Notifications)
+- Frontend: React + Vite, Tailwind CSS, JavaScript, React Router, Axios
+- Backend: Node.js + Express
+- Database: MongoDB Atlas (via Mongoose)
+- Authentication: Passport.js (Google OAuth 2.0)
+- Email: Twilio SendGrid
+- Logging: Pino
+- Storage: AWS S3 (via Presigned URLs)
+- Cloud & AI: 
   - Google Gemini AI (PDF Summarizations)
 - **Deployment**: Vercel (Frontend SPA) + Render (Node.js Backend).
 

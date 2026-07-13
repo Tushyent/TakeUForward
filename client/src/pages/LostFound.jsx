@@ -8,6 +8,7 @@ import Button from '../components/ui/Button';
 import Spinner from '../components/ui/Spinner';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
+import FilePreview from '../components/ui/FilePreview';
 import { Search, AlertCircle, MessageCircle, Calendar, MapPin, User, Clock } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -319,7 +320,7 @@ function LostFound() {
                     
                     {item.imageUrl && (
                       <div style={{ marginBottom: '15px', maxWidth: '300px' }}>
-                        <img src={item.imageUrl} alt="Lost item" style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }} />
+                        <FilePreview fileUrl={item.imageUrl} fileName={`Lost item: ${item.itemName}`} />
                       </div>
                     )}
 
