@@ -35,10 +35,10 @@ Status values: Not Started / In Progress / Done / Blocked
 |---|---|---|---|---|---|
 | Verified Alumni Directory | 2 | Done | | server/routes/alumniRoutes.js, client/src/pages/AlumniDirectory.jsx | 2026-07-05 |
 | Referral Request Board | 2 | Done (Tested) | | server/models/ReferralRequest.js, server/routes/referralRoutes.js, client/src/pages/ReferralBoard.jsx | 2026-07-10 |
-| Full Profile Pages | 2 | Done | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-09 |
+| Full Profile Pages | 2 | Done (Tabs & Contributions) | | server/routes/userRoutes.js, client/src/pages/PublicProfile.jsx, client/src/pages/ProfileSettings.jsx | 2026-07-14 |
 | Mock Interview / Resume Review Pairing | 2 | Done (Tested) | | server/models/MockInterviewRequest.js, server/routes/mockInterviewRoutes.js, client/src/pages/MockInterviews.jsx | 2026-07-10 |
-| Interview Experience Repository | 2 | Done (Retested) | | server/models/InterviewExperience.js, server/routes/interviewExperienceRoutes.js, client/src/pages/InterviewExperiences.jsx | 2026-07-11 |
-| NPTEL / Elective Suggestion Aggregator | 2 | Done (Retested) | | server/models/ElectiveSuggestion.js, server/routes/electiveRoutes.js, client/src/pages/Electives.jsx | 2026-07-11 |
+| Interview Experience Repository | 2 | Done (Tested & Cascading Deletes) | | server/models/InterviewExperience.js, server/routes/interviewExperienceRoutes.js, client/src/pages/InterviewExperiences.jsx | 2026-07-14 |
+| NPTEL / Elective Suggestion Aggregator | 2 | Done (Tested & Cascading Deletes) | | server/models/ElectiveSuggestion.js, server/routes/electiveRoutes.js, client/src/pages/Electives.jsx | 2026-07-14 |
 | Career Roadmap Templates | 2 | Done | | server/models/CareerRoadmap.js, server/routes/careerRoadmapRoutes.js, client/src/pages/CareerRoadmaps.jsx | 2026-07-05 |
 | Weekly Digest Email | 2 | Done | | server/services/digestService.js, server/routes/jobRoutes.js, server/models/User.js, client/src/pages/ProfileSettings.jsx | 2026-07-05 |
 | Web Push Notifications | 2 | Done | | server/routes/pushRoutes.js, server/services/notificationService.js, client/public/sw.js | 2026-07-05 |

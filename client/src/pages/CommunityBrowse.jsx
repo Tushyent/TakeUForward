@@ -17,6 +17,7 @@ function CommunityBrowse() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [openGroup, setOpenGroup] = useState(null);
   const searchRef = useRef(null);
 
   useEffect(() => {
@@ -76,6 +77,12 @@ function CommunityBrowse() {
     if (b === 'Other Batches' || b === 'Other') return -1;
     return b.localeCompare(a); // Descending year (e.g. 2029 Batch, 2028 Batch)
   });
+
+  useEffect(() => {
+    if (!loading && openGroup === null && sortedGroupKeys.length > 0) {
+      setOpenGroup(sortedGroupKeys[0]);
+    }
+  }, [loading, sortedGroupKeys, openGroup]);
 
   if (loading) {
     return (
@@ -169,51 +176,74 @@ function CommunityBrowse() {
             message="Try a different term."
           />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {sortedGroupKeys.map(groupKey => (
-              <div key={groupKey}>
-                <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 'var(--space-3)' }}>{groupKey}</h2>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--space-3)' }}>
-                  {groupedCommunities[groupKey].map(comm => (
-                    <Link
-                      key={comm._id}
-                      to={`/community/${comm._id}`}
-                      style={{ textDecoration: 'none' }}
-                    >
-                      <div style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: 'var(--space-3) var(--space-4)',
-                        borderRadius: 'var(--radius-sm)',
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border-subtle)',
-                        transition: 'background var(--transition-fast), border-color var(--transition-fast)',
-                        cursor: 'pointer',
-                        height: '100%',
-                      }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                          <div style={{
-                            width: 32, height: 32, borderRadius: 'var(--radius-sm)',
-                            background: 'rgba(124,106,247,0.12)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                          }}>
-                            <Hash size={14} color="var(--primary)" />
-                          </div>
-                          <div>
-                            <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{comm.name}</p>
-                            <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{comm.description}</p>
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexShrink: 0 }}>
-                          <Badge variant={communityVariant(comm.type)} size="sm">{comm.type}</Badge>
-                          <ChevronRight size={14} color="var(--text-muted)" />
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+              <div key={groupKey} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--bg-main)' }}>
+                <div 
+                  onClick={() => setOpenGroup(openGroup === groupKey ? null : groupKey)}
+                  style={{
+                    padding: 'var(--space-4) var(--space-5)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    background: openGroup === groupKey ? 'var(--bg-elevated)' : 'transparent',
+                    transition: 'background var(--transition-fast)'
+                  }}
+                >
+                  <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--text-primary)', margin: 0 }}>
+                    {groupKey} <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', fontWeight: 400, marginLeft: 'var(--space-2)' }}>({groupedCommunities[groupKey].length})</span>
+                  </h2>
+                  <div style={{ transform: openGroup === groupKey ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease-in-out' }}>
+                    <ChevronRight size={20} color="var(--text-muted)" />
+                  </div>
                 </div>
+                
+                {openGroup === groupKey && (
+                  <div style={{ padding: 'var(--space-5)', background: 'var(--bg-surface)', borderTop: '1px solid var(--border-subtle)' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'var(--space-4)' }}>
+                      {groupedCommunities[groupKey].map(comm => (
+                        <Link
+                          key={comm._id}
+                          to={`/community/${comm._id}`}
+                          style={{ textDecoration: 'none' }}
+                        >
+                          <div style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: 'var(--space-3) var(--space-4)',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'var(--bg-elevated)',
+                            border: '1px solid var(--border-subtle)',
+                            transition: 'all var(--transition-fast)',
+                            cursor: 'pointer',
+                            height: '100%',
+                          }}
+                            onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-input)'; e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                            onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-elevated)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                              <div style={{
+                                width: 32, height: 32, borderRadius: 'var(--radius-sm)',
+                                background: 'rgba(124,106,247,0.12)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                              }}>
+                                <Hash size={14} color="var(--primary)" />
+                              </div>
+                              <div>
+                                <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>{comm.name}</p>
+                                <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{comm.description}</p>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexShrink: 0, marginLeft: 'var(--space-2)' }}>
+                              <Badge variant={communityVariant(comm.type)} size="sm">{comm.type}</Badge>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>

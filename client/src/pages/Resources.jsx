@@ -218,7 +218,13 @@ function Resources() {
                 )}
 
                 <p style={{ fontSize: '0.85em', color: 'var(--text-secondary)', marginBottom: '15px' }}>
-                  Uploaded by: {res.uploaderId?.name || 'Unknown'}
+                  Uploaded by: {res.uploaderId?.username ? (
+                    <Link to={`/profile/${res.uploaderId.username}`} style={{ color: 'inherit', fontWeight: 500 }}>
+                      {res.uploaderId.name} (@{res.uploaderId.handle})
+                    </Link>
+                  ) : (
+                    res.uploaderId?.name || 'Unknown'
+                  )}
                 </p>
                 
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -229,7 +235,7 @@ function Resources() {
                     <Button variant="secondary" onClick={() => handleBookmark(res._id)} style={{ color: bookmarkedIds.has(res._id) ? 'var(--primary)' : 'inherit' }}>
                       {bookmarkedIds.has(res._id) ? '★ Saved' : '☆ Save'}
                     </Button>
-                    {user?.isPlatformAdmin && (
+                    {user && (user.isPlatformAdmin || user._id === (res.uploaderId?._id || res.uploaderId)) && (
                       <Button variant="danger" size="sm" onClick={() => handleDeleteResource(res)}>
                         <Trash2 size={13} /> Delete
                       </Button>

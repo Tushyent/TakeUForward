@@ -15,6 +15,7 @@ function ClubsList() {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(4);
   const searchRef = useRef(null);
 
   const fetchClubs = async () => {
@@ -45,12 +46,30 @@ function ClubsList() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  const priorityList = ["ssn coding club", "ssn acm", "ssn acm-w", "ssn ieee cs"];
+  
+  const sortedClubs = React.useMemo(() => {
+    return [...clubs].sort((a, b) => {
+      const aName = a.name.toLowerCase();
+      const bName = b.name.toLowerCase();
+      const aIndex = priorityList.indexOf(aName);
+      const bIndex = priorityList.indexOf(bName);
+      
+      if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [clubs]);
+
   const filtered = query.trim()
-    ? clubs.filter(c =>
+    ? sortedClubs.filter(c =>
         c.name.toLowerCase().includes(query.toLowerCase()) ||
         c.description?.toLowerCase().includes(query.toLowerCase())
       )
-    : clubs;
+    : sortedClubs;
+
+  const paginatedFiltered = filtered.slice(0, visibleCount);
 
   const suggestions = query.trim().length >= 1 ? filtered.slice(0, 8) : [];
 
@@ -85,34 +104,48 @@ function ClubsList() {
     }
     return (
       <>
-        {filtered.length === 0 ? (
+        {paginatedFiltered.length === 0 ? (
           <EmptyState
             icon={Search}
             title="No clubs match your search"
             message="Try a different search term."
           />
         ) : (
-          <div style={{ display: 'grid', gap: 'var(--space-6)', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
-            {filtered.map(club => (
-              <Card key={club._id} lift style={{ display: 'flex', flexDirection: 'column', height: '100%', marginBottom: 0 }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: 'var(--radius-sm)',
-                  background: 'rgba(124,106,247,0.12)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 'var(--space-4)',
-                }}>
-                  <Users size={18} color="var(--primary)" />
-                </div>
-                <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-base)' }}>{club.name}</h3>
-                <p style={{ flexGrow: 1, marginBottom: 'var(--space-5)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                  {club.description}
-                </p>
-                <Link to={`/clubs/${club._id}`} style={{ textDecoration: 'none' }}>
-                  <Button variant="outline" style={{ width: '100%' }}>View Club →</Button>
-                </Link>
-              </Card>
-            ))}
-          </div>
+          <>
+            <div style={{ display: 'grid', gap: 'var(--space-6)', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+              {paginatedFiltered.map(club => (
+                <Card key={club._id} lift style={{ display: 'flex', flexDirection: 'column', height: '100%', marginBottom: 0 }}>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 'var(--radius-sm)',
+                    background: 'rgba(124,106,247,0.12)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 'var(--space-4)',
+                  }}>
+                    <Users size={18} color="var(--primary)" />
+                  </div>
+                  <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-base)' }}>{club.name}</h3>
+                  <p style={{ flexGrow: 1, marginBottom: 'var(--space-5)', fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                    {club.description}
+                  </p>
+                  <Link to={`/clubs/${club._id}`} style={{ textDecoration: 'none' }}>
+                    <Button variant="outline" style={{ width: '100%' }}>View Club →</Button>
+                  </Link>
+                </Card>
+              ))}
+            </div>
+            
+            {filtered.length > visibleCount && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--space-8)' }}>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setVisibleCount(prev => prev + 5)}
+                  style={{ minWidth: '200px' }}
+                >
+                  View More ({filtered.length - visibleCount} left)
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </>
     );

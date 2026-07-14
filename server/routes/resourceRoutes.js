@@ -87,10 +87,11 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 // GET /api/resources
 router.get('/', async (req, res, next) => {
   try {
-    const { courseCode, q, page: pageQuery, limit: limitQuery } = req.query;
+    const { courseCode, q, uploaderId, page: pageQuery, limit: limitQuery } = req.query;
     const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
     const query = {};
+    if (uploaderId) query.uploaderId = uploaderId;
     if (courseCode) {
       const safeCourseCode = courseCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.courseCode = { $regex: new RegExp(safeCourseCode, 'i') };
@@ -133,15 +134,26 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // DELETE /api/resources/:id
-router.delete('/:id', requireSystemAdmin, async (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
   try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+
     const resource = await Resource.findById(req.params.id);
     if (!resource) return res.status(404).json({ error: { message: 'Resource not found' } });
+
+    // Allow deletion if the user is a platform admin OR the original uploader
+    if (!req.user.isPlatformAdmin && resource.uploaderId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: { message: 'Unauthorized to delete this resource' } });
+    }
 
     await deletePublicObjectByUrl(resource.fileUrl);
     await Resource.findByIdAndDelete(req.params.id);
     await Bookmark.deleteMany({ itemType: 'resource', itemId: req.params.id });
-    await logActivity({ action: 'delete', resource: 'Resource', resourceId: req.params.id, description: 'Admin deleted a resource', req });
+    
+    const actionDesc = req.user.isPlatformAdmin && resource.uploaderId.toString() !== req.user._id.toString() 
+      ? 'Admin deleted a resource' 
+      : 'User deleted their own resource';
+    await logActivity({ action: 'delete', resource: 'Resource', resourceId: req.params.id, description: actionDesc, req });
     res.status(200).json({ message: 'Resource deleted successfully' });
   } catch (err) {
     logger.error('Error deleting resource:', err);

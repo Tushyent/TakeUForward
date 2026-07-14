@@ -11,10 +11,12 @@ import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import ReportModal from '../components/ui/ReportModal';
-import { Search, AlertCircle } from 'lucide-react';
+import { Search, AlertCircle, Bookmark } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
+import { useAuth } from '../context/auth-context';
 
 function Electives() {
+  const { user } = useAuth();
   const [electives, setElectives] = useState([]);
   const [filters, setFilters] = useState({});
   const debouncedFilters = useDebounce(filters, 300);
@@ -22,6 +24,7 @@ function Electives() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reportingId, setReportingId] = useState(null);
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   // New elective state
   const [courseCode, setCourseCode] = useState('');
@@ -48,9 +51,36 @@ function Electives() {
     }
   }, [debouncedFilters]);
 
+  const fetchBookmarks = useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await axiosClient.get('/bookmarks?type=elective_suggestion');
+      const savedIds = new Set(response.data.map(b => b.itemId?._id || b.itemId));
+      setBookmarkedIds(savedIds);
+    } catch (err) {
+      console.error('Error fetching bookmarks:', err);
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchElectives();
-  }, [fetchElectives]);
+    fetchBookmarks();
+  }, [fetchElectives, fetchBookmarks]);
+
+  const handleBookmark = async (id) => {
+    try {
+      await axiosClient.post('/bookmarks', { itemType: 'elective_suggestion', itemId: id });
+      setBookmarkedIds(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(id)) newSet.delete(id);
+        else newSet.add(id);
+        return newSet;
+      });
+      toast.success(bookmarkedIds.has(id) ? 'Removed from saved' : 'Saved for later');
+    } catch (err) {
+      toast.error('Failed to update bookmark');
+    }
+  };
 
   const handleCreateElective = async (e) => {
     e.preventDefault();
@@ -241,6 +271,9 @@ function Electives() {
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <Button variant="secondary" onClick={() => handleUpvote(elective._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
                     ▲ Upvote ({elective.upvotesCount || 0})
+                  </Button>
+                  <Button variant="secondary" onClick={() => handleBookmark(elective._id)} style={{ padding: '6px 12px', fontSize: '13px', color: bookmarkedIds.has(elective._id) ? 'var(--primary)' : 'inherit' }}>
+                    <Bookmark size={14} fill={bookmarkedIds.has(elective._id) ? "currentColor" : "none"} style={{ marginRight: '4px' }} /> {bookmarkedIds.has(elective._id) ? 'Saved' : 'Save'}
                   </Button>
                   <Button variant="secondary" onClick={() => handleReport(elective._id)} style={{ padding: '6px 12px', fontSize: '13px' }}>
                     ⚑ Report

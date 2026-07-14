@@ -20,6 +20,7 @@ const marketplaceItemSchema = new mongoose.Schema({
     enum: ['available', 'sold'], 
     default: 'available' 
   },
+  isHidden: { type: Boolean, default: false },
   reports: [{
     reporterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     reason: String,

@@ -2,6 +2,8 @@ import express from 'express';
 import Post from '../models/Post.js';
 import User from '../models/User.js';
 import Community from '../models/Community.js';
+import Bookmark from '../models/Bookmark.js';
+import Notification from '../models/Notification.js';
 import '../models/Club.js'; // Required for mongoose populate
 import { createNotification } from '../services/notificationService.js';
 import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
@@ -89,7 +91,7 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
 // GET /api/posts
 router.get('/', async (req, res, next) => {
   try {
-    const { communityId, type, dept, year, courseCode, q, page: pageQuery, limit: limitQuery } = req.query;
+    const { communityId, type, dept, year, courseCode, q, authorId, page: pageQuery, limit: limitQuery } = req.query;
     
     const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
 
@@ -97,6 +99,7 @@ router.get('/', async (req, res, next) => {
     
     if (communityId) query.communityId = communityId;
     if (type) query.type = type;
+    if (authorId) query.authorId = authorId;
     if (dept) query['tags.dept'] = dept;
     if (year) query['tags.year'] = year;
     if (courseCode) query['tags.courseCode'] = courseCode;
@@ -341,6 +344,11 @@ router.delete('/:id', async (req, res, next) => {
     }
 
     await Post.findByIdAndDelete(req.params.id);
+    
+    // Cleanup orphaned bookmarks and notifications
+    await Bookmark.deleteMany({ itemId: req.params.id });
+    await Notification.deleteMany({ refId: req.params.id });
+    
     await logActivity({ action: 'delete', resource: 'Post', resourceId: req.params.id, description: 'Deleted a post', req });
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (err) {

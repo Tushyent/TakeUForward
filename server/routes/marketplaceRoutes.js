@@ -133,5 +133,33 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     next(err);
   }
 });
+// DELETE /api/marketplace/:id
+router.delete('/:id', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+
+  try {
+    const item = await MarketplaceItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: { message: 'Item not found' } });
+
+    // Allow deletion if the user is a platform admin OR the original seller
+    if (!req.user.isPlatformAdmin && item.sellerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: { message: 'Unauthorized to delete this item' } });
+    }
+
+    await MarketplaceItem.findByIdAndDelete(req.params.id);
+    
+    const actionDesc = req.user.isPlatformAdmin && item.sellerId.toString() !== req.user._id.toString() 
+      ? 'Admin deleted a marketplace item' 
+      : 'User deleted their own marketplace item';
+    await logActivity({ action: 'delete', resource: 'MarketplaceItem', resourceId: req.params.id, description: actionDesc, req });
+    
+    res.status(200).json({ message: 'Item deleted successfully' });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(404).json({ error: { message: 'Item not found' } });
+    }
+    next(err);
+  }
+});
 
 export default router;

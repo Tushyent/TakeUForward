@@ -1,7 +1,7 @@
 import express from 'express';
 import LostFoundItem from '../models/LostFoundItem.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
-import { postCreationLimiter } from '../middleware/rateLimiter.js';
+import { postCreationLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { generatePresignedUrl } from '../config/s3.js';
 import { logger } from '../utils/logger.js';
 import { logActivity } from '../services/activityLogger.js';
@@ -118,6 +118,64 @@ router.post('/:id/resolve', async (req, res, next) => {
     res.status(200).json(updatedItem);
   } catch (err) {
     logger.error('Error resolving lost/found item:', err);
+    next(err);
+  }
+});
+// DELETE /api/lost-found/:id
+router.delete('/:id', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+
+  try {
+    const item = await LostFoundItem.findById(req.params.id);
+    if (!item) return res.status(404).json({ error: { message: 'Item not found' } });
+
+    // Allow deletion if the user is a platform admin OR the original reporter
+    if (!req.user.isPlatformAdmin && item.reporterId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: { message: 'Unauthorized to delete this item' } });
+    }
+
+    await LostFoundItem.findByIdAndDelete(req.params.id);
+    
+    const actionDesc = req.user.isPlatformAdmin && item.reporterId.toString() !== req.user._id.toString() 
+      ? 'Admin deleted a lost/found item' 
+      : 'User deleted their own lost/found item';
+    await logActivity({ action: 'delete', resource: 'LostFoundItem', resourceId: req.params.id, description: actionDesc, req });
+    
+    res.status(200).json({ message: 'Item deleted successfully' });
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(404).json({ error: { message: 'Item not found' } });
+    }
+    next(err);
+  }
+});
+// POST /api/lost-found/:id/report - Report item
+router.post('/:id/report', reportLimiter, async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+  try {
+    const { reason } = req.body;
+    if (!reason) {
+      return res.status(400).json({ error: { message: 'Reason is required' } });
+    }
+
+    const item = await LostFoundItem.findById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ error: { message: 'Item not found' } });
+    }
+
+    const alreadyReported = item.reports && item.reports.some(r => r.reporterId.toString() === req.user._id.toString());
+    if (alreadyReported) {
+      return res.status(400).json({ error: { message: 'You already reported this item' } });
+    }
+
+    if (!item.reports) item.reports = [];
+    item.reports.push({ reporterId: req.user._id, reason });
+    await item.save();
+
+    await logActivity({ action: 'report', resource: 'LostFoundItem', resourceId: item._id, description: 'Reported a lost/found listing', req });
+
+    res.json({ message: 'Item reported successfully' });
+  } catch (err) {
     next(err);
   }
 });

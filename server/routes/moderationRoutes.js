@@ -4,6 +4,8 @@ import Review from '../models/Review.js';
 import InterviewExperience from '../models/InterviewExperience.js';
 import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
 import CareerRoadmap from '../models/CareerRoadmap.js';
+import MarketplaceItem from '../models/MarketplaceItem.js';
+import LostFoundItem from '../models/LostFoundItem.js';
 import crypto from 'crypto';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { sendEmail, buildEmailFooter } from '../config/mailer.js';
@@ -67,13 +69,49 @@ router.get('/queue', requireSystemAdmin, async (req, res, next) => {
       .populate('reports.userId', 'name handle')
       .sort({ createdAt: -1 });
 
+    const flaggedMarketplace = await MarketplaceItem.find({
+      $or: [
+        { isHidden: true },
+        { 'reports.0': { $exists: true } }
+      ]
+    })
+      .populate('sellerId', 'name handle role')
+      .populate('reports.reporterId', 'name handle')
+      .sort({ createdAt: -1 });
+
+    const flaggedLostFound = await LostFoundItem.find({
+      $or: [
+        { isHidden: true },
+        { 'reports.0': { $exists: true } }
+      ]
+    })
+      .populate('authorId', 'name handle role')
+      .populate('reports.reporterId', 'name handle')
+      .sort({ createdAt: -1 });
+
     const safePosts = flaggedPosts.map(post => ({ type: 'post', ...applyAnonymity(post) }));
     const safeReviews = flaggedReviews.map(review => ({ type: 'review', ...applyAnonymity(review) }));
     const safeExperiences = flaggedExperiences.map(exp => ({ type: 'interview_experience', ...applyAnonymity(exp) }));
     const typedElectives = flaggedElectives.map(e => ({ type: 'elective_suggestion', ...e.toObject() }));
     const typedRoadmaps = flaggedRoadmaps.map(r => ({ type: 'career_roadmap', ...r.toObject() }));
+    
+    // Normalize reporterId -> userId and sellerId -> authorId for consistency
+    const typedMarketplace = flaggedMarketplace.map(m => {
+      const obj = m.toObject();
+      obj.type = 'marketplace_item';
+      obj.authorId = obj.sellerId;
+      obj.reports = obj.reports.map(r => ({ ...r, userId: r.reporterId }));
+      return obj;
+    });
 
-    const combined = [...safePosts, ...safeReviews, ...safeExperiences, ...typedElectives, ...typedRoadmaps].sort((a, b) => b.reports.length - a.reports.length || new Date(b.createdAt) - new Date(a.createdAt));
+    const typedLostFound = flaggedLostFound.map(l => {
+      const obj = l.toObject();
+      obj.type = 'lost_found_item';
+      obj.reports = obj.reports.map(r => ({ ...r, userId: r.reporterId }));
+      return obj;
+    });
+
+    const combined = [...safePosts, ...safeReviews, ...safeExperiences, ...typedElectives, ...typedRoadmaps, ...typedMarketplace, ...typedLostFound].sort((a, b) => b.reports.length - a.reports.length || new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json(combined);
   } catch (err) {
@@ -97,6 +135,8 @@ router.post('/:itemId/resolve', requireSystemAdmin, async (req, res, next) => {
     if (type === 'interview_experience') Model = InterviewExperience;
     if (type === 'elective_suggestion') Model = ElectiveSuggestion;
     if (type === 'career_roadmap') Model = CareerRoadmap;
+    if (type === 'marketplace_item') Model = MarketplaceItem;
+    if (type === 'lost_found_item') Model = LostFoundItem;
     const item = await Model.findById(req.params.itemId);
     if (!item) {
       return res.status(404).json({ error: { message: 'Item not found' } });

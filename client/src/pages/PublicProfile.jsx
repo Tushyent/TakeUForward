@@ -6,7 +6,8 @@ import Card from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 import EmptyState from '../components/ui/EmptyState';
-import { UserX } from 'lucide-react';
+import { UserX, MessageSquare, FileText, Briefcase } from 'lucide-react';
+import Button from '../components/ui/Button';
 
 function PublicProfile() {
   const { username } = useParams();
@@ -14,6 +15,10 @@ function PublicProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [myUsername, setMyUsername] = useState(null);
+  const [activeTab, setActiveTab] = useState('about');
+  const [posts, setPosts] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [experiences, setExperiences] = useState([]);
 
   const fetchProfile = React.useCallback(async () => {
     try {
@@ -23,8 +28,21 @@ function PublicProfile() {
         axiosClient.get(`/users/${username}`),
         axiosClient.get('/auth/me').catch(() => ({ data: { user: {} } }))
       ]);
-      setProfile(profRes.data);
+      const user = profRes.data;
+      setProfile(user);
       setMyUsername(meRes.data.user?.username);
+
+      if (user._id) {
+        Promise.all([
+          axiosClient.get(`/posts?authorId=${user._id}`).catch(() => ({ data: [] })),
+          axiosClient.get(`/resources?uploaderId=${user._id}`).catch(() => ({ data: [] })),
+          axiosClient.get(`/interview-experiences?authorId=${user._id}`).catch(() => ({ data: [] }))
+        ]).then(([postsRes, resRes, expRes]) => {
+          setPosts(postsRes.data);
+          setResources(resRes.data);
+          setExperiences(expRes.data);
+        });
+      }
     } catch (err) {
       setError(err.response?.data?.error || 'Profile not found');
     } finally {
@@ -41,10 +59,12 @@ function PublicProfile() {
   if (!profile) return null;
 
   const isMe = myUsername === username;
+  
+  const hasAboutData = profile.bio || profile.about || (profile.skills && profile.skills.length > 0) || (profile.interests && profile.interests.length > 0) || (profile.experience && profile.experience.length > 0) || (profile.projects && profile.projects.length > 0) || profile.year || profile.graduationYear || profile.higherEducation;
 
   return (
     <div className="page-transition">
-            <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+      <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
         <Card>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
@@ -82,14 +102,27 @@ function PublicProfile() {
             {profile.currentCompany && <Badge variant="info">🏢 {profile.currentCompany}</Badge>}
           </div>
 
-          {(profile.bio || profile.about) && (
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ margin: '0 0 10px 0' }}>About</h3>
-              <p style={{ color: 'var(--text-primary)', margin: 0, lineHeight: 1.6 }}>
-                {profile.about || profile.bio}
-              </p>
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '15px', borderBottom: '1px solid var(--border)', marginBottom: '20px', overflowX: 'auto', paddingBottom: '5px' }}>
+            <Button variant={activeTab === 'about' ? 'primary' : 'ghost'} onClick={() => setActiveTab('about')}>About</Button>
+            <Button variant={activeTab === 'posts' ? 'primary' : 'ghost'} onClick={() => setActiveTab('posts')}>Posts ({posts.length})</Button>
+            <Button variant={activeTab === 'resources' ? 'primary' : 'ghost'} onClick={() => setActiveTab('resources')}>Resources ({resources.length})</Button>
+            <Button variant={activeTab === 'experiences' ? 'primary' : 'ghost'} onClick={() => setActiveTab('experiences')}>Experiences ({experiences.length})</Button>
+          </div>
+
+          {activeTab === 'about' && (
+            <div>
+              {!hasAboutData ? (
+                <EmptyState icon={UserX} title="Nothing to see here" message="This user hasn't filled out their profile yet." />
+              ) : (
+                <>
+                  {(profile.bio || profile.about) && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <h3 style={{ margin: '0 0 10px 0' }}>About</h3>
+                      <p style={{ color: 'var(--text-primary)', margin: 0, lineHeight: 1.6 }}>
+                        {profile.about || profile.bio}
+                      </p>
+                    </div>
+                  )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px' }}>
             {profile.skills && profile.skills.length > 0 && (
@@ -166,6 +199,70 @@ function PublicProfile() {
                   <a href={profile.socialLinks.instagram} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 500 }}>Instagram</a>
                 )}
               </div>
+            </div>
+          )}
+                </>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'posts' && (
+            <div>
+              {posts.length === 0 ? (
+                <EmptyState icon={MessageSquare} title="No posts yet" message="This user hasn't posted anything." />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {posts.map(post => (
+                    <Card key={post._id} style={{ background: 'var(--bg-input)' }}>
+                      <p style={{ margin: '0 0 10px 0', color: 'var(--text-primary)' }}>{post.content}</p>
+                      <div style={{ fontSize: '0.85em', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
+                        <span>❤️ {post.upvotes?.length || 0}</span>
+                        <Link to={`/community/${post.communityId}?post=${post._id}`} style={{ color: 'var(--primary)' }}>View Post</Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'resources' && (
+            <div>
+              {resources.length === 0 ? (
+                <EmptyState icon={FileText} title="No resources" message="This user hasn't uploaded any resources." />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {resources.map(res => (
+                    <Card key={res._id} style={{ background: 'var(--bg-input)' }}>
+                      <h4 style={{ margin: '0 0 5px 0' }}>{res.title}</h4>
+                      <p style={{ margin: '0 0 10px 0', color: 'var(--text-secondary)', fontSize: '0.9em' }}>{res.courseCode}</p>
+                      <div style={{ fontSize: '0.85em', display: 'flex', gap: '10px' }}>
+                        <a href={res.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>Download</a>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'experiences' && (
+            <div>
+              {experiences.length === 0 ? (
+                <EmptyState icon={Briefcase} title="No experiences" message="This user hasn't shared any interview experiences." />
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {experiences.map(exp => (
+                    <Card key={exp._id} style={{ background: 'var(--bg-input)' }}>
+                      <h4 style={{ margin: '0 0 5px 0' }}>{exp.company} - {exp.role}</h4>
+                      <p style={{ margin: '0 0 10px 0', color: 'var(--text-secondary)', fontSize: '0.9em' }}>Batch: {exp.batchYear} • Outcome: <span style={{textTransform: 'capitalize'}}>{exp.overallOutcome}</span></p>
+                      <div style={{ fontSize: '0.85em', display: 'flex', gap: '10px' }}>
+                        <Link to={`/interview-experiences`} style={{ color: 'var(--primary)' }}>View</Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </Card>

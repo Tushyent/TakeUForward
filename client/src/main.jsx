@@ -12,4 +12,14 @@ createRoot(document.getElementById('root')).render(
   </ErrorBoundary>
 )
 
-
+// Handle PWA auto-updates seamlessly by forcing a reload when a new service worker takes over.
+// This ensures users always see the latest UI without needing a manual hard refresh.
+if ('serviceWorker' in navigator) {
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
+}

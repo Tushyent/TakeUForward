@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/auth-context';
 import axiosClient from '../api/axiosClient';
 import useDebounce from '../hooks/useDebounce';
@@ -10,7 +10,7 @@ import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import ReportModal from '../components/ui/ReportModal';
 import Badge from '../components/ui/Badge';
-import { Store, AlertCircle, Search } from 'lucide-react';
+import { Store, AlertCircle, Search, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function Marketplace() {
@@ -123,6 +123,17 @@ function Marketplace() {
       toast.success('Item marked as sold');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Failed to mark item as sold');
+    }
+  };
+
+  const handleDeleteItem = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await axiosClient.delete(`/marketplace/${id}`);
+      setItems(prev => prev.filter(item => item._id !== id));
+      toast.success('Item deleted successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to delete item');
     }
   };
 
@@ -257,7 +268,13 @@ function Marketplace() {
                 </p>
 
                 <p style={{ margin: '0 0 15px 0', fontSize: '0.85em', color: 'var(--text-secondary)' }}>
-                  Posted by {item.sellerId?.name} • {new Date(item.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+                  Posted by {item.sellerId?.username ? (
+                    <Link to={`/profile/${item.sellerId.username}`} style={{ color: 'inherit', fontWeight: 500 }}>
+                      {item.sellerId.name} (@{item.sellerId.handle})
+                    </Link>
+                  ) : (
+                    item.sellerId?.name || 'Unknown'
+                  )} • {new Date(item.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </p>
                 
                 <div style={{ display: 'flex', gap: '10px', marginTop: 'auto', borderTop: '1px solid var(--border)', paddingTop: '15px' }}>
@@ -279,6 +296,12 @@ function Marketplace() {
                   {currentUser && item.sellerId && currentUser._id !== item.sellerId._id && (
                     <Button variant="secondary" onClick={() => handleReport(item._id)}>
                       ⚑
+                    </Button>
+                  )}
+
+                  {currentUser && (currentUser.isPlatformAdmin || currentUser._id === (item.sellerId?._id || item.sellerId)) && (
+                    <Button variant="danger" onClick={() => handleDeleteItem(item._id)} style={{ padding: '0 12px' }}>
+                      <Trash2 size={16} />
                     </Button>
                   )}
                 </div>

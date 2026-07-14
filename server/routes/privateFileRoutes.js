@@ -27,6 +27,16 @@ router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
     const { fileName, fileType } = req.body;
     if (!fileName || !fileType) return res.status(400).json({ error: { message: 'Missing file details' } });
 
+    // Enforce 100MB total storage quota per user
+    const totalSizeData = await PrivateFile.aggregate([
+      { $match: { ownerId: req.user._id } },
+      { $group: { _id: null, totalSize: { $sum: "$size" } } }
+    ]);
+    const currentTotalSize = totalSizeData.length > 0 ? totalSizeData[0].totalSize : 0;
+    if (currentTotalSize >= 100 * 1024 * 1024) {
+      return res.status(403).json({ error: { message: 'Storage quota exceeded. As TUF-SSN is under testing, we have certain limits, in future we will increase the limits.' } });
+    }
+
     const { uploadUrl, key } = await generatePrivateUploadUrl(fileName, fileType, req.user._id.toString());
     res.status(200).json({ uploadUrl, key });
   } catch (err) {
@@ -42,16 +52,30 @@ router.post('/confirm', async (req, res, next) => {
     const { key, fileName, fileType, size } = req.body;
     if (!key || !fileName || !fileType) return res.status(400).json({ error: { message: 'Missing metadata' } });
 
-    // Enforce 20MB limit for personal drive
+    // Enforce 20MB limit for personal drive file
     const validation = await validateObjectSize(key, 20 * 1024 * 1024);
     if (!validation.valid) {
       return res.status(400).json({ error: { message: validation.error || 'File size exceeds 20MB limit. The uploaded file has been discarded.' } });
     }
 
+    const fileSize = validation.size || size || 0;
+
+    // Enforce 100MB total storage quota per user
+    const totalSizeData = await PrivateFile.aggregate([
+      { $match: { ownerId: req.user._id } },
+      { $group: { _id: null, totalSize: { $sum: "$size" } } }
+    ]);
+    const currentTotalSize = totalSizeData.length > 0 ? totalSizeData[0].totalSize : 0;
+    if (currentTotalSize + fileSize > 100 * 1024 * 1024) {
+      // Clean up the rejected file from S3
+      await deleteObjectByKey(key).catch(err => console.error("Cleanup failed:", err));
+      return res.status(403).json({ error: { message: 'This upload exceeds your total storage quota of 100MB. Please delete some files first.' } });
+    }
+
     const newFile = await PrivateFile.create({
       fileName,
       mimeType: fileType,
-      size: validation.size || size || 0,
+      size: fileSize,
       s3Key: key,
       ownerId: req.user._id
     });

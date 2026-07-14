@@ -8,16 +8,33 @@ class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(_error) {
+  static getDerivedStateFromError(error) {
+    // Detect Vite lazy-load chunk failures (caused by new deployments invalidating old hashed files)
+    const isChunkError = error.name === 'ChunkLoadError' || (error.message && error.message.includes('Failed to fetch dynamically imported module'));
+    
+    if (isChunkError) {
+      const lastReload = sessionStorage.getItem('last_chunk_error_reload');
+      const now = Date.now();
+      // Only auto-reload if we haven't done so in the last 10 seconds (prevents infinite loop)
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        sessionStorage.setItem('last_chunk_error_reload', now.toString());
+        window.location.reload();
+        return { hasError: true, isReloading: true };
+      }
+    }
     return { hasError: true };
   }
 
   componentDidCatch(error, errorInfo) {
+    if (this.state.isReloading) return;
     console.error("Uncaught rendering error:", error, errorInfo);
     this.setState({ error, errorInfo });
   }
 
   render() {
+    if (this.state.isReloading) {
+      return null; // Show blank/nothing while forcing the reload
+    }
     if (this.state.hasError) {
       return (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', padding: '20px' }}>

@@ -13,6 +13,14 @@ const lostFoundItemSchema = new mongoose.Schema(
     contactPreference: { type: String }, // "Message me via app"
     whatsappNumber: { type: String },
     status: { type: String, enum: ['open', 'resolved'], default: 'open', index: true },
+    isHidden: { type: Boolean, default: false },
+    reports: [
+      {
+        reporterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        reason: { type: String, required: true },
+        reportedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

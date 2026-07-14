@@ -1,5 +1,6 @@
 import express from 'express';
 import ElectiveSuggestion from '../models/ElectiveSuggestion.js';
+import Bookmark from '../models/Bookmark.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { logger } from '../utils/logger.js';
@@ -160,6 +161,33 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     res.status(200).json({ message: 'Suggestion reported successfully', isHidden: suggestion.isHidden });
   } catch (err) {
     logger.error('Error reporting suggestion:', err);
+    next(err);
+  }
+});
+
+// DELETE /api/elective-suggestions/:id
+router.delete('/:id', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+
+  try {
+    const suggestion = await ElectiveSuggestion.findById(req.params.id);
+    if (!suggestion) return res.status(404).json({ error: { message: 'Suggestion not found' } });
+
+    if (!req.user.isPlatformAdmin && suggestion.authorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: { message: 'Unauthorized to delete this suggestion' } });
+    }
+
+    await ElectiveSuggestion.findByIdAndDelete(req.params.id);
+    await Bookmark.deleteMany({ itemType: 'elective_suggestion', itemId: req.params.id });
+
+    const actionDesc = req.user.isPlatformAdmin && suggestion.authorId.toString() !== req.user._id.toString() 
+      ? 'Admin deleted an elective suggestion' 
+      : 'User deleted their own elective suggestion';
+    await logActivity({ action: 'delete', resource: 'ElectiveSuggestion', resourceId: req.params.id, description: actionDesc, req });
+
+    res.status(200).json({ message: 'Suggestion deleted successfully' });
+  } catch (err) {
+    logger.error('Error deleting suggestion:', err);
     next(err);
   }
 });

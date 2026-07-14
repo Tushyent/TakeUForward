@@ -1,5 +1,6 @@
 import express from 'express';
 import InterviewExperience from '../models/InterviewExperience.js';
+import Bookmark from '../models/Bookmark.js';
 import { postCreationLimiter, upvoteLimiter, reportLimiter } from '../middleware/rateLimiter.js';
 import { applyAnonymity } from '../utils/anonymity.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
@@ -12,11 +13,12 @@ const router = express.Router();
 // GET /api/interview-experiences
 router.get('/', async (req, res, next) => {
   try {
-    const { company, role, year, page: pageQuery, limit: limitQuery } = req.query;
+    const { company, role, year, authorId, page: pageQuery, limit: limitQuery } = req.query;
     const { limit, skip } = getPaginationParams(pageQuery, limitQuery);
     
     const query = { isHidden: { $ne: true } };
     
+    if (authorId) query.authorId = authorId;
     if (company) {
       const safeCompany = company.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.company = { $regex: new RegExp(safeCompany, 'i') };
@@ -157,6 +159,33 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     res.status(200).json({ message: 'Experience reported successfully', isHidden: experience.isHidden });
   } catch (err) {
     logger.error('Error reporting experience:', err);
+    next(err);
+  }
+});
+
+// DELETE /api/interview-experiences/:id
+router.delete('/:id', async (req, res, next) => {
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
+
+  try {
+    const experience = await InterviewExperience.findById(req.params.id);
+    if (!experience) return res.status(404).json({ error: { message: 'Experience not found' } });
+
+    if (!req.user.isPlatformAdmin && experience.authorId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: { message: 'Unauthorized to delete this experience' } });
+    }
+
+    await InterviewExperience.findByIdAndDelete(req.params.id);
+    await Bookmark.deleteMany({ itemType: 'interview_experience', itemId: req.params.id });
+
+    const actionDesc = req.user.isPlatformAdmin && experience.authorId.toString() !== req.user._id.toString() 
+      ? 'Admin deleted an interview experience' 
+      : 'User deleted their own interview experience';
+    await logActivity({ action: 'delete', resource: 'InterviewExperience', resourceId: req.params.id, description: actionDesc, req });
+
+    res.status(200).json({ message: 'Experience deleted successfully' });
+  } catch (err) {
+    logger.error('Error deleting experience:', err);
     next(err);
   }
 });

@@ -38,7 +38,7 @@ router.get('/', async (req, res, next) => {
     // Apply anonymity check
     const safeBookmarks = validBookmarks.map(b => {
       const bObj = b.toObject();
-      if (bObj.itemType === 'post') {
+      if (bObj.itemType === 'post' || bObj.itemType === 'interview_experience') {
         bObj.itemId = applyAnonymity(b.itemId); // applyAnonymity handles the Mongoose document safely
       }
       return bObj;

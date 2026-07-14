@@ -8,6 +8,7 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 ## [Unreleased]
 
 ### Changed
+- **[Database] Orphan Data Cleanup**: Updated `DELETE` handlers across the codebase (`postRoutes`, `resourceRoutes`, `interviewExperienceRoutes`, `electiveRoutes`) to cascade-delete associated `Bookmark` and `Notification` documents to prevent ghost data from accumulating.
 - **[Admin] System Admin Dashboard Polish**: Refactored the System Admin Dashboard lists to use `Card` and `EmptyState` design system components for visual consistency with the rest of the application (PART 12).
 - **[UI] Rendering Glitch Fixed**: Fixed a Chrome rendering artifact (corrupted blur/lines near cards on hover) by adding `will-change: transform, box-shadow` and `transform: translateZ(0)` to `.card`, forcing stable GPU compositing without dropping the blur (PART 16).
 - **[UI] General Responsiveness**: Fixed Mobile header UI cut-offs by adding vertical scroll support and modifying z-index handling on `NotificationsDropdown` and `Modal` (PART 11).
@@ -15,6 +16,9 @@ Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 - **[Database] Performance**: Added compound and single indexes to `Post` (`communityId`/`createdAt`, `clubId`, `authorId`), `Notification` (`userId`/`createdAt`), and `SupportTicket` (`authorId`, `status`/`createdAt`) to eliminate full collection scans.
 
 ### Added
+- **[Profile] Contribution Tabs**: Added `authorId`/`uploaderId` filtering to backend routes and redesigned `PublicProfile.jsx` to fetch and display the user's `Posts`, `Resources`, and `Experiences` in a Tabbed UI.
+- **[Interview Experiences] Deletion**: Added missing DELETE route for `InterviewExperience` on the backend and wired up `handleDeleteExperience` on the frontend.
+- **[Electives] Deletion**: Added missing DELETE route for `ElectiveSuggestion` on the backend.
 - **[Notifications] Dedicated Page**: Added a dedicated `/notifications` page with full paginated viewing history, linked from the dropdown footer (PART 15).
 - **[Club] Contact Info**: Added `contactEmail` and `instagramUrl` to `Club` model and admin forms, displaying them on the public Club page (PART 9).
 - **[Chat] Text Formatting**: Preserved whitespace and line breaks in `ChatThread` using `whiteSpace: 'pre-wrap'` (PART 17).

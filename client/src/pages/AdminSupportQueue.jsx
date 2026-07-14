@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axiosClient from '../api/axiosClient';
 import toast from 'react-hot-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { MessageSquare, Filter } from 'lucide-react';
+import { MessageSquare, Filter, Trash2 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -55,6 +55,17 @@ const AdminSupportQueue = () => {
     }
   };
 
+  const handleDeleteTicket = async (id) => {
+    if (!window.confirm('Are you sure you want to completely delete this support ticket?')) return;
+    try {
+      await axiosClient.delete(`/support/${id}`);
+      setTickets(prev => prev.filter(t => t._id !== id));
+      toast.success('Ticket deleted');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to delete ticket');
+    }
+  };
+
   if (loading && page === 1) {
     return <div className="page-col" style={{ textAlign: 'center', padding: '50px' }}>Loading queue...</div>;
   }
@@ -101,6 +112,7 @@ const AdminSupportQueue = () => {
               key={ticket._id}
               ticket={ticket}
               onUpdate={handleStatusUpdate}
+              onDelete={handleDeleteTicket}
             />
           ))}
 
@@ -119,7 +131,7 @@ const AdminSupportQueue = () => {
   );
 };
 
-const TicketCard = ({ ticket, onUpdate }) => {
+const TicketCard = ({ ticket, onUpdate, onDelete }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const [status, setStatus] = useState(ticket.status);
@@ -159,10 +171,13 @@ const TicketCard = ({ ticket, onUpdate }) => {
         {!isEditing && !isReplying && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             <Button variant="outline" size="small" onClick={() => setIsReplying(true)}>
-              Reply (Notification)
+              Reply
             </Button>
             <Button variant="outline" size="small" onClick={() => setIsEditing(true)}>
               Update Status
+            </Button>
+            <Button variant="outline" size="small" onClick={() => onDelete(ticket._id)} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} title="Delete Ticket">
+              <Trash2 size={14} />
             </Button>
           </div>
         )}

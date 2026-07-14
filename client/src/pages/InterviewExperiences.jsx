@@ -11,10 +11,12 @@ import Badge from '../components/ui/Badge';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import ReportModal from '../components/ui/ReportModal';
-import { Search, AlertCircle } from 'lucide-react';
+import { Search, AlertCircle, Trash2, Bookmark } from 'lucide-react';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
+import { useAuth } from '../context/auth-context';
 
 function InterviewExperiences() {
+  const { user } = useAuth();
   const [experiences, setExperiences] = useState([]);
   const [filters, setFilters] = useState({});
   const debouncedFilters = useDebounce(filters, 300);
@@ -22,6 +24,7 @@ function InterviewExperiences() {
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reportingId, setReportingId] = useState(null);
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   // New experience state
   const [company, setCompany] = useState('');
@@ -50,9 +53,36 @@ function InterviewExperiences() {
     }
   }, [debouncedFilters]);
 
+  const fetchBookmarks = useCallback(async () => {
+    if (!user) return;
+    try {
+      const response = await axiosClient.get('/bookmarks?type=interview_experience');
+      const savedIds = new Set(response.data.map(b => b.itemId?._id || b.itemId));
+      setBookmarkedIds(savedIds);
+    } catch (err) {
+      console.error('Error fetching bookmarks:', err);
+    }
+  }, [user]);
+
   useEffect(() => {
     fetchExperiences();
-  }, [fetchExperiences]);
+    fetchBookmarks();
+  }, [fetchExperiences, fetchBookmarks]);
+
+  const handleBookmark = async (id) => {
+    try {
+      await axiosClient.post('/bookmarks', { itemType: 'interview_experience', itemId: id });
+      setBookmarkedIds(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(id)) newSet.delete(id);
+        else newSet.add(id);
+        return newSet;
+      });
+      toast.success(bookmarkedIds.has(id) ? 'Removed from saved' : 'Saved for later');
+    } catch (err) {
+      toast.error('Failed to update bookmark');
+    }
+  };
 
   const handleAddRound = () => {
     setRounds([...rounds, { roundName: '', description: '', difficulty: '' }]);
@@ -130,6 +160,18 @@ function InterviewExperiences() {
     } catch (err) {
       console.error(err);
       toast.error('Failed to upvote');
+    }
+  };
+
+  const handleDeleteExperience = async (expId) => {
+    if (!window.confirm('Are you sure you want to delete this experience?')) return;
+    try {
+      await axiosClient.delete(`/interview-experiences/${expId}`);
+      setExperiences(experiences.filter(exp => exp._id !== expId));
+      toast.success('Experience deleted');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to delete experience');
     }
   };
 
@@ -299,9 +341,17 @@ function InterviewExperiences() {
                   <Button variant="secondary" size="sm" onClick={() => handleUpvote(exp._id)}>
                     ▲ Upvote ({exp.upvotesCount || 0})
                   </Button>
+                  <Button variant="secondary" size="sm" onClick={() => handleBookmark(exp._id)} style={{ color: bookmarkedIds.has(exp._id) ? 'var(--primary)' : 'inherit' }}>
+                    <Bookmark size={14} fill={bookmarkedIds.has(exp._id) ? "currentColor" : "none"} style={{ marginRight: '4px' }} /> {bookmarkedIds.has(exp._id) ? 'Saved' : 'Save'}
+                  </Button>
                   <Button variant="secondary" size="sm" onClick={() => handleReport(exp._id)}>
                     ⚑ Report
                   </Button>
+                  {user && (user.isPlatformAdmin || user._id === (exp.authorId?._id || exp.authorId)) && (
+                    <Button variant="danger" size="sm" onClick={() => handleDeleteExperience(exp._id)}>
+                      <Trash2 size={13} style={{ marginRight: '4px' }} /> Delete
+                    </Button>
+                  )}
                 </div>
               </Card>
             ))}

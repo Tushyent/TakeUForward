@@ -237,4 +237,27 @@ router.post('/:id/reply', requireSystemAdmin, async (req, res, next) => {
   }
 });
 
+// DELETE /api/support/:id
+router.delete('/:id', requireSystemAdmin, async (req, res, next) => {
+  try {
+    const ticket = await SupportTicket.findByIdAndDelete(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+    
+    await logActivity({ 
+      action: 'delete', 
+      resource: 'SupportTicket', 
+      resourceId: req.params.id, 
+      description: `Deleted support ticket: ${ticket.title}`, 
+      req 
+    });
+
+    res.status(200).json({ message: 'Ticket deleted successfully' });
+  } catch (err) {
+    logger.error('Error deleting support ticket:', err);
+    next(err);
+  }
+});
+
 export default router;

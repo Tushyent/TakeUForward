@@ -9,7 +9,8 @@ import Spinner from '../components/ui/Spinner';
 import { Input, Select, Textarea } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import FilePreview from '../components/ui/FilePreview';
-import { Search, AlertCircle, MessageCircle, Calendar, MapPin, User, Clock } from 'lucide-react';
+import ReportModal from '../components/ui/ReportModal';
+import { Search, AlertCircle, MessageCircle, Calendar, MapPin, User, Clock, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 function LostFound() {
@@ -17,6 +18,7 @@ function LostFound() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [reportingId, setReportingId] = useState(null);
   
   // Filters
   const [filterType, setFilterType] = useState('');
@@ -123,6 +125,26 @@ function LostFound() {
       console.error(err);
       toast.error('Failed to resolve item');
     }
+  };
+
+  const handleDeleteItem = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this item?')) return;
+    try {
+      await axiosClient.delete(`/lost-found/${id}`);
+      setItems(prev => prev.filter(item => item._id !== id));
+      toast.success('Item deleted successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to delete item');
+    }
+  };
+
+  const handleReport = (id) => {
+    setReportingId(id);
+  };
+
+  const submitReport = async (reason) => {
+    await axiosClient.post(`/lost-found/${reportingId}/report`, { reason });
+    toast.success('Item reported successfully');
   };
 
   const navigate = useNavigate();
@@ -355,10 +377,22 @@ function LostFound() {
                         )}
                       </>
                     )}
+
+                    {currentUser && item.authorId && currentUser._id !== item.authorId._id && (
+                      <Button variant="secondary" onClick={() => handleReport(item._id)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <AlertCircle size={16} /> Report
+                      </Button>
+                    )}
                     
                     {currentUser && item.authorId && currentUser._id === item.authorId._id && item.status === 'open' && (
                       <Button variant="outline" onClick={() => handleResolve(item._id)} style={{ width: '100%' }}>
                         Mark as Resolved
+                      </Button>
+                    )}
+
+                    {currentUser && (currentUser.isPlatformAdmin || currentUser._id === (item.authorId?._id || item.authorId)) && (
+                      <Button variant="danger" onClick={() => handleDeleteItem(item._id)} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                        <Trash2 size={16} /> Delete
                       </Button>
                     )}
                   </div>
@@ -374,6 +408,14 @@ function LostFound() {
           </div>
         )}
       </div>
+
+      <ReportModal
+        isOpen={!!reportingId}
+        onClose={() => setReportingId(null)}
+        onSubmit={submitReport}
+        title="Report Item"
+        placeholder="Please describe why you are reporting this item:"
+      />
     </div>
   );
 }

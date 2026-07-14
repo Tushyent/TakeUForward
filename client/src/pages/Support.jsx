@@ -347,7 +347,28 @@ const Support = () => {
                 </div>
                 
                 <div style={{ backgroundColor: 'var(--bg-main)', padding: '15px', borderRadius: 'var(--radius)', marginBottom: '15px' }}>
-                  <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: 'var(--text-main)' }}>{ticket.description}</p>
+                  <p style={{ margin: '0 0 10px 0', whiteSpace: 'pre-wrap', color: 'var(--text-main)' }}>{ticket.description}</p>
+                  
+                  {ticket.pageContext && (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
+                      <strong>Context:</strong> {ticket.pageContext}
+                    </div>
+                  )}
+
+                  {(ticket.screenshotUrls?.length > 0 || ticket.screenshotUrl) && (
+                    <div style={{ marginTop: '10px' }}>
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                        <strong>Attached Screenshots:</strong>
+                      </div>
+                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        {(ticket.screenshotUrls?.length > 0 ? ticket.screenshotUrls : [ticket.screenshotUrl]).map((url, i) => (
+                          <div key={i} style={{ width: '120px' }}>
+                            <FilePreview fileUrl={url} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {ticket.adminReplies && ticket.adminReplies.length > 0 && (

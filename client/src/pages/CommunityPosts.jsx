@@ -11,13 +11,15 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import { Input } from '../components/ui/Input';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
-import { ThumbsUp, Send, Bookmark, Flag, MessageSquare } from 'lucide-react';
+import { ThumbsUp, Send, Bookmark, Flag, MessageSquare, Trash2 } from 'lucide-react';
+import { useAuth } from '../context/auth-context';
 import EmptyState from '../components/ui/EmptyState';
 import ReportModal from '../components/ui/ReportModal';
 
 function CommunityPosts() {
   const { id } = useParams();
   const location = useLocation();
+  const { user } = useAuth();
   const searchParams = React.useMemo(() => new URLSearchParams(location.search), [location.search]);
   const targetPostId = searchParams.get('post');
   const targetCommentId = searchParams.get('comment');
@@ -166,6 +168,33 @@ function CommunityPosts() {
     }
   };
 
+  const handleDeletePost = async (postId) => {
+    if (!window.confirm('Are you sure you want to completely delete this post?')) return;
+    try {
+      await axiosClient.delete(`/posts/${postId}`);
+      setPosts(prev => prev.filter(p => p._id !== postId));
+      toast.success('Post deleted successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to delete post');
+    }
+  };
+
+  const handleDeleteComment = async (postId, commentId) => {
+    if (!window.confirm('Are you sure you want to completely delete this comment?')) return;
+    try {
+      await axiosClient.delete(`/posts/${postId}/comments/${commentId}`);
+      setPosts(prev => prev.map(p => {
+        if (p._id === postId) {
+          return { ...p, comments: p.comments.filter(c => c._id !== commentId) };
+        }
+        return p;
+      }));
+      toast.success('Comment deleted successfully');
+    } catch (err) {
+      toast.error(err.response?.data?.error?.message || 'Failed to delete comment');
+    }
+  };
+
   if (error) return <div><EmptyState icon={Flag} title="Error" message={error} action={{ label: 'Retry', onClick: () => { fetchCommunity(); fetchPosts(); } }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!community) return <div><Spinner text="Loading..." /></div>;
 
@@ -245,7 +274,7 @@ function CommunityPosts() {
                   <span>• {new Date(post.createdAt).toLocaleString()}</span>
                 </div>
 
-                <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)' }}>
+                <div style={{ display: 'flex', gap: 'var(--space-3)', marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
                   <Button variant="secondary" size="sm" onClick={() => handleUpvote(post._id)}>
                     <ThumbsUp size={14} /> Upvote ({post.upvotes?.length || 0})
                   </Button>
@@ -255,6 +284,11 @@ function CommunityPosts() {
                   <Button variant="secondary" size="sm" onClick={() => handleReport(post._id)}>
                     <Flag size={14} /> Report
                   </Button>
+                  {(user?.isPlatformAdmin || user?._id === post.authorId?._id) && (
+                    <Button variant="secondary" size="sm" onClick={() => handleDeletePost(post._id)} style={{ color: 'var(--danger)' }}>
+                      <Trash2 size={14} /> Delete
+                    </Button>
+                  )}
                 </div>
 
                 <div style={{ paddingLeft: '1rem', borderLeft: '2px solid var(--border)', marginTop: '1rem' }}>
@@ -284,6 +318,15 @@ function CommunityPosts() {
                               </Link>
                             )}
                             <span>• {new Date(c.createdAt).toLocaleString()}</span>
+                            {(user?.isPlatformAdmin || user?._id === c.authorId?._id) && (
+                              <button 
+                                onClick={() => handleDeleteComment(post._id, c._id)}
+                                style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: 0, marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9em' }}
+                                title="Delete Comment"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            )}
                           </div>
                         </li>
                       ))}

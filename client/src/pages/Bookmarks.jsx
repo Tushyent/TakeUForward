@@ -50,10 +50,12 @@ function Bookmarks() {
         <h1 style={{ marginBottom: '10px' }}>Saved</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '20px' }}>Your personal tracker for posts and resources.</p>
 
-        <div style={{ marginBottom: '30px', display: 'flex', gap: '10px' }}>
+        <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <Button variant={filterType === 'all' ? 'primary' : 'secondary'} onClick={() => setFilterType('all')}>All</Button>
           <Button variant={filterType === 'post' ? 'primary' : 'secondary'} onClick={() => setFilterType('post')}>Posts</Button>
           <Button variant={filterType === 'resource' ? 'primary' : 'secondary'} onClick={() => setFilterType('resource')}>Resources</Button>
+          {/* <Button variant={filterType === 'interview_experience' ? 'primary' : 'secondary'} onClick={() => setFilterType('interview_experience')}>Interviews</Button> */}
+          {/* <Button variant={filterType === 'elective_suggestion' ? 'primary' : 'secondary'} onClick={() => setFilterType('elective_suggestion')}>Electives</Button> */}
         </div>
 
         {loading ? (
@@ -124,6 +126,53 @@ function Bookmarks() {
                       <div style={{ width: '100%', maxWidth: '400px' }}>
                         <FilePreview fileUrl={item.fileUrl} fileName={item.title} />
                       </div>
+                    </div>
+                  </Card>
+                );
+              }
+
+              if (bookmark.itemType === 'interview_experience') {
+                return (
+                  <Card key={bookmark._id} style={{ marginBottom: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Badge variant="warning" style={{ marginBottom: '10px' }}>Interview</Badge>
+                      <Button variant="secondary" onClick={() => handleUnbookmark('interview_experience', item._id)} style={{ padding: '4px 8px', fontSize: '12px', color: 'var(--primary)' }}>
+                        ★ Saved
+                      </Button>
+                    </div>
+                    <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-primary)' }}>
+                      <strong>{item.company}</strong> - {item.role} ({item.status})
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                      <Badge variant="secondary">Batch {item.batchYear}</Badge>
+                      <Badge variant="outline">{item.difficulty}</Badge>
+                    </div>
+                    <div style={{ fontSize: '0.85em', color: 'var(--text-secondary)' }}>
+                      By: {item.isAnonymous ? 'Anonymous' : (
+                        <Link to={`/profile/${item.authorId?.username}`} style={{ color: 'inherit', fontWeight: 500 }}>
+                          {item.authorId?.name || 'Unknown'}
+                        </Link>
+                      )}
+                    </div>
+                  </Card>
+                );
+              }
+
+              if (bookmark.itemType === 'elective_suggestion') {
+                return (
+                  <Card key={bookmark._id} style={{ marginBottom: 0 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Badge variant="primary" style={{ marginBottom: '10px' }}>Elective</Badge>
+                      <Button variant="secondary" onClick={() => handleUnbookmark('elective_suggestion', item._id)} style={{ padding: '4px 8px', fontSize: '12px', color: 'var(--primary)' }}>
+                        ★ Saved
+                      </Button>
+                    </div>
+                    <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-primary)' }}>
+                      <strong>{item.courseCode} - {item.courseName}</strong>
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '10px', flexWrap: 'wrap' }}>
+                      <Badge variant="secondary">Dept {item.department}</Badge>
+                      <Badge variant="outline">Difficulty: {item.difficulty}/5</Badge>
                     </div>
                   </Card>
                 );
