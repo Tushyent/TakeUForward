@@ -19,6 +19,11 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// Mock S3 upload for local development without AWS credentials
+router.put('/mock-s3-upload', (req, res) => {
+  res.status(200).send('Mock upload successful');
+});
+
 // POST /api/drive/upload-url
 router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });

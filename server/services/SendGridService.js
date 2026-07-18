@@ -28,7 +28,9 @@ class SendGridService {
     this.from = process.env.SENDGRID_FROM_EMAIL || null;
 
     if (!this.apiKey) {
-      logger.warn('SendGridService: SENDGRID_API_KEY not set — all email sending disabled.');
+      if (process.env.NODE_ENV !== 'test') {
+        logger.warn('SendGridService: SENDGRID_API_KEY not set — all email sending disabled.');
+      }
       return;
     }
 

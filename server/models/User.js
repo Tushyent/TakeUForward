@@ -67,5 +67,21 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ dept: 1 });
 userSchema.index({ currentCompany: 1 });
 
+userSchema.pre('save', function() {
+  if (this.role === 'alumni' && !this.isVerifiedAlumni) {
+    throw new Error('Cannot save user with role alumni without isVerifiedAlumni set to true');
+  }
+});
+
+userSchema.pre(['updateOne', 'findOneAndUpdate', 'updateMany'], function() {
+  const update = this.getUpdate();
+  const role = update.role || update.$set?.role;
+  const isVerifiedAlumni = update.isVerifiedAlumni ?? update.$set?.isVerifiedAlumni;
+  
+  if (role === 'alumni' && isVerifiedAlumni === false) {
+    throw new Error('Cannot update user role to alumni while setting isVerifiedAlumni to false');
+  }
+});
+
 const User = mongoose.model('User', userSchema);
 export default User;

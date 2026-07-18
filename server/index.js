@@ -48,7 +48,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(helmet({ contentSecurityPolicy: false })); // Sets robust HTTP security headers, but allows our inline auth script
+app.use(helmet()); // Default strict CSP is enabled; authRoutes handles its own nonce
 app.use(compression()); // GZIP compression for faster API responses
 app.use(express.json());
 app.use(pinoHttp({
@@ -176,7 +176,9 @@ let server;
 connectDB().then(async () => {
   const emailStatus = await verifyTransporter();
   if (!emailStatus.configured) {
-    logger.warn('SendGrid not configured — welcome emails and notifications will be silently skipped. Set SENDGRID_API_KEY in environment.');
+    if (process.env.NODE_ENV !== 'test') {
+      logger.warn('SendGrid not configured — welcome emails and notifications will be silently skipped. Set SENDGRID_API_KEY in environment.');
+    }
   } else if (!emailStatus.verified) {
     logger.error(`SendGrid verification FAILED: ${emailStatus.message}. Welcome emails and notifications will NOT be sent.`);
   } else {

@@ -13,6 +13,15 @@ const s3Client = new S3Client({
 });
 
 export const generatePresignedUrl = async (fileName, fileType) => {
+  if (!process.env.AWS_ACCESS_KEY_ID) {
+    console.warn('AWS_ACCESS_KEY_ID is missing. Falling back to local mock S3 upload.');
+    return {
+      uploadUrl: '/api/drive/mock-s3-upload',
+      fileUrl: `http://localhost:5000/mock-s3/${Date.now()}-${fileName}`,
+      key: `resources/mock/${Date.now()}-${fileName}`
+    };
+  }
+
   const bucketName = process.env.AWS_BUCKET_NAME;
   if (!bucketName) throw new Error('AWS_BUCKET_NAME is missing');
 
@@ -34,6 +43,14 @@ export const generatePresignedUrl = async (fileName, fileType) => {
 };
 
 export const generatePrivateUploadUrl = async (fileName, fileType, userId) => {
+  if (!process.env.AWS_ACCESS_KEY_ID) {
+    console.warn('AWS_ACCESS_KEY_ID is missing. Falling back to local mock S3 private upload.');
+    return {
+      uploadUrl: '/api/drive/mock-s3-upload',
+      key: `private/mock/${userId}/${Date.now()}-${fileName}`
+    };
+  }
+
   const bucketName = process.env.AWS_BUCKET_NAME;
   if (!bucketName) throw new Error('AWS_BUCKET_NAME is missing');
 

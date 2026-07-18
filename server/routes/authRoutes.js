@@ -32,11 +32,19 @@ router.get(
         // Chrome on Android drops Set-Cookie on 302 responses that are part
         // of the OAuth bounce chain. A 200 response + script redirect breaks
         // that detection and the cookie is stored correctly.
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+        
+        // Generate a cryptographically secure nonce for the inline script
+        const nonce = crypto.randomBytes(16).toString('base64');
+        
+        // Explicitly set a strictly scoped CSP just for this callback page to allow the nonce
+        res.setHeader('Content-Security-Policy', `default-src 'none'; script-src 'nonce-${nonce}'; style-src 'unsafe-inline'`);
+        
         res.send(`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Signing in...</title>
+  <title>Authenticating...</title>
   <style>
     body { font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #0D0E14; color: #fff; }
     .spinner { width: 40px; height: 40px; border: 4px solid #2a2b35; border-top-color: #7C6AF7; border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 16px; }
@@ -48,7 +56,7 @@ router.get(
     <div class="spinner"></div>
     <p>Signing you in...</p>
   </div>
-  <script>window.location.replace('${clientUrl}');</script>
+  <script nonce="${nonce}">window.location.replace('${clientUrl}');</script>
 </body>
 </html>`);
       });

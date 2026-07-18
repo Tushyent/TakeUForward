@@ -30,3 +30,13 @@ tmp-*.log
 # Others
 docs/
 refactor_admin.js
+
+# Scratch / one-off dev scripts (never commit these)
+scratch_*.js
+scratch_*.cjs
+capture_*.js
+check-db.cjs
+migrations/
+
+# Local test HTML files
+client/public/test-*.html
