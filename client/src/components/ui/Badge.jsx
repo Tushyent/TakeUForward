@@ -25,13 +25,13 @@ const Badge = ({ children, variant = 'primary', size = 'md', style }) => {
   };
 
   const variants = {
-    primary:   { background: 'rgba(124,106,247,0.15)', color: 'var(--primary)',   borderColor: 'rgba(124,106,247,0.30)' },
-    secondary: { background: 'var(--bg-elevated)',      color: 'var(--text-secondary)', borderColor: 'var(--border)' },
-    accent:    { background: 'var(--accent-bg)',        color: 'var(--accent)',    borderColor: 'var(--accent-border)' },
-    danger:    { background: 'var(--danger-bg)',        color: 'var(--danger)',    borderColor: 'rgba(248,113,113,0.30)' },
-    success:   { background: 'var(--success-bg)',       color: 'var(--success)',   borderColor: 'rgba(52,211,153,0.30)' },
-    warning:   { background: 'var(--warning-bg)',       color: 'var(--warning)',   borderColor: 'rgba(251,191,36,0.30)' },
-    info:      { background: 'var(--info-bg)',          color: 'var(--info)',      borderColor: 'rgba(96,165,250,0.30)' },
+    primary:   { background: 'rgba(99,102,241,0.14)',  color: '#A5B4FC',              borderColor: 'rgba(99,102,241,0.28)' },
+    secondary: { background: 'var(--bg-elevated)',      color: 'var(--text-secondary)', borderColor: 'var(--border-strong)' },
+    accent:    { background: 'var(--accent-bg)',        color: 'var(--accent)',         borderColor: 'var(--accent-border)' },
+    danger:    { background: 'var(--danger-bg)',        color: 'var(--danger)',         borderColor: 'rgba(244,63,94,0.30)' },
+    success:   { background: 'var(--success-bg)',       color: 'var(--success)',        borderColor: 'rgba(16,185,129,0.30)' },
+    warning:   { background: 'var(--warning-bg)',       color: 'var(--warning)',        borderColor: 'rgba(245,158,11,0.30)' },
+    info:      { background: 'var(--info-bg)',          color: 'var(--info)',           borderColor: 'rgba(56,189,248,0.30)' },
   };
 
   return (

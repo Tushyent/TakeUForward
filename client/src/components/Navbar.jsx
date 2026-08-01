@@ -2,8 +2,16 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
-import { LogOut, Zap, Menu, X, Settings } from 'lucide-react';
+import { LogOut, Menu, X, Settings } from 'lucide-react';
 import { NAV_PRIMARY, NAV_CAREERS, NAV_COMMUNITY, ALL_NAV_ITEMS } from '../constants/navigation';
+
+const BrandMark = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="2" y="4" width="8" height="16" rx="2.5" fill="white" fillOpacity="0.95" />
+    <rect x="14" y="10" width="8" height="10" rx="2.5" fill="white" fillOpacity="0.65" />
+    <circle cx="18" cy="6" r="2.5" fill="white" fillOpacity="0.90" />
+  </svg>
+);
 
 const NavItem = ({ to, icon: Icon, label, isActive }) => {
   return (
@@ -54,7 +62,7 @@ const Navbar = () => {
       <nav className="navbar">
         <Link to="/home" className="navbar-brand">
           <div className="navbar-logo">
-            <Zap size={16} color="white" fill="white" />
+            <BrandMark />
           </div>
           <div className="navbar-brand-text">
             <span className="navbar-brand-name">TakeUForward</span>
@@ -98,7 +106,7 @@ const Navbar = () => {
         <div className="nav-drawer-header">
           <div className="navbar-brand">
             <div className="navbar-logo">
-              <Zap size={14} color="white" fill="white" />
+              <BrandMark />
             </div>
             <div className="navbar-brand-text">
               <span className="navbar-brand-name">TakeUForward</span>

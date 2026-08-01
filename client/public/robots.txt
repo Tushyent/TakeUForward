@@ -1,13 +1,17 @@
 User-agent: *
 Allow: /
+Allow: /about
+Allow: /login
+Allow: /support
+Allow: /sitemap.xml
 
 # Do not index internal dashboard routes behind authentication
 Disallow: /home
 Disallow: /profile
 Disallow: /chat
 Disallow: /admin
-Disallow: /resources
-Disallow: /referrals
 Disallow: /api/
 
-Sitemap: https://takeuforward-ssn.vercel.app/sitemap.xml
+# Sitemap location
+# Sitemap: https://takeuforward-ssn.vercel.app/sitemap.xml
+Sitemap: https://takeuforward.blastorz.fun/sitemap.xml

@@ -53,6 +53,18 @@ app.use(compression()); // GZIP compression for faster API responses
 app.use(express.json());
 app.use(pinoHttp({
   logger,
+  customLogLevel: function (req, res, err) {
+    if (res.statusCode >= 500 || err) return 'error';
+    if (res.statusCode >= 400) return 'warn';
+    return 'info';
+  },
+  customProps: function (req) {
+    return {
+      userId: req.user?._id || 'unauthenticated',
+      userRole: req.user?.role || 'guest',
+      ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip,
+    };
+  },
   serializers: {
     req(req) {
       return {

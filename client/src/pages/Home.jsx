@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/auth-context';
 import toast from 'react-hot-toast';
@@ -10,140 +10,431 @@ import { Input } from '../components/ui/Input';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import {
-  Users, BookOpen, ShieldAlert, MessageCircle,
-  ArrowRight, ChevronRight, Hash, Link2, MessageSquare, Briefcase, GraduationCap, FileText, Map, Star, Lightbulb, UserCheck, Package, ShoppingBag
+  Users, BookOpen, ShieldAlert,
+  ArrowRight, ChevronRight, Hash, Link2, MessageSquare,
+  Briefcase, GraduationCap, FileText, Map, Star, Lightbulb,
+  UserCheck, Package, ShoppingBag, Settings, Sparkles,
 } from 'lucide-react';
 
-/* ---------------------------------------------------------------
-   DASHBOARD CATEGORIES
-   --------------------------------------------------------------- */
+/* ═══════════════════════════════════════════════════════════════════
+   DASHBOARD CATEGORIES — each with its own color identity
+   ═══════════════════════════════════════════════════════════════════ */
 const ACADEMIC_LINKS = [
-  { to: '/resources', icon: BookOpen, label: 'Resources', desc: 'Notes & materials', color: 'var(--info)', glow: 'var(--info-bg)' },
-  { to: '/electives', icon: Lightbulb, label: 'Electives', desc: 'Course insights', color: 'var(--warning)', glow: 'var(--warning-bg)' },
-  { to: '/reviews', icon: Star, label: 'Reviews', desc: 'Professors & courses', color: 'var(--success)', glow: 'var(--success-bg)' },
+  {
+    to: '/resources', icon: BookOpen, label: 'Resources', desc: 'Notes & past papers',
+    color: '#38BDF8', bg: 'rgba(56,189,248,0.10)', border: 'rgba(56,189,248,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.04) 100%)',
+  },
+  {
+    to: '/electives', icon: Lightbulb, label: 'Electives', desc: 'Course insights',
+    color: '#F59E0B', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(245,158,11,0.16) 0%, rgba(245,158,11,0.04) 100%)',
+  },
+  {
+    to: '/reviews', icon: Star, label: 'Reviews', desc: 'Professors & courses',
+    color: '#10B981', bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(16,185,129,0.16) 0%, rgba(16,185,129,0.04) 100%)',
+  },
 ];
 
 const CAREER_LINKS = [
-  { to: '/mock-interviews', icon: MessageSquare, label: 'Mock Interviews', desc: 'Practice with peers', color: 'var(--primary)', glow: 'var(--primary-glow)' },
-  { to: '/referrals', icon: Briefcase, label: 'Referrals', desc: 'Get referred', color: 'var(--accent)', glow: 'var(--accent-bg)' },
-  { to: '/alumni', icon: GraduationCap, label: 'Alumni', desc: 'Network & connect', color: 'var(--info)', glow: 'var(--info-bg)' },
-  { to: '/interview-experiences', icon: FileText, label: 'Experiences', desc: 'Read past stories', color: 'var(--warning)', glow: 'var(--warning-bg)' },
-  { to: '/career-roadmaps', icon: Map, label: 'Roadmaps', desc: 'Guided paths', color: 'var(--success)', glow: 'var(--success-bg)' },
+  {
+    to: '/mock-interviews', icon: MessageSquare, label: 'Mock Interviews', desc: 'Practice with peers',
+    color: '#A78BFA', bg: 'rgba(167,139,250,0.10)', border: 'rgba(167,139,250,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(167,139,250,0.16) 0%, rgba(167,139,250,0.04) 100%)',
+  },
+  {
+    to: '/referrals', icon: Briefcase, label: 'Referrals', desc: 'Get referred fast',
+    color: '#F59E0B', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(245,158,11,0.16) 0%, rgba(245,158,11,0.04) 100%)',
+  },
+  {
+    to: '/alumni', icon: GraduationCap, label: 'Alumni', desc: 'Network & connect',
+    color: '#38BDF8', bg: 'rgba(56,189,248,0.10)', border: 'rgba(56,189,248,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.04) 100%)',
+  },
+  {
+    to: '/interview-experiences', icon: FileText, label: 'Experiences', desc: 'Real interview stories',
+    color: '#FB7185', bg: 'rgba(251,113,133,0.10)', border: 'rgba(251,113,133,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(251,113,133,0.14) 0%, rgba(251,113,133,0.04) 100%)',
+  },
+  {
+    to: '/career-roadmaps', icon: Map, label: 'Roadmaps', desc: 'Guided paths',
+    color: '#10B981', bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(16,185,129,0.16) 0%, rgba(16,185,129,0.04) 100%)',
+  },
 ];
 
 const CAMPUS_LINKS = [
-  { to: '/clubs', icon: Users, label: 'Clubs', desc: 'Join communities', color: 'var(--accent)', glow: 'var(--accent-bg)' },
-  { to: '/team-finder', icon: UserCheck, label: 'Team Finder', desc: 'Find hackathon mates', color: 'var(--success)', glow: 'var(--success-bg)' },
-  { to: '/lost-found', icon: Package, label: 'Lost & Found', desc: 'Report & find', color: 'var(--info)', glow: 'var(--info-bg)' },
-  { to: '/marketplace', icon: ShoppingBag, label: 'Marketplace', desc: 'Buy & sell', color: 'var(--primary)', glow: 'var(--primary-glow)' },
+  {
+    to: '/clubs', icon: Users, label: 'Clubs', desc: 'Join campus clubs',
+    color: '#F59E0B', bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(245,158,11,0.16) 0%, rgba(245,158,11,0.04) 100%)',
+  },
+  {
+    to: '/team-finder', icon: UserCheck, label: 'Team Finder', desc: 'Hackathon teammates',
+    color: '#10B981', bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(16,185,129,0.16) 0%, rgba(16,185,129,0.04) 100%)',
+  },
+  {
+    to: '/lost-found', icon: Package, label: 'Lost & Found', desc: 'Report & find items',
+    color: '#38BDF8', bg: 'rgba(56,189,248,0.10)', border: 'rgba(56,189,248,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(56,189,248,0.18) 0%, rgba(56,189,248,0.04) 100%)',
+  },
+  {
+    to: '/marketplace', icon: ShoppingBag, label: 'Marketplace', desc: 'Buy & sell campus stuff',
+    color: '#A78BFA', bg: 'rgba(167,139,250,0.10)', border: 'rgba(167,139,250,0.22)',
+    gradient: 'linear-gradient(135deg, rgba(167,139,250,0.16) 0%, rgba(167,139,250,0.04) 100%)',
+  },
 ];
 
-const renderGrid = (title, items, icon) => (
-  <div style={{ marginBottom: 'var(--space-8)' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-5)' }}>
-      {icon}
-      <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{title}</h3>
+/* ═══════════════════════════════════════════════════════════════════
+   SECTION HEADER
+   ═══════════════════════════════════════════════════════════════════ */
+const SectionHeader = ({ icon: Icon, label, iconColor, accent }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 'var(--space-4)',
+  }}>
+    <div style={{
+      width: 32,
+      height: 32,
+      borderRadius: 'var(--radius-sm)',
+      background: accent,
+      border: `1px solid ${iconColor}35`,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <Icon size={15} color={iconColor} strokeWidth={2} />
     </div>
+    <h3 style={{
+      margin: 0,
+      fontSize: 'var(--text-base)',
+      fontWeight: 700,
+      color: 'var(--text-primary)',
+      letterSpacing: '-0.02em',
+    }}>{label}</h3>
+    <div style={{
+      flex: 1,
+      height: 1,
+      background: 'linear-gradient(90deg, var(--border-strong) 0%, transparent 80%)',
+      marginLeft: 4,
+    }} />
+  </div>
+);
+
+/* ═══════════════════════════════════════════════════════════════════
+   PREMIUM GRID CARD
+   ═══════════════════════════════════════════════════════════════════ */
+const GridCard = ({ to, icon: Icon, label, desc, color, bg, border, gradient }) => {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <Link to={to} style={{ textDecoration: 'none' }}>
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          position: 'relative',
+          padding: '20px 18px 18px',
+          borderRadius: 'var(--radius-lg)',
+          background: hovered
+            ? gradient
+            : 'rgba(22, 22, 28, 0.80)',
+          border: `1px solid ${hovered ? border : 'rgba(255,255,255,0.06)'}`,
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          boxShadow: hovered
+            ? `0 8px 28px rgba(0,0,0,0.30), 0 0 0 1px ${border}, inset 0 1px 0 rgba(255,255,255,0.08)`
+            : '0 2px 8px rgba(0,0,0,0.20), inset 0 1px 0 rgba(255,255,255,0.04)',
+          cursor: 'pointer',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 'var(--space-3)',
+          transform: hovered ? 'translateY(-4px)' : 'translateY(0)',
+          transition: 'all 200ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          overflow: 'hidden',
+          height: '100%',
+          minHeight: 126,
+        }}
+      >
+        {/* Top-right corner glow blob */}
+        <div style={{
+          position: 'absolute',
+          top: -12,
+          right: -12,
+          width: 60,
+          height: 60,
+          borderRadius: '50%',
+          background: `${color}14`,
+          filter: 'blur(16px)',
+          opacity: hovered ? 1 : 0,
+          transition: 'opacity 200ms ease',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Icon */}
+        <div style={{
+          width: 40,
+          height: 40,
+          borderRadius: 'var(--radius-sm)',
+          background: bg,
+          border: `1px solid ${border}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          transition: 'transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: hovered ? 'scale(1.12) rotate(-4deg)' : 'scale(1)',
+        }}>
+          <Icon size={18} color={color} strokeWidth={1.75} />
+        </div>
+
+        <div>
+          <p style={{
+            margin: 0,
+            fontSize: 'var(--text-sm)',
+            fontWeight: 700,
+            color: hovered ? 'white' : 'var(--text-primary)',
+            letterSpacing: '-0.01em',
+            lineHeight: 1.3,
+            transition: 'color 150ms ease',
+          }}>
+            {label}
+          </p>
+          <p style={{
+            margin: '3px 0 0',
+            fontSize: 'var(--text-xs)',
+            color: hovered ? 'rgba(255,255,255,0.55)' : 'var(--text-muted)',
+            lineHeight: 1.4,
+            transition: 'color 150ms ease',
+          }}>
+            {desc}
+          </p>
+        </div>
+
+        {/* Bottom arrow — shows on hover */}
+        <div style={{
+          position: 'absolute',
+          bottom: 12,
+          right: 12,
+          opacity: hovered ? 1 : 0,
+          transform: hovered ? 'translateX(0)' : 'translateX(-4px)',
+          transition: 'all 150ms ease',
+          color,
+        }}>
+          <ArrowRight size={13} />
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   SECTION GRID
+   ═══════════════════════════════════════════════════════════════════ */
+const renderGrid = (title, items, icon, iconColor, accent) => (
+  <div style={{ marginBottom: 'var(--space-8)' }}>
+    <SectionHeader icon={icon} label={title} iconColor={iconColor} accent={accent} />
     <div style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
-      gap: 'var(--space-4)',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))',
+      gap: 'var(--space-3)',
     }}>
-      {items.map(({ to, icon: Icon, label, desc, color }) => (
-        <Link to={to} key={label} style={{ textDecoration: 'none' }}>
-          <Card
-            lift
-            accent={color}
-            style={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <div style={{
-              width: 44,
-              height: 44,
-              borderRadius: 'var(--radius-md)',
-              background: `${color}28`,
-              border: `1px solid ${color}55`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 'var(--space-5)',
-            }}
-            className="grid-card-icon"
-            >
-              <Icon size={24} color={color} />
-            </div>
-            <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
-              {label}
-            </p>
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
-              {desc}
-            </p>
-          </Card>
-        </Link>
+      {items.map(item => (
+        <GridCard key={item.label} {...item} />
       ))}
     </div>
   </div>
 );
 
-/* ---------------------------------------------------------------
-   COMMUNITY TYPE BADGE VARIANT MAP
-   --------------------------------------------------------------- */
+/* ═══════════════════════════════════════════════════════════════════
+   COMMUNITY TYPE HELPERS
+   ═══════════════════════════════════════════════════════════════════ */
 const communityVariant = (type) => {
   const map = { dept: 'primary', batch: 'info', general: 'success', topic: 'accent' };
   return map[type] || 'secondary';
 };
-
 const communityAccent = (type) => {
   const map = { dept: 'var(--primary)', batch: 'var(--info)', general: 'var(--success)', topic: 'var(--accent)' };
   return map[type] || 'var(--text-muted)';
 };
 
-const communityBg = (type) => {
-  const map = { dept: 'var(--primary-glow)', batch: 'var(--info-bg)', general: 'var(--success-bg)', topic: 'var(--accent-bg)' };
-  return map[type] || 'var(--bg-elevated)';
-};
-
-/* ---------------------------------------------------------------
-   INITIALS AVATAR — fallback for users without a picture
-   --------------------------------------------------------------- */
-const InitialsAvatar = ({ name, size = 44 }) => {
-  const initials = (name || 'U')
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+/* ═══════════════════════════════════════════════════════════════════
+   INITIALS AVATAR
+   ═══════════════════════════════════════════════════════════════════ */
+const InitialsAvatar = ({ name, size = 52 }) => {
+  const initials = (name || 'U').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
   return (
     <div style={{
-      width: size,
-      height: size,
-      borderRadius: 'var(--radius-full)',
-      background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      fontSize: size * 0.38,
-      fontWeight: 700,
-      letterSpacing: '-0.02em',
-      flexShrink: 0,
+      width: size, height: size,
+      borderRadius: '50%',
+      background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: 'white', fontSize: size * 0.36, fontWeight: 700,
+      letterSpacing: '-0.02em', flexShrink: 0,
+      boxShadow: '0 0 0 3px rgba(99,102,241,0.30)',
     }}>
       {initials}
     </div>
   );
 };
 
-/* ---------------------------------------------------------------
+/* ═══════════════════════════════════════════════════════════════════
+   HERO GREETING CARD
+   ═══════════════════════════════════════════════════════════════════ */
+const HeroCard = ({ user, navigate }) => {
+  const [hovered, setHovered] = useState(false);
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+  return (
+    <div
+      onClick={() => navigate('/settings/profile')}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        borderRadius: 'var(--radius-xl)',
+        padding: 'var(--space-8)',
+        marginBottom: 'var(--space-8)',
+        background: 'linear-gradient(135deg, #0F0F1A 0%, #12121E 40%, #0A0A12 100%)',
+        border: '1px solid rgba(99,102,241,0.28)',
+        boxShadow: hovered
+          ? '0 0 0 1px rgba(99,102,241,0.35), 0 20px 60px rgba(99,102,241,0.12)'
+          : '0 4px 24px rgba(0,0,0,0.35)',
+        overflow: 'hidden',
+        cursor: 'pointer',
+        transition: 'box-shadow 300ms ease, border-color 300ms ease',
+      }}
+    >
+      {/* Gradient mesh blobs */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        background: `
+          radial-gradient(ellipse 55% 60% at 80% -10%, rgba(99,102,241,0.22) 0%, transparent 65%),
+          radial-gradient(ellipse 40% 35% at 5% 100%, rgba(245,158,11,0.10) 0%, transparent 55%),
+          radial-gradient(ellipse 35% 30% at 50% 50%, rgba(139,92,246,0.06) 0%, transparent 60%)
+        `,
+      }} />
+
+      {/* Subtle grid lines overlay */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        opacity: 0.03,
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
+        backgroundSize: '32px 32px',
+      }} />
+
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+
+          {/* Avatar */}
+          <div style={{ flexShrink: 0 }}>
+            {user?.picture ? (
+              <img
+                src={user.picture}
+                alt={user.name}
+                referrerPolicy="no-referrer"
+                style={{
+                  width: 56, height: 56, borderRadius: '50%', objectFit: 'cover',
+                  border: '2.5px solid rgba(99,102,241,0.60)',
+                  boxShadow: '0 0 0 4px rgba(99,102,241,0.12), 0 0 20px rgba(99,102,241,0.25)',
+                }}
+              />
+            ) : (
+              <InitialsAvatar name={user?.name} size={56} />
+            )}
+          </div>
+
+          {/* Text */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{
+              margin: '0 0 2px',
+              fontSize: 'var(--text-xs)',
+              fontWeight: 600,
+              color: 'rgba(165,180,252,0.70)',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}>{greeting} ·</p>
+
+            <h1 style={{
+              margin: 0,
+              fontSize: 'clamp(1.4rem, 4vw, 1.9rem)',
+              fontWeight: 800,
+              letterSpacing: '-0.04em',
+              lineHeight: 1.15,
+              background: 'linear-gradient(135deg, #F0F0F8 0%, #C4B5FD 55%, #A78BFA 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}>
+              {user?.name?.split(' ')[0] || 'there'} 👋
+            </h1>
+
+            <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-3)', flexWrap: 'wrap' }}>
+              <Badge variant={user?.isPlatformAdmin ? 'danger' : user?.role === 'alumni' ? 'accent' : 'primary'}>
+                {user?.role?.replace('_', ' ')}
+              </Badge>
+              {user?.dept && <Badge variant="secondary">{user.dept}</Badge>}
+              {user?.year && <Badge variant="secondary">Class of {user.year}</Badge>}
+              {user?.currentCompany && <Badge variant="success">{user.currentCompany}</Badge>}
+            </div>
+          </div>
+
+          {/* Profile CTA chip */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            borderRadius: 'var(--radius-full)',
+            background: 'rgba(99,102,241,0.12)',
+            border: '1px solid rgba(99,102,241,0.28)',
+            color: '#A5B4FC',
+            fontSize: '0.72rem',
+            fontWeight: 600,
+            flexShrink: 0,
+            transition: 'background 150ms ease',
+          }}>
+            <Settings size={11} />
+            Edit Profile
+          </div>
+        </div>
+
+        {/* Tagline */}
+        <p style={{
+          marginTop: 'var(--space-5)',
+          marginBottom: 0,
+          color: 'rgba(168,168,200,0.75)',
+          fontSize: 'var(--text-sm)',
+          lineHeight: 1.7,
+          maxWidth: 560,
+        }}>
+          Your SSN campus platform — academics, placements, alumni, and everything campus.{' '}
+          <span style={{ color: '#A5B4FC', fontWeight: 500 }}>Explore below →</span>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════════════════════════════════════════
    HOME PAGE
-   --------------------------------------------------------------- */
+   ═══════════════════════════════════════════════════════════════════ */
 function Home() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [communities, setCommunities] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Alumni invite (admin only)
   const [inviteEmail, setInviteEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -152,7 +443,6 @@ function Home() {
       try {
         const response = await axiosClient.get('/communities');
         const all = response.data;
-        // Filter to only show: user's dept+batch community, General, and Placements
         const deptToShort = {
           Mechanical: 'MECH', Chemical: 'CHEM', Biomedical: 'BIOMED', Civil: 'CIVIL',
           'MTECH-CSE': 'MTECH-CSE',
@@ -180,9 +470,7 @@ function Home() {
     if (!inviteEmail) { toast.error('Please enter an email'); return; }
     setIsSubmitting(true);
     try {
-      const response = await axiosClient.post('/admin/marketing-email', {
-        email: inviteEmail,
-      });
+      const response = await axiosClient.post('/admin/marketing-email', { email: inviteEmail });
       toast.success(response.data.message || 'Email sent successfully!');
       setInviteEmail('');
     } catch (err) {
@@ -192,11 +480,10 @@ function Home() {
     }
   };
 
-  /* ---------- Loading skeleton ---------- */
   if (loading) {
     return (
       <div className="page-transition">
-                <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+        <div className="page-col page-col-wide">
           <SkeletonCard lines={2} />
           <SkeletonCard lines={3} />
           <SkeletonCard lines={4} />
@@ -205,144 +492,55 @@ function Home() {
     );
   }
 
-  /* ---------- Full page ---------- */
   return (
     <div className="page-transition">
-      
-      <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
+      <div className="page-col page-col-wide">
 
-        <div 
-          onClick={() => navigate('/settings/profile')}
-          style={{
-          position: 'relative',
-          borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-8)',
-          marginBottom: 'var(--space-6)',
-          background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
-          border: '1px solid rgba(124,106,247,0.25)',
-          boxShadow: '0 0 40px rgba(124,106,247,0.10)',
-          overflow: 'hidden',
-          cursor: 'pointer',
-        }}>
-          {/* Decorative gradient blob */}
-          <div style={{
-            position: 'absolute',
-            top: -60,
-            right: -60,
-            width: 220,
-            height: 220,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(124,106,247,0.25) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: -40,
-            left: 80,
-            width: 160,
-            height: 160,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }} />
+        {/* ── HERO ── */}
+        <HeroCard user={user} navigate={navigate} />
 
-          {/* Content */}
-          <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-5)' }}>
-              {user?.picture ? (
-                <img
-                  src={user.picture}
-                  alt={user.name}
-                  referrerPolicy="no-referrer"
-                  style={{ width: 52, height: 52, borderRadius: 'var(--radius-full)', border: '2px solid var(--primary)', objectFit: 'cover' }}
-                />
-              ) : (
-                <InitialsAvatar name={user?.name} size={52} />
-              )}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                    <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>
-                    Hey, {user?.name?.split(' ')[0] || 'there'} 👋
-                  </h1>
-                </div>
-                <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)', flexWrap: 'wrap' }}>
-                  <Badge variant={user?.isPlatformAdmin ? 'danger' : user?.role === 'alumni' ? 'accent' : 'primary'}>
-                    {user?.role?.replace('_', ' ')}
-                  </Badge>
-                  {user?.dept && <Badge variant="secondary">{user.dept}</Badge>}
-                  {user?.year && <Badge variant="secondary">Class of {user.year}</Badge>}
-                  {user?.currentCompany && <Badge variant="success">{user.currentCompany}</Badge>}
-                </div>
-              </div>
-            </div>
-
-            <p style={{
-              color: 'var(--text-secondary)',
-              fontSize: 'var(--text-sm)',
-              margin: 0,
-              lineHeight: 1.7,
-            }}>
-              Welcome back to <strong style={{ color: 'var(--text-primary)' }} className="home-brand-name">TakeUForward</strong> — your campus community for academics, placements, and everything in between.
-            </p>
-          </div>
-        </div>
-
-        {/* ── MODERATION QUEUE (admin only) ── */}
+        {/* ── ADMIN: MODERATION QUEUE ── */}
         {user?.isPlatformAdmin && (
-          <Card
-            style={{
-              background: 'var(--danger-bg)',
-              borderColor: 'rgba(248,113,113,0.35)',
-              marginBottom: 'var(--space-6)',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-                <div style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--danger-bg)',
-                  border: '1px solid var(--danger)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <ShieldAlert size={18} color="var(--danger)" />
-                </div>
-                <div>
-                  <h3 style={{ fontSize: 'var(--text-base)', margin: 0, color: 'var(--danger)' }}>Moderation Queue</h3>
-                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0 }}>Review flagged and reported posts</p>
-                </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: 'var(--space-4) var(--space-5)',
+            borderRadius: 'var(--radius-md)',
+            background: 'rgba(244,63,94,0.07)',
+            border: '1px solid rgba(244,63,94,0.28)',
+            marginBottom: 'var(--space-6)',
+            gap: 'var(--space-4)',
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 'var(--radius-sm)',
+                background: 'rgba(244,63,94,0.14)', border: '1px solid rgba(244,63,94,0.35)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <ShieldAlert size={16} color="var(--danger)" />
               </div>
-              <Link to="/moderation" style={{ textDecoration: 'none' }}>
-                <Button variant="danger" size="sm">
-                  Open Dashboard <ArrowRight size={13} />
-                </Button>
-              </Link>
+              <div>
+                <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--danger)' }}>Moderation Queue</p>
+                <p style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>Review flagged and reported posts</p>
+              </div>
             </div>
-          </Card>
+            <Link to="/moderation" style={{ textDecoration: 'none' }}>
+              <Button variant="danger" size="sm">Open Dashboard <ArrowRight size={13} /></Button>
+            </Link>
+          </div>
         )}
 
-        {/* ── STUDENT WELCOME EMAIL (platform admin only) ── */}
+        {/* ── ADMIN: STUDENT WELCOME EMAIL ── */}
         {user?.isPlatformAdmin && (
           <Card style={{ marginBottom: 'var(--space-6)' }}>
             <h3 style={{ fontSize: 'var(--text-base)', marginBottom: 'var(--space-4)', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Link2 size={16} color="var(--primary)" />
-              Send Welcome Email to Student
+              <Link2 size={16} color="var(--primary)" /> Send Welcome Email to Student
             </h3>
             <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
-              <Input
-                type="email"
-                placeholder="Student email address"
-                value={inviteEmail}
-                onChange={e => setInviteEmail(e.target.value)}
-              />
-              <Button
-                onClick={handleSendStudentWelcome}
-                disabled={isSubmitting}
-                style={{ flexShrink: 0 }}
-              >
+              <Input type="email" placeholder="Student email address" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
+              <Button onClick={handleSendStudentWelcome} disabled={isSubmitting} style={{ flexShrink: 0 }}>
                 {isSubmitting ? 'Sending…' : 'Send'}
               </Button>
             </div>
@@ -350,66 +548,53 @@ function Home() {
         )}
 
         {/* ── DASHBOARD GRIDS ── */}
-        {renderGrid('Academics', ACADEMIC_LINKS, <BookOpen size={16} color="var(--info)" />)}
-        {renderGrid('Career & Placements', CAREER_LINKS, <Briefcase size={16} color="var(--accent)" />)}
-        {renderGrid('Campus Life', CAMPUS_LINKS, <Users size={16} color="var(--success)" />)}
+        {renderGrid('Academics', ACADEMIC_LINKS, BookOpen, '#38BDF8', 'rgba(56,189,248,0.12)')}
+        {renderGrid('Career & Placements', CAREER_LINKS, Briefcase, '#F59E0B', 'rgba(245,158,11,0.12)')}
+        {renderGrid('Campus Life', CAMPUS_LINKS, Users, '#10B981', 'rgba(16,185,129,0.12)')}
 
         {/* ── FEEDBACK CTA ── */}
-        <Card
-          variant="highlight"
-          style={{
-            marginBottom: 'var(--space-6)',
-            background: 'linear-gradient(135deg, var(--primary-glow) 0%, transparent 100%)',
-            border: '1px solid var(--primary)',
-            textAlign: 'center',
-            padding: 'var(--space-8)',
-            transition: 'box-shadow 0.3s ease',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.boxShadow = '0 0 30px var(--primary-glow), 0 0 60px rgba(124,106,247,0.10)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.boxShadow = 'none';
-          }}
-        >
+        <div style={{
+          position: 'relative',
+          padding: 'var(--space-8)',
+          borderRadius: 'var(--radius-xl)',
+          background: 'linear-gradient(135deg, #0F0F1A 0%, #0D0D18 100%)',
+          border: '1px solid rgba(99,102,241,0.28)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.35)',
+          marginBottom: 'var(--space-8)',
+          overflow: 'hidden',
+          textAlign: 'center',
+        }}>
           <div style={{
-            width: 48,
-            height: 48,
-            borderRadius: 'var(--radius-full)',
-            background: 'var(--primary-glow)',
-            border: '1px solid rgba(124,106,247,0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto var(--space-4)',
-          }}>
-            <MessageCircle size={22} color="var(--primary)" />
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(99,102,241,0.18) 0%, transparent 65%)',
+          }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%',
+              background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.28)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto var(--space-4)',
+            }}>
+              <Sparkles size={22} color="#A5B4FC" />
+            </div>
+            <h3 style={{ margin: '0 0 var(--space-2)', fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--text-primary)' }}>
+              We need your support! 🙌
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', margin: '0 auto var(--space-5)', maxWidth: 480, lineHeight: 1.7 }}>
+              TakeUForward is built by students like you. Spot a bug, have an idea? Share it — every bit of feedback shapes this platform.
+            </p>
+            <Link to="/support" style={{ textDecoration: 'none' }}>
+              <Button variant="primary" className="btn-lg">Share Feedback</Button>
+            </Link>
           </div>
-          <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-xl)' }}>
-            We need your support! 🙌
-          </h3>
-          <p style={{
-            color: 'var(--text-secondary)',
-            fontSize: 'var(--text-sm)',
-            margin: '0 auto var(--space-5)',
-            maxWidth: 480,
-            lineHeight: 1.7,
-          }}>
-            TakeUForward SSN is built and improved by students like you. Spot a bug, have an idea,
-            or just want to tell us what's missing? Share it with us — every bit of feedback helps
-            us make this better for everyone.
-          </p>
-          <Link to="/support" style={{ textDecoration: 'none' }}>
-            <Button variant="primary" className="btn-lg">Share Feedback</Button>
-          </Link>
-        </Card>
+        </div>
 
-        {/* ── COMMUNITIES LIST ── */}
+        {/* ── COMMUNITIES ── */}
         <Card>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-5)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Hash size={15} color="var(--primary)" />
-              <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>Your Communities</h3>
+              <h3 style={{ fontSize: 'var(--text-base)', margin: 0, fontWeight: 700 }}>Your Communities</h3>
             </div>
             <Badge variant="secondary">{communities.length} total</Badge>
           </div>
@@ -417,56 +602,40 @@ function Home() {
           {communities.length === 0 ? (
             <EmptyState
               icon={Users}
-              title="No communities to show"
-              message="This is a community-driven platform. Help us grow it by joining or creating a community."
+              title="No communities yet"
+              message="This is a community-driven platform. Join or create a community to get started."
             />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
               {communities.map(comm => {
                 const accent = communityAccent(comm.type);
-                const bgg = communityBg(comm.type);
                 return (
-                  <Link
-                    key={comm._id}
-                    to={`/community/${comm._id}`}
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: 'var(--space-3) var(--space-4)',
-                        borderRadius: 'var(--radius-md)',
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border-subtle)',
-                        transition: 'background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease',
-                        cursor: 'pointer',
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = `${bgg}18`;
-                        e.currentTarget.style.borderColor = `${accent}55`;
-                        e.currentTarget.style.boxShadow = `0 0 0 1px ${accent}22`;
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background = 'var(--bg-elevated)';
-                        e.currentTarget.style.borderColor = 'var(--border-subtle)';
-                        e.currentTarget.style.boxShadow = 'none';
-                      }}
+                  <Link key={comm._id} to={`/community/${comm._id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: 'var(--space-3) var(--space-4)',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid var(--border-subtle)',
+                      transition: 'background 0.18s ease, border-color 0.18s ease',
+                      cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(99,102,241,0.06)';
+                      e.currentTarget.style.borderColor = 'rgba(99,102,241,0.30)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                      e.currentTarget.style.borderColor = 'var(--border-subtle)';
+                    }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                         <div style={{
-                          width: 34,
-                          height: 34,
-                          borderRadius: 'var(--radius-md)',
-                          background: `linear-gradient(135deg, ${accent}22 0%, ${accent}08 100%)`,
-                          border: `1px solid ${accent}33`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          flexShrink: 0,
+                          width: 32, height: 32, borderRadius: 'var(--radius-sm)',
+                          background: `${accent}18`, border: `1px solid ${accent}30`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                         }}>
-                          <Hash size={15} color={accent} />
+                          <Hash size={13} color={accent} />
                         </div>
                         <div>
                           <p style={{ margin: 0, fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)' }}>

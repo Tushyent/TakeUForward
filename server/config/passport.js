@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
 import { isSystemAdminEmail, syncUserIdentity } from '../utils/userIdentity.js';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ passport.use(
           }
         }
 
+        logger.info({ email, role, isVerifiedAlumni, isSystemAdmin }, 'Google OAuth: authenticating profile');
         let user = await User.findOne({ $or: [{ googleId: profile.id }, { email }] });
         if (!user) {
           // Attempt to extract dept/year from email or defaults (since it's not provided by Google directly)
@@ -70,9 +72,7 @@ passport.use(
           });
           const changed = await syncUserIdentity(User, user);
           if (changed) await user.save();
-
-          // Welcome email is sent after profile completion in authRoutes.js (isFirstCompletion)
-          // to avoid sending twice.
+          logger.info({ userId: user._id, email: user.email, role: user.role, isApproved: user.isApproved }, 'Google OAuth: created new user account');
         } else {
           if (user.googleId !== profile.id) {
             user.googleId = profile.id;
@@ -91,9 +91,11 @@ passport.use(
           }
           const changed = await syncUserIdentity(User, user);
           if (changed) await user.save();
+          logger.info({ userId: user._id, email: user.email, role: user.role, isApproved: user.isApproved }, 'Google OAuth: existing user profile synced');
         }
         return done(null, user);
       } catch (err) {
+        logger.error({ err: err.message, stack: err.stack }, 'Google OAuth: verification callback error');
         return done(err, null);
       }
     }

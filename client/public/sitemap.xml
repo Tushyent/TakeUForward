@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Main Landing Page -->
+  <!-- <loc>https://takeuforward-ssn.vercel.app/</loc> -->
   <url>
-    <loc>https://takeuforward-ssn.vercel.app/</loc>
-    <lastmod>2024-10-01</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://takeuforward.blastorz.fun/</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
-  <!-- Public About Page (if you create a public one later) -->
+  <!-- Authentication / Login Page -->
+  <!-- <loc>https://takeuforward-ssn.vercel.app/login</loc> -->
   <url>
-    <loc>https://takeuforward-ssn.vercel.app/about</loc>
-    <lastmod>2024-10-01</lastmod>
+    <loc>https://takeuforward.blastorz.fun/login</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- Public About Page -->
+  <!-- <loc>https://takeuforward-ssn.vercel.app/about</loc> -->
+  <url>
+    <loc>https://takeuforward.blastorz.fun/about</loc>
+    <lastmod>2026-08-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <!-- Additional public pages can be added here -->
+  <!-- Support & Feedback Page -->
+  <!-- <loc>https://takeuforward-ssn.vercel.app/support</loc> -->
+  <url>
+    <loc>https://takeuforward.blastorz.fun/support</loc>
+    <lastmod>2026-08-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

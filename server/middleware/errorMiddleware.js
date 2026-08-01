@@ -22,6 +22,8 @@ export const errorHandler = (err, req, res, next) => {
     url: req.originalUrl,
     status: statusCode,
     userId: req.user?._id || 'unauthenticated',
+    userRole: req.user?.role || 'guest',
+    ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip,
     error: message
   };
 

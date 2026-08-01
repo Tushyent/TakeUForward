@@ -5,6 +5,38 @@ Every commit that adds/changes a feature should have a matching entry here.
 Have orderwise log either based on filewise, or changes did in the codebase.
 Format: Keep a Changelog style — Added / Changed / Fixed / Removed.
 
+## [Unreleased] — ui-revamp branch
+
+### Added (SEO & Logging)
+- **[Domain & SEO]**: Migrated active domain configuration to `https://takeuforward.blastorz.fun` (retaining legacy `https://takeuforward-ssn.vercel.app` as comments in HTML/XML/txt files). Added JSON-LD Structured Data Schema (`schema.org`) for Google Rich Snippets, rich Open Graph & Twitter Card tags (`summary_large_image`), PWA Web App Manifest (`site.webmanifest`), crawler-optimized `robots.txt`, and expanded `sitemap.xml`. Added `docs/VISIBILITY_AND_SEO_GUIDE.md`.
+- **[Logging]**: Upgraded backend logger for Render stdout debugging. Enriched `pinoHttp` request logs with `userId`, `userRole`, and `ip`; added real-time `logger.info` output to `logActivity` for all DB mutations (posts, comments, reviews, tickets, marketplace, lost & found, referrals, mock interviews, admin moderation); added Google OAuth lifecycle and error trace logging.
+
+### Changed (UI Revamp — Design System v3)
+- **[CSS] Design System v3**: Complete token overhaul in `index.css` — new indigo-violet primary (`#6366F1`), amber accent (`#F59E0B`), warmer dark backgrounds (`#0C0C0F` base), real glassmorphism re-enabled (`backdrop-filter: blur(12px)` on cards and surfaces), gradient mesh background blobs, new gradient primary button style, `Inter` font added alongside Plus Jakarta Sans.
+- **[Sidebar]**: Gradient logo mark (SVG), active nav items use indigo gradient pill, section labels refined, close button visible.
+- **[Navbar]**: Gradient logo mark consistent with sidebar, active item indicator uses gradient underline glow.
+- **[AppLayout]**: Mobile header updated to gradient brand mark and tighter typography.
+- **[Login]**: Full revamp — branding panel with floating animated campus icons, 2-column feature cards (glassmorphic), premium Google sign-in button with hover lift, improved copy. Alumni form preserved.
+- **[Home]**: Hero banner uses new indigo glow border/radial, feedback CTA card updated to indigo gradient, avatar ring with indigo tint.
+- **[CommunityPosts]**: Posts now use `.card-post` class (glassmorphic, indigo left-border on hover), `notification-target-highlight` correctly composed.
+- **[AlumniDirectory]**: Cards use `.card-alumni` (glassmorphic, indigo top border, hover lift).
+- **[Resources]**: Upload form and resource list use `.card-resource` (glassmorphic hover).
+- **[PendingApproval]**: Glass surface card, `console.error` removed per code style rules.
+- **[NotificationsDropdown]**: Bell hover uses primary-subtle, dropdown panel glassmorphic (blur 20px), unread dot pulses, unread count badge uses gradient.
+- **[Badge]**: Primary variant updated to indigo-300 readable color, semantic borders updated to match new danger/success/warning tokens.
+- **[EmptyState]**: Icon container uses new indigo rgba values.
+- **[Modal]**: Glassmorphic background with backdrop-filter, stronger shadow.
+- **[Spinner/SkeletonCard]**: Skeleton uses glass surface tokens.
+- **[Swept]**: All hardcoded `rgba(124,106,247,…)` violet values replaced with `rgba(99,102,241,…)` indigo equivalents across `ProfileSettings`, `NotificationsPage`, `CommunityBrowse`, `ClubsList`, `About`, `NotificationsDropdown`.
+
+### Fixed (Server — committed to main fd11eed)
+- **[S3]**: Mock fallback when `AWS_ACCESS_KEY_ID` is missing — enables local dev without real AWS credentials.
+- **[Auth]**: CSP nonce applied to OAuth callback inline script to satisfy Helmet's strict-dynamic CSP.
+- **[User]**: Pre-save Mongoose hooks enforce alumni role invariant — can't set `role=alumni` with `isVerifiedAlumni=false`.
+- **[SendGrid]**: `NODE_ENV !== 'test'` guard suppresses startup warnings during test runs.
+- **[Drive]**: Mock S3 upload endpoint (`PUT /api/drive/mock-s3-upload`) for local development.
+- **[gitignore]**: Scratch scripts (`scratch_*.js`), capture scripts, check-db, migrations, and test HTML files added to `.gitignore`.
+
 ## [Unreleased]
 
 ### Changed

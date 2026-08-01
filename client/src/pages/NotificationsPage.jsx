@@ -129,13 +129,13 @@ const NotificationsPage = () => {
                     gap: 'var(--space-3)',
                     padding: 'var(--space-4)',
                     cursor: 'pointer',
-                    background: notif.isRead ? 'transparent' : 'rgba(124,106,247,0.05)',
+                    background: notif.isRead ? 'transparent' : 'rgba(99,102,241,0.06)',
                     borderBottom: idx === notifications.length - 1 ? 'none' : '1px solid var(--border-subtle)',
                     borderLeft: notif.isRead ? '3px solid transparent' : '3px solid var(--primary)',
                     transition: 'background var(--transition-fast)',
                   }}
                   onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-                  onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : 'rgba(124,106,247,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : 'rgba(99,102,241,0.06)'}
                 >
                   <div style={{
                     width: 40,

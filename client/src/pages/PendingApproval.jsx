@@ -8,8 +8,8 @@ const PendingApproval = () => {
   const handleLogout = async () => {
     try {
       await axiosClient.get('/auth/logout');
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // silent logout
     }
     window.location.href = '/login';
   };
@@ -24,9 +24,12 @@ const PendingApproval = () => {
         textAlign: 'center',
       }}>
         <div style={{
-          background: 'var(--bg-surface)',
+          background: 'var(--glass-surface)',
+          backdropFilter: 'blur(var(--glass-surface-blur))',
+          WebkitBackdropFilter: 'blur(var(--glass-surface-blur))',
           borderRadius: 'var(--radius-xl)',
-          border: '1px solid var(--border)',
+          border: '1px solid var(--glass-border)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
           padding: 'var(--space-8) var(--space-6)',
         }}>
           <div style={{

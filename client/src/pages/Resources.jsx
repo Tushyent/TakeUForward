@@ -147,7 +147,7 @@ function Resources() {
         </Link>
         <h1>Academic Resources</h1>
 
-        <Card variant="elevated" style={{ maxWidth: '600px' }}>
+        <Card className="card-resource" style={{ maxWidth: '600px', marginBottom: 'var(--space-6)' }}>
           <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <h3 style={{ marginTop: 0 }}>Upload a Resource</h3>
             
@@ -199,7 +199,7 @@ function Resources() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {resources.map((res) => (
-              <Card key={res._id} style={{ marginBottom: 0 }}>
+              <Card className="card-resource" key={res._id} style={{ marginBottom: 0 }}>
                 <p style={{ fontSize: '1.2em', margin: '0 0 10px 0', color: 'var(--text-primary)' }}>
                   <strong>{res.title}</strong>
                 </p>

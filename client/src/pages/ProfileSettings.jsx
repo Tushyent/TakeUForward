@@ -198,7 +198,7 @@ function ProfileSettings() {
             width: 40, height: 40,
             borderRadius: 'var(--radius-md)',
             background: 'var(--primary-glow)',
-            border: '1px solid rgba(124,106,247,0.3)',
+            border: '1px solid rgba(99,102,241,0.28)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
           }}>
@@ -333,7 +333,7 @@ function ProfileSettings() {
                 borderRadius: 'var(--radius-sm)',
                 background: profile.weeklyDigestOptIn ? 'var(--primary-glow)' : 'transparent',
                 border: '1px solid',
-                borderColor: profile.weeklyDigestOptIn ? 'rgba(124,106,247,0.2)' : 'var(--border-subtle)',
+                borderColor: profile.weeklyDigestOptIn ? 'rgba(99,102,241,0.20)' : 'var(--border-subtle)',
                 transition: 'background 0.15s, border-color 0.15s',
               }}>
                 <input
@@ -357,7 +357,7 @@ function ProfileSettings() {
                   borderRadius: 'var(--radius-sm)',
                   background: webPushOptIn ? 'var(--primary-glow)' : 'transparent',
                   border: '1px solid',
-                  borderColor: webPushOptIn ? 'rgba(124,106,247,0.2)' : 'var(--border-subtle)',
+                  borderColor: webPushOptIn ? 'rgba(99,102,241,0.20)' : 'var(--border-subtle)',
                   transition: 'background 0.15s, border-color 0.15s',
                 }}>
                   <input
@@ -402,7 +402,7 @@ function ProfileSettings() {
                     borderRadius: 'var(--radius-sm)',
                     background: value ? 'var(--primary-glow)' : 'var(--bg-elevated)',
                     border: '1px solid',
-                    borderColor: value ? 'rgba(124,106,247,0.2)' : 'var(--border-subtle)',
+                    borderColor: value ? 'rgba(99,102,241,0.20)' : 'var(--border-subtle)',
                     transition: 'background 0.15s, border-color 0.15s',
                     fontSize: 'var(--text-xs)',
                     color: 'var(--text-primary)',

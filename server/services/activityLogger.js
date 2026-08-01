@@ -3,6 +3,16 @@ import { logger } from '../utils/logger.js';
 
 export const logActivity = async ({ action, resource, resourceId, description, req, details }) => {
   try {
+    const logData = {
+      action,
+      resource,
+      resourceId: resourceId || undefined,
+      userId: req?.user?._id,
+      userRole: req?.user?.role || 'user',
+      details: details || undefined,
+    };
+    logger.info(logData, `[ACTION] ${action.toUpperCase()} ${resource}: ${description || action}`);
+
     await ActivityLog.create({
       action,
       resource,
@@ -14,6 +24,6 @@ export const logActivity = async ({ action, resource, resourceId, description, r
       details: details || undefined,
     });
   } catch (err) {
-    logger.error('Failed to log activity:', err);
+    logger.error({ err, action, resource }, 'Failed to log activity');
   }
 };

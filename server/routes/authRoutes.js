@@ -24,10 +24,15 @@ router.get(
     passport.authenticate('google', (err, user) => {
       const clientUrl = getClientUrl();
       if (err || !user) {
+        logger.warn({ err: err?.message || 'User null or non-SSN email rejected', ip: req.ip }, 'Auth: Google OAuth login failed/rejected');
         return res.redirect(clientUrl + '/login?error=domain');
       }
       req.logIn(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          logger.error({ err: err.message, userId: user._id }, 'Auth: req.logIn session creation failed');
+          return next(err);
+        }
+        logger.info({ userId: user._id, email: user.email, role: user.role, isApproved: user.isApproved }, 'Auth: User logged in successfully via Google OAuth');
         // Render HTML with a client-side redirect instead of using a 302.
         // Chrome on Android drops Set-Cookie on 302 responses that are part
         // of the OAuth bounce chain. A 200 response + script redirect breaks
@@ -168,12 +173,16 @@ router.patch('/profile', async (req, res, next) => {
 });
 
 router.get('/logout', (req, res, next) => {
+  const userId = req.user?._id;
+  const email = req.user?.email;
   req.logout((err) => {
     if (err) {
+      logger.error({ err: err.message, userId }, 'Auth: req.logout failed');
       return next(err);
     }
     // Since we are using express-session, we might also want to destroy it
     req.session && req.session.destroy();
+    logger.info({ userId, email }, 'Auth: User logged out successfully');
     res.status(200).json({ message: 'Logged out successfully' });
   });
 });

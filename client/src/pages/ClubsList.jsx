@@ -117,7 +117,7 @@ function ClubsList() {
                 <Card key={club._id} lift style={{ display: 'flex', flexDirection: 'column', height: '100%', marginBottom: 0 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: 'var(--radius-sm)',
-                    background: 'rgba(124,106,247,0.12)',
+                    background: 'rgba(99,102,241,0.10)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     marginBottom: 'var(--space-4)',
                   }}>

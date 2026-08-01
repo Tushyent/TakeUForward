@@ -225,7 +225,7 @@ function CommunityBrowse() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                               <div style={{
                                 width: 32, height: 32, borderRadius: 'var(--radius-sm)',
-                                background: 'rgba(124,106,247,0.12)',
+                                background: 'rgba(99,102,241,0.10)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                               }}>
                                 <Hash size={14} color="var(--primary)" />

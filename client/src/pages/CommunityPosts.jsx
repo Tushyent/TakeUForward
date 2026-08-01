@@ -245,7 +245,7 @@ function CommunityPosts() {
               <Card
                 key={post._id}
                 data-post-id={post._id}
-                className={targetPostId === post._id && !targetCommentId ? 'notification-target-highlight' : ''}
+                className={`card-post${targetPostId === post._id && !targetCommentId ? ' notification-target-highlight' : ''}`}
                 style={{ marginBottom: 0 }}
               >
                 <p style={{ fontSize: '1.1em', marginBottom: '10px', color: 'var(--text-primary)' }}>

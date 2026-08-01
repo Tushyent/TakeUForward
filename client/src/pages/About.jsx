@@ -45,8 +45,8 @@ function About() {
           padding: 'var(--space-8) var(--space-6)',
           marginBottom: 'var(--space-8)',
           background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
-          border: '1px solid rgba(124,106,247,0.2)',
-          boxShadow: '0 0 40px rgba(124,106,247,0.08)',
+          border: '1px solid rgba(99,102,241,0.18)',
+          boxShadow: '0 0 40px rgba(99,102,241,0.08)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -57,13 +57,13 @@ function About() {
           <div style={{
             position: 'absolute', top: -50, right: -50,
             width: 200, height: 200, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(124,106,247,0.2) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
           <div style={{
             position: 'absolute', bottom: -30, left: 60,
             width: 140, height: 140, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(249,115,22,0.10) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(245,158,11,0.10) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
 

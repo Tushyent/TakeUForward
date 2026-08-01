@@ -50,7 +50,7 @@ function AlumniDirectory() {
           Connect with verified SSN alumni across the industry.
         </p>
 
-        <Card style={{ marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
+        <Card className="card-alumni" style={{ marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center' }}>
           <div style={{ flex: 1, minWidth: '200px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500, color: 'var(--text-primary)' }}>Filter by Company</label>
             <Input 
@@ -83,7 +83,7 @@ function AlumniDirectory() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {alumniList.map(alumni => (
-              <Card key={alumni._id} style={{ display: 'flex', flexDirection: 'column', height: '100%', marginBottom: 0 }}>
+              <Card className="card-alumni" key={alumni._id} style={{ display: 'flex', flexDirection: 'column', height: '100%', marginBottom: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
                     <h2 style={{ margin: '0 0 5px 0', fontSize: '1.2em', display: 'flex', alignItems: 'center' }}>
                       <Link to={`/profile/${alumni.username}`} style={{ color: 'inherit', textDecoration: 'none' }}>

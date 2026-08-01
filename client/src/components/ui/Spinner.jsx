@@ -52,9 +52,9 @@ const Spinner = ({ text = 'Loading...', center = true, size = 'md' }) => {
  */
 export const SkeletonCard = ({ lines = 3 }) => (
   <div style={{
-    background: 'var(--bg-surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius-md)',
+    background: 'var(--glass-surface)',
+    border: '1px solid var(--glass-border)',
+    borderRadius: 'var(--radius-lg)',
     padding: 'var(--space-6)',
     marginBottom: 'var(--space-6)',
   }}>

@@ -18,7 +18,7 @@
                          ┌─────────────────────────────┐
                          │   Vercel (Frontend + Proxy)  │
                          │   /client — React+Vite       │
-                         │   takeuforward-ssn.vercel.app│
+                         │   takeuforward.blastorz.fun │
                          │                              │
                          │   /api/* → reverse proxy     │
                          │   to Render backend          │
@@ -96,7 +96,7 @@ across the project so far.
 | `SESSION_SECRET` | Yes | long random string | Sessions can be forged/decoded if weak; missing may crash session middleware |
 | `GOOGLE_CLIENT_ID` | Yes | from Google Cloud Console | OAuth login fails entirely |
 | `GOOGLE_CLIENT_SECRET` | Yes | from Google Cloud Console | OAuth callback fails |
-| `CLIENT_URL` | Yes | `https://takeuforward-ssn.vercel.app` (**no trailing slash** — see §7) | CORS rejects all frontend requests |
+| `CLIENT_URL` | Yes | `https://takeuforward.blastorz.fun` (**no trailing slash** — see §7) | CORS rejects all frontend requests |
 | `NODE_ENV` | Yes | `production` | Controls cookie `secure`/`sameSite` flags, error stack-trace leakage, CORS localhost fallback |
 | `LOG_LEVEL` | No | `info` | Determines structured Pino logging output verbosity (`debug`, `info`, `warn`, `error`) |
 | `ALLOW_TEST_SESSION` | No, dev/test only | `false` / unset in production | If set to `true` outside production it enables the Playwright-only session seeding route; never set this in Render production |

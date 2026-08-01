@@ -1,9 +1,9 @@
 <div align="center">
-  <img src="https://takeuforward-ssn.vercel.app/favicon.svg" alt="TakeUForward Logo" width="120" />
+  <img src="https://takeuforward.blastorz.fun/favicon.svg" alt="TakeUForward Logo" width="120" />
   <h1>TakeUForward</h1>
   <p><strong>The Ultimate SSN Campus Mentorship, Utility, & Networking Platform</strong></p>
 
-  [![Vercel Deployment](https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://takeuforward-ssn.vercel.app)
+  [![Vercel Deployment](https://img.shields.io/badge/Deployed_on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://takeuforward.blastorz.fun)
   [![Render Backend](https://img.shields.io/badge/Backend-Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://takeuforward-ssn.onrender.com)
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
   [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](#)

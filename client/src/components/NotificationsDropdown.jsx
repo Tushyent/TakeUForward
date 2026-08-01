@@ -69,13 +69,15 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
           width: 36,
           height: 36,
           borderRadius: 'var(--radius-sm)',
-          background: isOpen ? 'var(--bg-elevated)' : 'transparent',
-          border: '1px solid ' + (isOpen ? 'var(--border-strong)' : 'transparent'),
+          background: isOpen ? 'var(--primary-subtle)' : 'transparent',
+          border: '1px solid ' + (isOpen ? 'rgba(99,102,241,0.35)' : 'transparent'),
           color: unreadCount > 0 ? 'var(--primary)' : 'var(--text-muted)',
           cursor: 'pointer',
-          transition: 'background var(--transition-fast), color var(--transition-fast)',
+          transition: 'background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast)',
         }}
         title="Notifications"
+        onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = 'var(--primary-subtle)'; }}
+        onMouseLeave={e => { if (!isOpen) e.currentTarget.style.background = 'transparent'; }}
       >
         <Bell size={16} />
         {unreadCount > 0 && (
@@ -88,6 +90,7 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
             background: 'var(--danger)',
             borderRadius: '50%',
             border: '1.5px solid var(--bg-base)',
+            animation: 'pulseGlow 2s ease-in-out infinite',
           }} />
         )}
       </button>
@@ -100,10 +103,12 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
           ...(placement.endsWith('left') ? { left: 0 } : { right: 0 }),
           width: 'min(320px, calc(100vw - 32px))',
           maxWidth: 'calc(100vw - 32px)',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-strong)',
+          background: 'rgba(14, 14, 20, 0.96)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.10)',
           borderRadius: 'var(--radius-md)',
-          boxShadow: 'var(--shadow-lg)',
+          boxShadow: '0 16px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(99,102,241,0.08)',
           zIndex: 200,
           overflow: 'hidden',
         }}>
@@ -122,7 +127,7 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
               </span>
               {unreadCount > 0 && (
                 <span style={{
-                  background: 'var(--primary)',
+                  background: 'var(--gradient-primary)',
                   color: 'white',
                   fontSize: 10,
                   fontWeight: 700,
@@ -171,13 +176,13 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
                       gap: 'var(--space-3)',
                       padding: 'var(--space-3) var(--space-5)',
                       cursor: 'pointer',
-                      background: notif.isRead ? 'transparent' : 'rgba(124,106,247,0.05)',
+                      background: notif.isRead ? 'transparent' : 'rgba(99,102,241,0.06)',
                       borderBottom: '1px solid var(--border-subtle)',
                       borderLeft: notif.isRead ? '3px solid transparent' : '3px solid var(--primary)',
                       transition: 'background var(--transition-fast)',
                     }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-                    onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : 'rgba(124,106,247,0.05)'}
+                    onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : 'rgba(99,102,241,0.06)'}
                   >
                     <div style={{
                       width: 32,
