@@ -29,14 +29,14 @@ class SendGridService {
 
     if (!this.apiKey) {
       if (process.env.NODE_ENV !== 'test') {
-        logger.warn('SendGridService: SENDGRID_API_KEY not set — all email sending disabled.');
+        logger.warn('SendGridService: SENDGRID_API_KEY not set - all email sending disabled.');
       }
       return;
     }
 
     if (!this.from) {
       logger.warn(
-        'SendGridService: SENDGRID_FROM_EMAIL not set — you must set SENDGRID_FROM_EMAIL to a verified sender in SendGrid.'
+        'SendGridService: SENDGRID_FROM_EMAIL not set - you must set SENDGRID_FROM_EMAIL to a verified sender in SendGrid.'
       );
     }
 
@@ -52,12 +52,12 @@ class SendGridService {
   async send({ to, subject, html }) {
     if (this.ready && !process.env.SENDGRID_API_KEY) {
       this.ready = false;
-      logger.warn('SendGridService: SENDGRID_API_KEY was removed from environment — deinitialized.');
+      logger.warn('SendGridService: SENDGRID_API_KEY was removed from environment - deinitialized.');
     }
 
     if (!this.ready) {
       throw new SendGridError(
-        'SendGridService not initialized — set SENDGRID_API_KEY environment variable',
+        'SendGridService not initialized - set SENDGRID_API_KEY environment variable',
         'CONFIG_ERROR'
       );
     }

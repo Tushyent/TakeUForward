@@ -1,13 +1,74 @@
+# Production Robots.txt for TakeUForward SSN (https://takeuforward.blastorz.fun)
+# Optimized for Google, Bing, DuckDuckGo, Yahoo, Yandex, Brave, and AI Search Engines (ChatGPT, Claude, Perplexity, Gemini, Grok, DeepSeek)
+
+# Default Rules for Web Search Engine & Social Media Crawlers
 User-agent: *
 Allow: /
+Allow: /about
+Allow: /login
+Allow: /support
+Allow: /alumni-invite
+Allow: /sitemap.xml
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /manifest.json
 
-# Do not index internal dashboard routes behind authentication
-Disallow: /home
-Disallow: /profile
-Disallow: /chat
-Disallow: /admin
-Disallow: /resources
-Disallow: /referrals
+# Major Search Engine Crawlers
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# AI Search Engines & LLM Directives (OpenAI, Anthropic, Perplexity, Google Gemini, Firecrawl, Common Crawl)
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: FirecrawlAgent
+Allow: /
+
+# Social Media Link Preview Bots
+User-agent: FacebookExternalHit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: WhatsApp
+Allow: /
+
+# Block strictly internal API endpoints & authenticated dashboard routes from public indexing
 Disallow: /api/
+Disallow: /admin
+Disallow: /chat
+Disallow: /settings
 
-Sitemap: https://takeuforward-ssn.vercel.app/sitemap.xml
+# Canonical Sitemap & LLM Protocol References
+Sitemap: https://takeuforward.blastorz.fun/sitemap.xml

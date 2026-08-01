@@ -73,8 +73,8 @@ function ProfileSettings() {
       navigator.serviceWorker.ready.then(reg => {
         reg.pushManager.getSubscription().then(sub => {
           if (sub) setWebPushOptIn(true);
-        }).catch(() => {});
-      }).catch(() => {});
+        }).catch(() => { });
+      }).catch(() => { });
     }
 
     fetchMe();
@@ -103,7 +103,7 @@ function ProfileSettings() {
 
   const handlePushToggle = async () => {
     if (!pushSupported) return toast.error('Push notifications are not supported in this browser.');
-    
+
     if (webPushOptIn) {
       try {
         const reg = await navigator.serviceWorker.ready;
@@ -123,15 +123,15 @@ function ProfileSettings() {
         if (permission !== 'granted') {
           return toast.error('Permission denied for push notifications');
         }
-        
+
         const reg = await navigator.serviceWorker.register('/sw.js');
         await navigator.serviceWorker.ready;
-        
+
         const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
         if (!publicVapidKey) {
           return toast.error('VAPID public key not configured in frontend');
         }
-        
+
         const urlBase64ToUint8Array = (base64String) => {
           const padding = '='.repeat((4 - base64String.length % 4) % 4);
           const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -147,7 +147,7 @@ function ProfileSettings() {
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
         });
-        
+
         await axiosClient.post('/push/subscribe', sub);
         setWebPushOptIn(true);
         toast.success('Subscribed to push notifications');
@@ -242,28 +242,28 @@ function ProfileSettings() {
 
               <div>
                 <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
-                  Skills <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                  Skills <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>- comma separated</span>
                 </label>
                 <Input name="skills" value={profile.skills} onChange={e => handleChange(e)} placeholder="React, Node.js, Python..." style={{ width: '100%' }} aria-label="Skills" />
               </div>
 
               <div>
                 <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
-                  Interests <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                  Interests <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>- comma separated</span>
                 </label>
                 <Input name="interests" value={profile.interests} onChange={e => handleChange(e)} placeholder="Machine Learning, Web Dev, Photography..." style={{ width: '100%' }} aria-label="Interests" />
               </div>
 
               <div>
                 <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
-                  Experience <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                  Experience <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>- comma separated</span>
                 </label>
                 <Input name="experience" value={profile.experience} onChange={e => handleChange(e)} placeholder="SWE Intern at Google, GDSC Lead..." style={{ width: '100%' }} aria-label="Experience" />
               </div>
 
               <div>
                 <label style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 500, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>
-                  Projects <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>— comma separated</span>
+                  Projects <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>- comma separated</span>
                 </label>
                 <Input name="projects" value={profile.projects} onChange={e => handleChange(e)} placeholder="TakeUForward, React Native App..." style={{ width: '100%' }} aria-label="Projects" />
               </div>

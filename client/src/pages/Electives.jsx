@@ -78,7 +78,7 @@ function Electives() {
       });
       toast.success(bookmarkedIds.has(id) ? 'Removed from saved' : 'Saved for later');
     } catch (err) {
-      toast.error('Failed to update bookmark');
+      toast.error(err.response?.data?.error?.message || 'Failed to update bookmark');
     }
   };
 

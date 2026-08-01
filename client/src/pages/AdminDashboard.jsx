@@ -363,52 +363,52 @@ const AdminDashboard = () => {
       </Card>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 'var(--space-5)' }}>
-      <Card style={{ marginBottom: 'var(--space-6)' }}>
-        <h2 style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-3)' }}>
-          <UserPlus size={18} color="var(--primary)" /> Recent Signups
-          {signupsLoading && <Spinner />}
-        </h2>
-        {signups.length === 0 && !signupsLoading && (
-          <p style={{ color: 'var(--text-secondary)' }}>No signups yet.</p>
-        )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 320, overflowY: 'auto' }}>
-          {signups.map(u => (
-            <div key={u._id} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: 'var(--space-2) var(--space-3)',
-              borderRadius: 'var(--radius-sm)',
-              background: 'var(--bg-card)',
-              fontSize: 'var(--text-sm)',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                <div style={{
-                  width: 28, height: 28, borderRadius: '50%',
-                  background: 'var(--accent)', color: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 'var(--text-xs)', fontWeight: 600, flexShrink: 0,
-                }}>
-                  {(u.name || u.email || '?')[0].toUpperCase()}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <span style={{ fontWeight: 500, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {u.name || 'Unnamed'}
-                  </span>
-                  {u.email && (
-                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {u.email}
+        <Card style={{ marginBottom: 'var(--space-6)' }}>
+          <h2 style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-3)' }}>
+            <UserPlus size={18} color="var(--primary)" /> Recent Signups
+            {signupsLoading && <Spinner />}
+          </h2>
+          {signups.length === 0 && !signupsLoading && (
+            <p style={{ color: 'var(--text-secondary)' }}>No signups yet.</p>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 320, overflowY: 'auto' }}>
+            {signups.map(u => (
+              <div key={u._id} style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                padding: 'var(--space-2) var(--space-3)',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--bg-card)',
+                fontSize: 'var(--text-sm)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    background: 'var(--accent)', color: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 'var(--text-xs)', fontWeight: 600, flexShrink: 0,
+                  }}>
+                    {(u.name || u.email || '?')[0].toUpperCase()}
+                  </div>
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontWeight: 500, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {u.name || 'Unnamed'}
                     </span>
-                  )}
+                    {u.email && (
+                      <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {u.email}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+                  {u.dept && <Badge variant="secondary">{u.dept}</Badge>}
+                  {u.year && <span>{u.year}</span>}
+                  <span>{new Date(u.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0, fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
-                {u.dept && <Badge variant="secondary">{u.dept}</Badge>}
-                {u.year && <span>{u.year}</span>}
-                <span>{new Date(u.createdAt).toLocaleDateString()}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
 
         <Card>
           <h2 style={{ fontSize: 'var(--text-lg)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -696,15 +696,15 @@ const AdminDashboard = () => {
             <div style={{
               width: 32, height: 32, borderRadius: 'var(--radius-sm)', flexShrink: 0,
               background: log.action === 'delete' ? 'var(--danger-bg, rgba(239,68,68,0.1))' :
-                           log.action === 'create' ? 'var(--success-bg, rgba(34,197,94,0.1))' :
-                           log.action === 'report' ? 'var(--warning-bg, rgba(234,179,8,0.1))' :
-                           'var(--bg-input)',
+                log.action === 'create' ? 'var(--success-bg, rgba(34,197,94,0.1))' :
+                  log.action === 'report' ? 'var(--warning-bg, rgba(234,179,8,0.1))' :
+                    'var(--bg-input)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 'var(--text-xs)', fontWeight: 600,
               color: log.action === 'delete' ? 'var(--danger)' :
-                     log.action === 'create' ? 'var(--success)' :
-                     log.action === 'report' ? 'var(--warning)' :
-                     'var(--text-secondary)',
+                log.action === 'create' ? 'var(--success)' :
+                  log.action === 'report' ? 'var(--warning)' :
+                    'var(--text-secondary)',
             }}>
               {log.action === 'create' ? '+' : log.action === 'delete' ? '×' : log.action === 'update' ? '~' : '•'}
             </div>
@@ -774,7 +774,7 @@ const AdminDashboard = () => {
           <div>
             <h1 style={{ marginBottom: 'var(--space-2)' }}>System Admin</h1>
             <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-              Full platform management — seed data, content moderation, and platform oversight.
+              Full platform management - seed data, content moderation, and platform oversight.
             </p>
           </div>
           <Button variant="secondary" onClick={() => {

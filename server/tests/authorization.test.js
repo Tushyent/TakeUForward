@@ -70,7 +70,7 @@ app.use('/api/moderation', moderationRoutes);
 // ─── Test Data ────────────────────────────────────────────────────────────────
 let ownerUser, otherUser, adminUser, communityId;
 
-describe('Authorization Tests — Mutating Routes', () => {
+describe('Authorization Tests - Mutating Routes', () => {
   beforeAll(async () => {
     await mongoose.connect('mongodb://localhost:27017/takeuforward_test_authz');
 
@@ -136,19 +136,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await Post.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot delete a post', async () => {
+    it('401 - unauthenticated user cannot delete a post', async () => {
       mockUser = null;
       const res = await request(app).delete(`/api/posts/${postId}`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — authenticated non-owner cannot delete a post', async () => {
+    it('403 - authenticated non-owner cannot delete a post', async () => {
       mockUser = otherUser;
       const res = await request(app).delete(`/api/posts/${postId}`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — the owner can delete their own post', async () => {
+    it('200 - the owner can delete their own post', async () => {
       mockUser = ownerUser;
       const res = await request(app).delete(`/api/posts/${postId}`);
       expect(res.status).toBe(200);
@@ -180,19 +180,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await Post.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot delete a comment', async () => {
+    it('401 - unauthenticated user cannot delete a comment', async () => {
       mockUser = null;
       const res = await request(app).delete(`/api/posts/${postId}/comments/${commentId}`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — authenticated non-owner cannot delete a comment', async () => {
+    it('403 - authenticated non-owner cannot delete a comment', async () => {
       mockUser = otherUser;
       const res = await request(app).delete(`/api/posts/${postId}/comments/${commentId}`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — comment owner can delete their own comment', async () => {
+    it('200 - comment owner can delete their own comment', async () => {
       mockUser = ownerUser;
       const res = await request(app).delete(`/api/posts/${postId}/comments/${commentId}`);
       expect(res.status).toBe(200);
@@ -216,19 +216,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await ReferralRequest.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot close a referral request', async () => {
+    it('401 - unauthenticated user cannot close a referral request', async () => {
       mockUser = null;
       const res = await request(app).patch(`/api/referrals/${referralId}/close`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — a different user cannot close someone else\'s referral request', async () => {
+    it('403 - a different user cannot close someone else\'s referral request', async () => {
       mockUser = otherUser;
       const res = await request(app).patch(`/api/referrals/${referralId}/close`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — the requester can close their own referral request', async () => {
+    it('200 - the requester can close their own referral request', async () => {
       mockUser = ownerUser;
       const res = await request(app).patch(`/api/referrals/${referralId}/close`);
       expect(res.status).toBe(200);
@@ -254,19 +254,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await MockInterviewRequest.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot close a mock interview request', async () => {
+    it('401 - unauthenticated user cannot close a mock interview request', async () => {
       mockUser = null;
       const res = await request(app).patch(`/api/mock-interviews/${mockInterviewId}/close`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — a different user cannot close someone else\'s mock interview request', async () => {
+    it('403 - a different user cannot close someone else\'s mock interview request', async () => {
       mockUser = otherUser;
       const res = await request(app).patch(`/api/mock-interviews/${mockInterviewId}/close`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — the requester can close their own mock interview request', async () => {
+    it('200 - the requester can close their own mock interview request', async () => {
       mockUser = ownerUser;
       const res = await request(app).patch(`/api/mock-interviews/${mockInterviewId}/close`);
       expect(res.status).toBe(200);
@@ -294,19 +294,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await TeamRequest.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot close a team request', async () => {
+    it('401 - unauthenticated user cannot close a team request', async () => {
       mockUser = null;
       const res = await request(app).post(`/api/team-requests/${teamRequestId}/close`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — a different user cannot close someone else\'s team request', async () => {
+    it('403 - a different user cannot close someone else\'s team request', async () => {
       mockUser = otherUser;
       const res = await request(app).post(`/api/team-requests/${teamRequestId}/close`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — the author can close their own team request', async () => {
+    it('200 - the author can close their own team request', async () => {
       mockUser = ownerUser;
       const res = await request(app).post(`/api/team-requests/${teamRequestId}/close`);
       expect(res.status).toBe(200);
@@ -331,19 +331,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await Club.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot view club analytics', async () => {
+    it('401 - unauthenticated user cannot view club analytics', async () => {
       mockUser = null;
       const res = await request(app).get(`/api/clubs/${clubId}/analytics`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — an authenticated user who is NOT this club\'s admin cannot view its analytics', async () => {
+    it('403 - an authenticated user who is NOT this club\'s admin cannot view its analytics', async () => {
       mockUser = otherUser;
       const res = await request(app).get(`/api/clubs/${clubId}/analytics`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — the club\'s own admin can view their club analytics', async () => {
+    it('200 - the club\'s own admin can view their club analytics', async () => {
       mockUser = ownerUser;
       const res = await request(app).get(`/api/clubs/${clubId}/analytics`);
       expect(res.status).toBe(200);
@@ -372,19 +372,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await MarketplaceItem.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot mark a marketplace item as sold', async () => {
+    it('401 - unauthenticated user cannot mark a marketplace item as sold', async () => {
       mockUser = null;
       const res = await request(app).patch(`/api/marketplace/${marketplaceItemId}/sold`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — a different user cannot mark someone else\'s item as sold', async () => {
+    it('403 - a different user cannot mark someone else\'s item as sold', async () => {
       mockUser = otherUser;
       const res = await request(app).patch(`/api/marketplace/${marketplaceItemId}/sold`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — the seller can mark their own item as sold', async () => {
+    it('200 - the seller can mark their own item as sold', async () => {
       mockUser = ownerUser;
       const res = await request(app).patch(`/api/marketplace/${marketplaceItemId}/sold`);
       expect(res.status).toBe(200);
@@ -413,19 +413,19 @@ describe('Authorization Tests — Mutating Routes', () => {
       await LostFoundItem.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot resolve a lost & found item', async () => {
+    it('401 - unauthenticated user cannot resolve a lost & found item', async () => {
       mockUser = null;
       const res = await request(app).post(`/api/lost-found/${lostFoundItemId}/resolve`);
       expect(res.status).toBe(401);
     });
 
-    it('403 — a different user cannot resolve someone else\'s lost & found item', async () => {
+    it('403 - a different user cannot resolve someone else\'s lost & found item', async () => {
       mockUser = otherUser;
       const res = await request(app).post(`/api/lost-found/${lostFoundItemId}/resolve`);
       expect(res.status).toBe(403);
     });
 
-    it('200 — the author can resolve their own lost & found item', async () => {
+    it('200 - the author can resolve their own lost & found item', async () => {
       mockUser = ownerUser;
       const res = await request(app).post(`/api/lost-found/${lostFoundItemId}/resolve`);
       expect(res.status).toBe(200);
@@ -452,7 +452,7 @@ describe('Authorization Tests — Mutating Routes', () => {
       await Post.deleteMany({});
     });
 
-    it('401 — unauthenticated user cannot resolve moderation actions', async () => {
+    it('401 - unauthenticated user cannot resolve moderation actions', async () => {
       mockUser = null;
       const res = await request(app)
         .post(`/api/moderation/${reportedPostId}/resolve`)
@@ -460,7 +460,7 @@ describe('Authorization Tests — Mutating Routes', () => {
       expect(res.status).toBe(401);
     });
 
-    it('403 — a regular authenticated user (non-admin) cannot resolve moderation actions', async () => {
+    it('403 - a regular authenticated user (non-admin) cannot resolve moderation actions', async () => {
       mockUser = otherUser;
       const res = await request(app)
         .post(`/api/moderation/${reportedPostId}/resolve`)
@@ -468,7 +468,7 @@ describe('Authorization Tests — Mutating Routes', () => {
       expect(res.status).toBe(403);
     });
 
-    it('200 — a platform admin can dismiss a reported item', async () => {
+    it('200 - a platform admin can dismiss a reported item', async () => {
       mockUser = adminUser;
       const res = await request(app)
         .post(`/api/moderation/${reportedPostId}/resolve`)

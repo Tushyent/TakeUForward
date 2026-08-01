@@ -1,8 +1,20 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Card from '../components/ui/Card';
-import { Users, Shield, Search, Heart, Sparkles, BookOpen } from 'lucide-react';
+import Button from '../components/ui/Button';
+import { Users, Shield, Search, Heart, Sparkles, BookOpen, LogIn, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../context/auth-context';
+import { useSEO } from '../hooks/useSEO';
 
 function About() {
+  const { user } = useAuth();
+
+  useSEO({
+    title: 'About - TakeUForward SSN Campus Community',
+    description: 'Learn why TakeUForward was built for SSN College of Engineering. Centralizing academic resources, Gemini AI notes summarization, server-side anonymity engine, and verified alumni mentorship.',
+    keywords: 'SSN College of Engineering, TakeUForward About, SSN Alumni Network, College Mentorship, Academic Resources, Anonymous Discussions',
+    canonical: 'https://takeuforward.blastorz.fun/about'
+  });
   const features = [
     {
       icon: Shield,
@@ -36,6 +48,43 @@ function About() {
 
   return (
     <div className="page-transition">
+      {/* ── TOP PUBLIC NAV BAR ── */}
+      <header style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        background: 'rgba(13, 14, 20, 0.85)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        padding: 'var(--space-3) var(--space-6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <Link to={user ? "/home" : "/login"} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', textDecoration: 'none' }}>
+          <img src="/favicon.svg" alt="TakeUForward Logo" style={{ width: 36, height: 36 }} />
+          <span style={{ fontWeight: 700, fontSize: '1.2rem', color: '#fff', letterSpacing: '-0.02em' }}>
+            TakeUForward <span style={{ color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 600 }}>SSN</span>
+          </span>
+        </Link>
+
+        <div>
+          {user ? (
+            <Link to="/home" style={{ textDecoration: 'none' }}>
+              <Button variant="primary" size="sm">
+                <LayoutDashboard size={16} /> Go to Dashboard
+              </Button>
+            </Link>
+          ) : (
+            <Link to="/login" style={{ textDecoration: 'none' }}>
+              <Button variant="primary" size="sm">
+                <LogIn size={16} /> Sign In
+              </Button>
+            </Link>
+          )}
+        </div>
+      </header>
+
       <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-6) var(--space-8)' }}>
 
         {/* ── HERO ── */}
@@ -132,6 +181,94 @@ function About() {
             </Card>
           ))}
         </div>
+
+        {/* ── FREQUENTLY ASKED QUESTIONS (SEO & AEO OPTIMIZED) ── */}
+        <div style={{ marginBottom: 'var(--space-8)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 'var(--space-6)' }}>
+            <BookOpen size={24} color="var(--primary)" />
+            <h2 style={{ margin: 0, fontSize: '1.8rem' }}>Frequently Asked Questions</h2>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+            {[
+              {
+                q: "What is TakeUForward?",
+                a: "TakeUForward SSN is an all-in-one campus community, placement preparation, and alumni mentorship platform created exclusively for SSN College of Engineering students and alumni."
+              },
+              {
+                q: "How does alumni mentorship work?",
+                a: "Enrolled SSN students can search verified alumni profiles by company or engineering domain and request 1:1 mock interviews, career guidance, and corporate job referrals."
+              },
+              {
+                q: "Is TakeUForward free to use?",
+                a: "Yes, TakeUForward is 100% free for all verified SSN College of Engineering students, faculty, and alumni."
+              },
+              {
+                q: "Who can join the platform?",
+                a: "Currently, enrolled SSN students using official @ssn.edu.in Google Workspace accounts and verified alumni are eligible to join."
+              },
+              {
+                q: "Can students request job referrals?",
+                a: "Yes, students can browse active alumni working at top tech firms (e.g. Google, Amazon, Microsoft, PayPal) and submit structured referral requests."
+              },
+              {
+                q: "Is my privacy protected when discussing sensitive topics?",
+                a: "Absolutely. TakeUForward features a server-side anonymity engine that strips author metadata at the database controller level before sending API responses."
+              }
+            ].map((faq, index) => (
+              <Card key={index} style={{ padding: 'var(--space-5)', background: 'var(--bg-surface)' }}>
+                <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: '1.15rem', color: 'var(--text-primary)' }}>
+                  {faq.q}
+                </h3>
+                <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                  {faq.a}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* ── FAQ SCHEMAS FOR SEARCH ENGINES & LLM OVERVIEWS ── */}
+        <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "What is TakeUForward?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "TakeUForward SSN is an all-in-one campus community, placement preparation, and alumni mentorship platform created exclusively for SSN College of Engineering students and alumni."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does alumni mentorship work?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Enrolled SSN students can search verified alumni profiles by company or engineering domain and request 1:1 mock interviews, career guidance, and corporate job referrals."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is TakeUForward free to use?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, TakeUForward is 100% free for all verified SSN College of Engineering students, faculty, and alumni."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Is my privacy protected when discussing sensitive topics?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Absolutely. TakeUForward features a server-side anonymity engine that strips author metadata at the database controller level before sending API responses."
+              }
+            }
+          ]
+        })}
+        </script>
 
         {/* ── FOOTER ── */}
         <Card style={{

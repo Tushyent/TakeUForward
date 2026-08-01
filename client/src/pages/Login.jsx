@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Zap, ArrowRight, BookOpen, Users, Briefcase } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import Button from '../components/ui/Button';
 import { Input, Textarea } from '../components/ui/Input';
+import { useSEO } from '../hooks/useSEO';
 
 /* ---------------------------------------------------------------
    GOOGLE SIGN-IN SVG LOGO
@@ -12,15 +13,15 @@ import { Input, Textarea } from '../components/ui/Input';
    --------------------------------------------------------------- */
 const GoogleMark = () => (
   <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/>
-    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.2-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
+    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.2-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
   </svg>
 );
 
 /* ---------------------------------------------------------------
-   DECORATIVE BLOB — abstract background shape for branding panel
+   DECORATIVE BLOB - abstract background shape for branding panel
    --------------------------------------------------------------- */
 const BlobDecoration = () => (
   <svg
@@ -47,7 +48,7 @@ const BlobDecoration = () => (
 /* Feature pills shown on the branding panel */
 const FEATURES = [
   { icon: BookOpen, text: 'Notes & PYQ resources' },
-  { icon: Users,    text: 'Dept. & batch communities' },
+  { icon: Users, text: 'Dept. & batch communities' },
   { icon: Briefcase, text: 'Alumni referral network' },
 ];
 
@@ -58,6 +59,13 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  useSEO({
+    title: 'Sign In - TakeUForward SSN Campus Community',
+    description: 'Sign in to TakeUForward SSN using your @ssn.edu.in account to access campus communities, alumni mentorship, placement notes, and referral requests.',
+    keywords: 'SSN Login, TakeUForward Sign In, SSN Mentorship Login, Campus Community SSN',
+    canonical: 'https://takeuforward.blastorz.fun/login'
+  });
+
   const [showAlumniForm, setShowAlumniForm] = useState(false);
   const [alumniFormData, setAlumniFormData] = useState({
     name: '', email: '', dept: '', graduationYear: '',
@@ -67,7 +75,11 @@ function Login() {
 
   useEffect(() => {
     if (errorParam) {
-      toast.error(`Login failed: ${decodeURIComponent(errorParam)}`);
+      if (errorParam === 'domain') {
+        toast.error('Login failed: Please use your official @ssn.edu.in email address, or submit an Alumni Verification request below.', { duration: 6000 });
+      } else {
+        toast.error(`Login failed: ${decodeURIComponent(errorParam)}`);
+      }
       // Clean up the URL
       navigate('/login', { replace: true });
     }
@@ -171,7 +183,7 @@ function Login() {
             lineHeight: 1.7,
             marginBottom: 'var(--space-10)',
           }}>
-            The all-in-one platform for SSN students — academics, placements, alumni mentorship, and campus community in one place.
+            The all-in-one platform for SSN students - academics, placements, alumni mentorship, and campus community in one place.
           </p>
 
           {/* Feature list */}
@@ -218,7 +230,7 @@ function Login() {
             gap: 10,
             marginBottom: 'var(--space-10)',
           }}
-          className="login-mobile-brand"
+            className="login-mobile-brand"
           >
             <div style={{
               width: 36,
@@ -253,21 +265,21 @@ function Login() {
             marginBottom: 'var(--space-8)',
             lineHeight: 1.6,
           }}>
-            {showAlumniForm 
-              ? 'Submit your details to get an invite link.' 
+            {showAlumniForm
+              ? 'Submit your details to get an invite link.'
               : 'Sign in with your official SSN College email to continue.'}
           </p>
 
           {showAlumniForm ? (
             <form onSubmit={handleAlumniSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-              <Input placeholder="Full Name" required value={alumniFormData.name} onChange={e => setAlumniFormData({...alumniFormData, name: e.target.value})} />
-              <Input type="email" placeholder="Email Address" required value={alumniFormData.email} onChange={e => setAlumniFormData({...alumniFormData, email: e.target.value})} />
-              <Input placeholder="Department (e.g. CSE)" required value={alumniFormData.dept} onChange={e => setAlumniFormData({...alumniFormData, dept: e.target.value})} />
-              <Input type="number" placeholder="Graduation Year (e.g. 2020)" required value={alumniFormData.graduationYear} onChange={e => setAlumniFormData({...alumniFormData, graduationYear: e.target.value})} />
-              <Input placeholder="Current Company / Masters Uni" value={alumniFormData.currentCompany} onChange={e => setAlumniFormData({...alumniFormData, currentCompany: e.target.value})} />
-              <Input placeholder="Proof Link (LinkedIn/Drive)" required value={alumniFormData.proofLink} onChange={e => setAlumniFormData({...alumniFormData, proofLink: e.target.value})} />
-              <Textarea placeholder="Optional message to admins..." value={alumniFormData.message} onChange={e => setAlumniFormData({...alumniFormData, message: e.target.value})} />
-              
+              <Input placeholder="Full Name" required value={alumniFormData.name} onChange={e => setAlumniFormData({ ...alumniFormData, name: e.target.value })} />
+              <Input type="email" placeholder="Email Address" required value={alumniFormData.email} onChange={e => setAlumniFormData({ ...alumniFormData, email: e.target.value })} />
+              <Input placeholder="Department (e.g. CSE)" required value={alumniFormData.dept} onChange={e => setAlumniFormData({ ...alumniFormData, dept: e.target.value })} />
+              <Input type="number" placeholder="Graduation Year (e.g. 2020)" required value={alumniFormData.graduationYear} onChange={e => setAlumniFormData({ ...alumniFormData, graduationYear: e.target.value })} />
+              <Input placeholder="Current Company / Masters Uni" value={alumniFormData.currentCompany} onChange={e => setAlumniFormData({ ...alumniFormData, currentCompany: e.target.value })} />
+              <Input placeholder="Proof Link (LinkedIn/Drive)" required value={alumniFormData.proofLink} onChange={e => setAlumniFormData({ ...alumniFormData, proofLink: e.target.value })} />
+              <Textarea placeholder="Optional message to admins..." value={alumniFormData.message} onChange={e => setAlumniFormData({ ...alumniFormData, message: e.target.value })} />
+
               <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-4)' }}>
                 <Button type="button" variant="ghost" style={{ flex: 1 }} onClick={() => setShowAlumniForm(false)}>Cancel</Button>
                 <Button type="submit" variant="primary" style={{ flex: 1 }} disabled={submittingRequest}>
@@ -280,91 +292,91 @@ function Login() {
 
 
 
-          {/* Google sign-in button */}
-          <Button
-            onClick={handleLogin}
-            disabled={loading}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 'var(--space-3)',
-            }}
-          >
-            {loading ? (
-              <>
-                <div style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: '50%',
-                  border: '2px solid var(--border-strong)',
-                  borderTopColor: 'var(--primary)',
-                  animation: 'spin 0.8s ease-in-out infinite',
-                  flexShrink: 0,
-                }} />
-                Redirecting to Google…
-              </>
-            ) : (
-              <>
-                <GoogleMark />
-                Sign in with Google
-                <ArrowRight size={14} color="var(--text-muted)" style={{ marginLeft: 'auto' }} />
-              </>
-            )}
-          </Button>
-
-          {/* Domain restriction note */}
-          <p style={{
-            marginTop: 'var(--space-5)',
-            fontSize: 'var(--text-xs)',
-            color: 'var(--text-muted)',
-            textAlign: 'center',
-            lineHeight: 1.6,
-          }}>
-            Only <strong style={{ color: 'var(--text-secondary)' }}>@ssn.edu.in</strong> email addresses are accepted.
-            <br />Alumni without an invite?{' '}
-            <button 
-              type="button"
-              onClick={() => setShowAlumniForm(true)} 
-              style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: 'var(--space-1) var(--space-1)', fontWeight: 600, fontFamily: 'inherit', fontSize: 'inherit' }}
-            >
-              Request Access
-            </button>
-          </p>
-
-          {/* Mobile-only Features */}
-          <div className="login-mobile-features" style={{ flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-8)' }}>
-            <h3 style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>Platform Features</h3>
-            {FEATURES.map(({ icon: Icon, text }) => (
-              <div key={text} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-3)',
-                padding: 'var(--space-3) var(--space-4)',
-                background: 'rgba(124,106,247,0.07)',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid rgba(124,106,247,0.15)',
-              }}>
-                <div style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 'var(--radius-xs)',
-                  background: 'rgba(124,106,247,0.15)',
+              {/* Google sign-in button */}
+              <Button
+                onClick={handleLogin}
+                disabled={loading}
+                style={{
+                  width: '100%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <Icon size={14} color="var(--primary)" />
-                </div>
-                <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>
-                  {text}
-                </span>
+                  gap: 'var(--space-3)',
+                }}
+              >
+                {loading ? (
+                  <>
+                    <div style={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      border: '2px solid var(--border-strong)',
+                      borderTopColor: 'var(--primary)',
+                      animation: 'spin 0.8s ease-in-out infinite',
+                      flexShrink: 0,
+                    }} />
+                    Redirecting to Google…
+                  </>
+                ) : (
+                  <>
+                    <GoogleMark />
+                    Sign in with Google
+                    <ArrowRight size={14} color="var(--text-muted)" style={{ marginLeft: 'auto' }} />
+                  </>
+                )}
+              </Button>
+
+              {/* Domain restriction note */}
+              <p style={{
+                marginTop: 'var(--space-5)',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--text-muted)',
+                textAlign: 'center',
+                lineHeight: 1.6,
+              }}>
+                Only <strong style={{ color: 'var(--text-secondary)' }}>@ssn.edu.in</strong> email addresses are accepted.
+                <br />Alumni without an invite?{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowAlumniForm(true)}
+                  style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', padding: 'var(--space-1) var(--space-1)', fontWeight: 600, fontFamily: 'inherit', fontSize: 'inherit' }}
+                >
+                  Request Access
+                </button>
+              </p>
+
+              {/* Mobile-only Features */}
+              <div className="login-mobile-features" style={{ flexDirection: 'column', gap: 'var(--space-3)', marginTop: 'var(--space-8)' }}>
+                <h3 style={{ fontSize: 'var(--text-sm)', color: 'var(--text-muted)', marginBottom: 'var(--space-2)' }}>Platform Features</h3>
+                {FEATURES.map(({ icon: Icon, text }) => (
+                  <div key={text} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 'var(--space-3)',
+                    padding: 'var(--space-3) var(--space-4)',
+                    background: 'rgba(124,106,247,0.07)',
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid rgba(124,106,247,0.15)',
+                  }}>
+                    <div style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: 'var(--radius-xs)',
+                      background: 'rgba(124,106,247,0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <Icon size={14} color="var(--primary)" />
+                    </div>
+                    <span style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--text-primary)' }}>
+                      {text}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          </>
+            </>
           )}
 
         </div>

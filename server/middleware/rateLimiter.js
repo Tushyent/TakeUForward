@@ -26,7 +26,7 @@ export const applyTeamLimiter = rateLimit({
 
 export const upvoteLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 30, // 30 upvotes per minute — generous for normal use, blocks spam bots
+  max: 30, // 30 upvotes per minute - generous for normal use, blocks spam bots
   message: { error: { message: 'Too many upvotes, please slow down' } },
   standardHeaders: true,
   legacyHeaders: false,
@@ -34,7 +34,7 @@ export const upvoteLimiter = rateLimit({
 
 export const reportLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // 5 reports per 10 min — high-risk spam vector, strict
+  max: 5, // 5 reports per 10 min - high-risk spam vector, strict
   message: { error: { message: 'Too many reports submitted, please try again later' } },
   standardHeaders: true,
   legacyHeaders: false,
@@ -42,7 +42,7 @@ export const reportLimiter = rateLimit({
 
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  // 500 req/15min per IP — generous enough for real users (normal browsing is 40-80 req/session
+  // 500 req/15min per IP - generous enough for real users (normal browsing is 40-80 req/session
   // but polling + StrictMode dev doubles can spike it). Still blocks scrapers and bots.
   // Per-route limiters (postCreationLimiter etc.) provide strict controls on write actions.
   max: 500,

@@ -1,0 +1,28 @@
+# TakeUForward SSN — Campus Community & Mentorship Platform
+
+> The ultimate campus community connecting students, seniors, and alumni at SSN College of Engineering.
+
+## Public Links
+- Main Landing / Sign In: https://takeuforward.blastorz.fun/login
+- About Platform & Mission: https://takeuforward.blastorz.fun/about
+- Alumni Registration: https://takeuforward.blastorz.fun/alumni-invite
+- Support & Helpdesk: https://takeuforward.blastorz.fun/support
+- Sitemap: https://takeuforward.blastorz.fun/sitemap.xml
+
+## Key Features & Value Proposition
+
+### 1. Server-Side Anonymity Engine
+Allows SSN students to post confessions, sensitive questions, and placement doubts with guaranteed server-side identity stripping at the database level.
+
+### 2. Verified Alumni Directory & Mentorship
+Connects juniors with vetted SSN alumni for 1:1 mock interviews, career guidance, and corporate job referrals.
+
+### 3. Centralized Academic Repository & AI PDF Summarizer
+Centralizes department study materials, previous year question papers (PYQs), notes, and integrates Gemini AI to instantly summarize complex academic PDFs.
+
+### 4. Peer-to-Peer Campus Marketplace & Lost/Found
+Dedicated peer-to-peer utility boards for buying/selling second-hand textbooks and returning lost campus items.
+
+## Contact & Credits
+Created with ❤️ for SSN College of Engineering by Tushyent N P.
+Website: https://takeuforward.blastorz.fun

@@ -1,7 +1,7 @@
 /**
  * e2e/critical-path.spec.js
  *
- * PART 4e — Minimum viable E2E test covering the critical path defined in
+ * PART 4e - Minimum viable E2E test covering the critical path defined in
  * MASTER_PLAN.md §17:
  *
  *   1. Login (Google OAuth bypass via test-session seeding)
@@ -96,14 +96,14 @@ test.describe('Critical Path E2E', () => {
     const setCookieHeaders = await seedSession(userAEmail);
     await injectCookies(page, setCookieHeaders);
 
-    // Navigate to home page — should be authenticated now
+    // Navigate to home page - should be authenticated now
     await page.goto('/home');
     // ── STEP 2: User A navigates to a community and posts an anonymous question ─
     // Fetch a community ID directly from the backend to guarantee navigation
     const commRes = await axios.get(`${API_BASE}/communities`);
     const targetCommunity = commRes.data[0];
     if (!targetCommunity) throw new Error("No communities found in DB!");
-    
+
     // Navigate directly to the community feed
     await page.goto(`/community/${targetCommunity._id}`);
 
@@ -125,7 +125,7 @@ test.describe('Critical Path E2E', () => {
 
     // Verify it shows as anonymous (no author name, or shows "Anonymous")
     const postCard = page.locator('p', { hasText: uniquePostText }).first().locator('..');
-    
+
     await expect(postCard.getByText('Anonymous')).toBeVisible({ timeout: 5000 });
 
     // Verify author's own name is NOT visible on that post card
@@ -142,13 +142,13 @@ test.describe('Critical Path E2E', () => {
     // Navigate directly to the community feed where the post was created
     await userBPage.goto(`/community/${targetCommunity._id}`);
 
-    // User B sees the post (not the author name — it's anonymous)
+    // User B sees the post (not the author name - it's anonymous)
     await expect(userBPage.locator('p', { hasText: uniquePostText }).first()).toBeVisible({ timeout: 10000 });
 
     // User B comments on the post
     // Click on the post to open it
     const postCardB = userBPage.locator('p', { hasText: uniquePostText }).first().locator('..');
-    
+
     // In Phase 3 UI, there might be a comment input directly on the card or we might need to click "Comments"
     // Let's assume there's a comment textarea or button
     const commentInput = postCardB.locator('textarea[placeholder*="comment"], input[placeholder*="comment"], [contenteditable]').first();

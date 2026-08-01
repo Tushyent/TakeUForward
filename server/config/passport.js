@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import ApprovedAlumniEmail from '../models/ApprovedAlumniEmail.js';
 import { assignDefaultCommunity } from '../utils/assignDefaultCommunity.js';
 import { isSystemAdminEmail, syncUserIdentity } from '../utils/userIdentity.js';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
@@ -44,16 +45,15 @@ passport.use(
           }
         }
 
+        const isApproved = isSsnDomain || isSystemAdmin || isVerifiedAlumni;
+        logger.info({ email, role, isApproved, isSsnDomain, isSystemAdmin, isVerifiedAlumni }, 'Google OAuth verifying user');
+
         let user = await User.findOne({ $or: [{ googleId: profile.id }, { email }] });
         if (!user) {
           // Attempt to extract dept/year from email or defaults (since it's not provided by Google directly)
-          // For now we assume they might be null unless we can parse them, or we just leave them null
           let dept = null;
           let year = null;
           let defaultCommunityId = await assignDefaultCommunity(dept, year);
-
-          // Non-SSN users must be approved by an admin before they can access the platform
-          const isApproved = isSsnDomain || isSystemAdmin || isVerifiedAlumni;
 
           user = await User.create({
             googleId: profile.id,
@@ -70,9 +70,7 @@ passport.use(
           });
           const changed = await syncUserIdentity(User, user);
           if (changed) await user.save();
-
-          // Welcome email is sent after profile completion in authRoutes.js (isFirstCompletion)
-          // to avoid sending twice.
+          logger.info({ userId: user._id, email: user.email, role: user.role }, 'Created new user via Google OAuth');
         } else {
           if (user.googleId !== profile.id) {
             user.googleId = profile.id;
@@ -91,9 +89,11 @@ passport.use(
           }
           const changed = await syncUserIdentity(User, user);
           if (changed) await user.save();
+          logger.info({ userId: user._id, email: user.email, role: user.role, isApproved: user.isApproved }, 'Authenticated existing user via Google OAuth');
         }
         return done(null, user);
       } catch (err) {
+        logger.error({ email: profile?.emails?.[0]?.value, errMsg: err.message, stack: err.stack }, 'Google OAuth strategy authentication error');
         return done(err, null);
       }
     }

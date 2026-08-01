@@ -1,13 +1,13 @@
-# DEPLOYMENT.md — TakeUForward
+# DEPLOYMENT.md - TakeUForward
 
 > **How to use this file:** This is the single source of truth for deploying,
 > redeploying, and debugging this project in production. Sections marked **[VERIFY]**
-> should be confirmed against the live codebase before you rely on them — this
+> should be confirmed against the live codebase before you rely on them - this
 > document was compiled from project history (CHANGELOG, AGENTS.md, MASTER_PLAN, and
 > real incidents), not from a fresh code read, so treat those markers as "check this
 > is still true" rather than "this is guaranteed accurate."
 >
-> Keep this file updated whenever a new deployment incident happens — add it to
+> Keep this file updated whenever a new deployment incident happens - add it to
 > Section 7 immediately, while the fix is fresh, not after the next incident.
 
 ---
@@ -15,10 +15,11 @@
 ## 1. Architecture Overview
 
 ```
-                         ┌─────────────────────────────┐
+                         ┌──────────────────────────────┐
                          │   Vercel (Frontend + Proxy)  │
-                         │   /client — React+Vite       │
-                         │   takeuforward-ssn.vercel.app│
+                         │   /client - React+Vite       │
+                         │  takeuforward.blastorz.fun   │
+                         │ (takeuforward-ssn.vercel.app)│
                          │                              │
                          │   /api/* → reverse proxy     │
                          │   to Render backend          │
@@ -26,15 +27,15 @@
                     static SPA  │          │  proxied /api/* requests
                     assets      │          │  (same-origin cookie)
                                 │          │
-                         ┌──────▼──────────▼────────────┐
-                         │   Render (Backend)            │
-                         │   /server — Node/Express      │
+                         ┌──────▼──────────▼──────────────┐
+                         │   Render (Backend)             │
+                         │   /server - Node/Express       │
                          │   Passport.js OAuth            │
                          │   express-session +            │
                          │   connect-mongo store          │
-                         └──┬──────────┬──────────┬──────┘
-                            │          │          │
-              ┌─────────────▼──┐  ┌────▼────┐  ┌──▼────────────┐
+                         └──┬───────────┬──────────┬──────┘
+                            │           │          │
+              ┌─────────────▼───┐  ┌────▼────┐  ┌──▼────────────┐
               │ MongoDB Atlas   │  │ AWS S3  │  │ Gemini API    │
               │ users, posts,   │  │(or      │  │ (resource     │
               │ resources,      │  │Supabase │  │ summarization,│
@@ -43,10 +44,10 @@
               │ referralRequests│
               └─────────────────┘
                             │
-                  ┌─────────▼──────────┐
+                  ┌─────────▼───────────┐
                   │ SMTP (Nodemailer)   │
                   │ transactional email │
-                  └──────────────────────┘
+                  └─────────────────────┘
 
 Key: All /api/* requests from the browser go to Vercel first, which proxies
 them to Render. This makes the session cookie FIRST-PARTY (same origin as
@@ -62,7 +63,7 @@ cold starts (per MASTER_PLAN §7.9). This should ping the RENDER URL directly
 |---|---|---|
 | `/client` | Vercel | Vite build output served as static SPA |
 | `/server` | Render | Node/Express, `npm start` runs `node index.js` |
-| root | — | Only used for local `npm run dev` (concurrently) — not used in production deploy path |
+| root | - | Only used for local `npm run dev` (concurrently) - not used in production deploy path |
 
 ---
 
@@ -70,33 +71,33 @@ cold starts (per MASTER_PLAN §7.9). This should ping the RENDER URL directly
 
 | Service | Purpose | Tier | Known gotcha |
 |---|---|---|---|
-| MongoDB Atlas | Primary database | Free (M0) | Requires IP whitelist config; free tier has storage caps — see §8 |
+| MongoDB Atlas | Primary database | Free (M0) | Requires IP whitelist config; free tier has storage caps - see §8 |
 | Render | Backend hosting | Free | Cold-starts after ~15 min idle; needs UptimeRobot keep-alive |
-| Vercel | Frontend hosting | Free (Hobby) | Generates unique preview URLs per deploy — see §7 CORS incident |
+| Vercel | Frontend hosting | Free (Hobby) | Generates unique preview URLs per deploy - see §7 CORS incident |
 | Google Cloud Console | OAuth 2.0 credentials | Free | Redirect URIs must be added manually per environment |
 | AWS S3 (or Supabase Storage fallback) | Resource file storage | Free tier (12 months, card required) | Bucket CORS policy must separately allow the frontend origin |
-| Gemini API | AI summarization | Free tier w/ quota | Confirm graceful fallback still holds if quota is hit — see §8 |
+| Gemini API | AI summarization | Free tier w/ quota | Confirm graceful fallback still holds if quota is hit - see §8 |
 | SMTP provider (Gmail SMTP / Resend / SendGrid) | Transactional email | Free/low volume | Gmail SMTP is dev-grade only; consider a real provider before scaling |
-| UptimeRobot (or cron-job.org) | Keep-alive pings | Free | Works against Render's cost-saving intent by design — expected trade-off |
+| UptimeRobot (or cron-job.org) | Keep-alive pings | Free | Works against Render's cost-saving intent by design - expected trade-off |
 
 ---
 
-## 3. Environment Variables — Full Reference
+## 3. Environment Variables - Full Reference
 
 **[VERIFIED]** Cross-checked this table against `server/.env.example` and every
-`process.env.X` usage in the codebase — this list reflects what's been referenced
+`process.env.X` usage in the codebase - this list reflects what's been referenced
 across the project so far.
 
 ### Backend (Render)
 
 | Variable | Required | Example format | Breaks if missing/wrong |
 |---|---|---|---|
-| `MONGODB_URI` | Yes | `mongodb+srv://user:pass@cluster.mongodb.net/dbname` | Server fails to boot — "Could not connect to any servers in your MongoDB Atlas cluster" |
+| `MONGODB_URI` | Yes | `mongodb+srv://user:pass@cluster.mongodb.net/dbname` | Server fails to boot - "Could not connect to any servers in your MongoDB Atlas cluster" |
 | `MONGODB_DB_NAME` | Yes | `takeuforward` | App collections may be created in the default `test` database if omitted/misconfigured in production |
 | `SESSION_SECRET` | Yes | long random string | Sessions can be forged/decoded if weak; missing may crash session middleware |
 | `GOOGLE_CLIENT_ID` | Yes | from Google Cloud Console | OAuth login fails entirely |
 | `GOOGLE_CLIENT_SECRET` | Yes | from Google Cloud Console | OAuth callback fails |
-| `CLIENT_URL` | Yes | `https://takeuforward-ssn.vercel.app` (**no trailing slash** — see §7) | CORS rejects all frontend requests |
+| `CLIENT_URL` | Yes | `https://takeuforward.blastorz.fun` (**no trailing slash** - see §7) | CORS rejects all frontend requests |
 | `NODE_ENV` | Yes | `production` | Controls cookie `secure`/`sameSite` flags, error stack-trace leakage, CORS localhost fallback |
 | `LOG_LEVEL` | No | `info` | Determines structured Pino logging output verbosity (`debug`, `info`, `warn`, `error`) |
 | `ALLOW_TEST_SESSION` | No, dev/test only | `false` / unset in production | If set to `true` outside production it enables the Playwright-only session seeding route; never set this in Render production |
@@ -104,20 +105,20 @@ across the project so far.
 | `AWS_SECRET_ACCESS_KEY` | Yes (or Supabase equivalent) | AWS IAM secret | Same as above |
 | `AWS_BUCKET_NAME` | Yes | bucket name | Uploads fail / 404 on file access |
 | `AWS_REGION` | Yes | e.g. `ap-south-1` | Presigned URL generation fails or points to wrong region |
-| `GEMINI_API_KEY` | Yes | from Google AI Studio | Resource summarization silently falls back (should degrade gracefully — see §8) |
+| `GEMINI_API_KEY` | Yes | from Google AI Studio | Resource summarization silently falls back (should degrade gracefully - see §8) |
 | `SENDGRID_API_KEY` | Yes | from SendGrid dashboard (Settings → API Keys) | All transactional email (welcome, notifications, digest) uses SendGrid. No email sent if missing. |
 | `SENDGRID_FROM_EMAIL` | Yes | `notifications@yourdomain.com` | A verified single sender or verified domain in SendGrid. Must match what was verified in SendGrid dashboard. |
 | `CRON_SECRET` | Yes (for Weekly Digest) | long random string | Weekly Digest endpoint `/api/jobs/weekly-digest` will reject external triggers |
 | `VAPID_PUBLIC_KEY` | Yes (for Web Push) | Web Push public key | Generated via `npx web-push generate-vapid-keys` |
 | `VAPID_PRIVATE_KEY`| Yes (for Web Push) | Web Push private key | Generated via `npx web-push generate-vapid-keys` |
 | `VAPID_SUBJECT` | Yes (for Web Push) | `mailto:admin@domain.com` | Required by the web-push protocol |
-| `PORT` | Usually auto-set by Render | `5000`/auto | Render auto-injects this — do not hardcode a port in code |
+| `PORT` | Usually auto-set by Render | `5000`/auto | Render auto-injects this - do not hardcode a port in code |
 
 ### Frontend (Vercel)
 
 | Variable | Required | Example | Notes |
 |----------|----------|---------|-------|
-| `VITE_API_URL` | **No** (production) | Not set on Vercel — API calls use `/api` (relative, same-origin via reverse proxy) | Only set in local dev `.env` as `http://localhost:5000/api` |
+| `VITE_API_URL` | **No** (production) | Not set on Vercel - API calls use `/api` (relative, same-origin via reverse proxy) | Only set in local dev `.env` as `http://localhost:5000/api` |
 | `VITE_VAPID_PUBLIC_KEY`| Yes (for Web Push)| Same as Backend `VAPID_PUBLIC_KEY` | Used by the frontend to subscribe to Web Push |
 
 **IMPORTANT (changed from previous):** `VITE_API_URL` (previously documented as
@@ -133,14 +134,14 @@ a `VITE_` prefix.
 
 ---
 
-## 4. First-Time Deployment — Step by Step
+## 4. First-Time Deployment - Step by Step
 
 1. **MongoDB Atlas**
    - Create a free (M0) cluster.
    - Database Access → create a DB user with a real password (not the `<password>`
      placeholder Atlas shows in the connection string).
    - Network Access → Add IP Address → `0.0.0.0/0` (Render free tier has no static
-     IP, so this is the standard approach — the DB user credentials remain the real
+     IP, so this is the standard approach - the DB user credentials remain the real
      access gate).
    - Copy the full connection string into `MONGODB_URI`.
    - Set `MONGODB_DB_NAME=takeuforward` in Render. Atlas will still show internal
@@ -151,7 +152,7 @@ a `VITE_` prefix.
    - Create OAuth 2.0 credentials (Web application type).
    - Add Authorized redirect URIs for **both**:
      - `http://localhost:5000/api/auth/google/callback` (local dev)
-     - `https://<your-vercel-app>.vercel.app/api/auth/google/callback` (production — goes through Vercel proxy)
+     - `https://<your-vercel-app>.vercel.app/api/auth/google/callback` (production - goes through Vercel proxy)
    - **IMPORTANT:** The production callback URI must use the **Vercel** URL (not the
      Render URL), because the OAuth callback must go through the reverse proxy so the
      session cookie is set as first-party on the Vercel domain.
@@ -165,20 +166,20 @@ a `VITE_` prefix.
      the relative callback path `/api/auth/google/callback`; the externally
      registered callback URL still must be the Vercel-proxied URL from step 2.
    - Deploy, then check logs for successful boot (no MemoryStore warning, no Atlas
-     connection error — see §7 if either appears).
+     connection error - see §7 if either appears).
 
 4. **Vercel (Frontend)**
    - New Project → connect this repo → root directory `/client`.
    - **Confirmed** Build command and output directory match Vite defaults
-     (`npm run build`, output `dist`) — confirm in Vercel project settings, don't
+     (`npm run build`, output `dist`) - confirm in Vercel project settings, don't
      assume Vercel auto-detected correctly.
    - **Replace the placeholder** in `vercel.json`: change
      `REPLACE_WITH_YOUR_RENDER_BACKEND_URL.onrender.com` to your actual Render
      backend hostname (e.g. `takeuforward-api.onrender.com`).
-   - **Do NOT set `VITE_API_URL`** on Vercel — the reverse proxy handles API routing.
+   - **Do NOT set `VITE_API_URL`** on Vercel - the reverse proxy handles API routing.
    - Only set `VITE_VAPID_PUBLIC_KEY` if Web Push is configured.
    - Confirm `vercel.json` exists in `/client` with both the API proxy rewrite and
-     the SPA catch-all rewrite — without the API rewrite, auth will fail; without
+     the SPA catch-all rewrite - without the API rewrite, auth will fail; without
      the SPA rewrite, direct navigation 404s.
    - Deploy, then copy the production URL back into Render's `CLIENT_URL`.
 
@@ -201,7 +202,7 @@ a `VITE_` prefix.
 
 9. **Seed production data**
    - Run `npm run seed:communities` and `npm run seed:clubs` **against the
-     production `MONGODB_URI`**, not local Mongo — seeding locally does not seed
+     production `MONGODB_URI`**, not local Mongo - seeding locally does not seed
      Atlas. This was a real incident (see §7).
    - Run `npm run seed:admin` against production as well. This creates/repairs the
      fixed system admin identity for `takeuforwardssn@gmail.com` with handle
@@ -226,9 +227,9 @@ a `VITE_` prefix.
 |---|---|
 | New/changed seed data | Re-run the relevant `npm run seed:*` script against production `MONGODB_URI` |
 | Schema migration script added (e.g. `migrate-profiles.js`) | Run it manually once against production Atlas: `MONGODB_URI="<prod-uri>" node server/scripts/migrate-profiles.js` |
-| New env var added to code | Add it in Render/Vercel dashboard — code changes alone do not create the var in production |
+| New env var added to code | Add it in Render/Vercel dashboard - code changes alone do not create the var in production |
 | System admin needs repair/reseed | Run `npm run seed:admin` against production; do not create arbitrary platform admins |
-| Google OAuth redirect URI changes | Update Google Cloud Console manually — not part of any deploy |
+| Google OAuth redirect URI changes | Update Google Cloud Console manually - not part of any deploy |
 
 ### 5.1 Changing the Frontend URL / Custom Domain
 
@@ -247,18 +248,18 @@ If you change the Vercel URL or add a custom domain (e.g. `www.takeuforward.com`
 
 ---
 
-## 6. CI/CD — Current State and Recommended Next Step
+## 6. CI/CD - Current State and Recommended Next Step
 
 **Current reality:** there is no CI pipeline gating
-deploys. Pushing to `main` triggers Render and Vercel to build and deploy directly —
+deploys. Pushing to `main` triggers Render and Vercel to build and deploy directly -
 lint and test failures do **not** currently block a bad deploy from going live.
 `npm run lint` and `npm test` are run manually per the AGENTS.md pre-push checklist,
 but nothing enforces this before a merge.
 
-**Recommended future CI/CD (not yet implemented — a suggestion for later):**
+**Recommended future CI/CD (not yet implemented - a suggestion for later):**
 A minimal GitHub Actions workflow on pull requests to `main`:
 ```yaml
-# .github/workflows/ci.yml (NOT YET CREATED — reference only)
+# .github/workflows/ci.yml (NOT YET CREATED - reference only)
 on: pull_request
 jobs:
   lint-and-test:
@@ -271,7 +272,7 @@ jobs:
       - run: npm test --prefix server
 ```
 This would catch lint/test failures before merge, without touching how Render/Vercel
-deploy. Do not implement this without a dedicated task — this file only documents
+deploy. Do not implement this without a dedicated task - this file only documents
 the recommendation.
 
 ---
@@ -294,7 +295,7 @@ the recommendation.
   production environment, as it will leak memory, and will not scale past a single
   process.`
 - **Root cause:** Default in-memory session store was never replaced for
-  production — sessions are lost on every Render restart, and it's not
+  production - sessions are lost on every Render restart, and it's not
   production-safe.
 - **Fix:** Installed `connect-mongo` and wired it as the session `store`, reusing
   the existing `MONGODB_URI`.
@@ -320,14 +321,14 @@ the recommendation.
 - **Fix:** Added `vercel.json` in `/client` with a rewrite rule serving
   `index.html` for all unmatched paths.
 - **Prevention:** After any deploy, hard-refresh 2-3 deep routes (not just `/`) to
-  confirm this hasn't regressed — see the standing checklist in §13.
+  confirm this hasn't regressed - see the standing checklist in §13.
 
 ### 7.5 CORS rejecting Vercel preview deployment URLs
 - **Symptom:** `Network Error` when accessing the app via a Vercel preview URL
   (e.g. `https://takeuforward-kv5z50qb4-tushyents-projects.vercel.app`).
 - **Root cause:** CORS allowlist only contained the single production `CLIENT_URL`;
   Vercel generates a unique preview URL per branch/deploy that was never whitelisted.
-- **Fix:** Changed CORS config to accept a pattern/list of allowed origins —
+- **Fix:** Changed CORS config to accept a pattern/list of allowed origins -
   production domain plus a suffix/regex match for this project's Vercel preview URL
   pattern (`*-tushyents-projects.vercel.app`), rather than a single hardcoded string.
 - **Prevention:** Confirmed login/session actually works on preview URLs
@@ -352,19 +353,19 @@ the recommendation.
 - **Prevention (Future Fix):** Migrate to `createPresignedPost` and update the frontend `axios.put` to a `FormData` POST submission to enforce strict size boundaries natively at the S3 bucket level.
 
 ### 7.9 Welcome email silently skipped when SMTP unconfigured
-- **Symptom:** New users register via Google OAuth but never receive a welcome email ("Welcome to TakeUForward — You're member #X!"). No error returned to the user — the email is simply not sent.
-- **Root cause (original):** `sendEmail()` in `server/config/mailer.js` checked `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS` — if any was missing/falsy, it logged a `warn` and returned without sending. Additionally, Render blocks outbound TCP connections to `smtp.gmail.com` entirely (`ENETUNREACH`/`ETIMEDOUT`), making SMTP unusable in the Render environment regardless of correct credentials.
-- **Fix:** Switched from nodemailer/SMTP to Resend API (`server/config/mailer.js`). Removed `SMTP_HOST/USER/PASS` vars — now requires only `RESEND_API_KEY` in environment.
-- **Prevention:** Server now calls `verifyTransporter()` at startup and logs either `Resend configured and verified — email sending is active.` or `Resend verification FAILED: <error>` depending on whether the API key is valid.
+- **Symptom:** New users register via Google OAuth but never receive a welcome email ("Welcome to TakeUForward - You're member #X!"). No error returned to the user - the email is simply not sent.
+- **Root cause (original):** `sendEmail()` in `server/config/mailer.js` checked `SMTP_HOST`, `SMTP_USER`, and `SMTP_PASS` - if any was missing/falsy, it logged a `warn` and returned without sending. Additionally, Render blocks outbound TCP connections to `smtp.gmail.com` entirely (`ENETUNREACH`/`ETIMEDOUT`), making SMTP unusable in the Render environment regardless of correct credentials.
+- **Fix:** Switched from nodemailer/SMTP to Resend API (`server/config/mailer.js`). Removed `SMTP_HOST/USER/PASS` vars - now requires only `RESEND_API_KEY` in environment.
+- **Prevention:** Server now calls `verifyTransporter()` at startup and logs either `Resend configured and verified - email sending is active.` or `Resend verification FAILED: <error>` depending on whether the API key is valid.
 
-### 7.10 Resend sandbox domain — only sends to verified emails
+### 7.10 Resend sandbox domain - only sends to verified emails
 - **Symptom:** `verifyTransporter()` passes at startup and `POST /api/admin/test-email` returns success for the admin's email, but notification emails (mentions, replies, comments) to other users never arrive.
 - **Root cause:** Resend's default `onboarding@resend.dev` sandbox sender can only deliver to the email address that created the Resend account. Sending to any other address succeeds (no API error) but the email is silently dropped.
 - **Fix (original):** Verify a domain in Resend dashboard (Settings → Domains → Add Domain), update DNS TXT records, then set `EMAIL_FROM="TakeUForward SSN" <notifications@yourdomain.com>` and `RESEND_API_KEY=re_...` in Render env vars.
 - **Fix (2026-07-12):** Migrated from Resend to Twilio SendGrid. SendGrid uses HTTP API (no SMTP ports blocked on Render) and requires sender verification. See §7 entry 5.
 
-### 7.11 SendGrid migration — Resend replaced
-- **Symptom:** N/A — proactive migration after discovering Resend sandbox limitations. Resend's `onboarding@resend.dev` sender could only deliver to the account owner's email, making notification emails (mention/reply/digest) to other users silently fail.
+### 7.11 SendGrid migration - Resend replaced
+- **Symptom:** N/A - proactive migration after discovering Resend sandbox limitations. Resend's `onboarding@resend.dev` sender could only deliver to the account owner's email, making notification emails (mention/reply/digest) to other users silently fail.
 - **Root cause:** Resend API worked correctly for `verifyTransporter()` (sends to `test@resend.dev`) but delivery to real users was silently dropped due to sandbox restrictions. Render also blocks outbound SMTP, so nodemailer/SMTP was not a fallback option.
 - **Fix:** Replaced Resend with Twilio SendGrid (`@sendgrid/mail`). Created `server/services/SendGridService.js` with identical interface: send(), sendWithRetry(), verify(). Rewrote `server/config/mailer.js` to use SendGridService. Removed `resend` package, `EmailService.js`, and all Resend env vars. New env vars: `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL`. Added 15s AbortController timeout, detailed error extraction for SendGrid-specific errors, and proper error classification (CONFIG_ERROR, SENDGRID_ERROR, VALIDATION_ERROR).
 - **Requirement:** SendGrid requires a verified single sender or verified domain before sending. You must set up sender verification in SendGrid dashboard (Settings → Sender Authentication → Verify Single Sender) using a real email address, then set `SENDGRID_FROM_EMAIL` to that address.
@@ -432,16 +433,16 @@ the recommendation.
   Resource uploads store metadata in Mongo (files themselves go to S3), so this is
   a slower risk than S3 filling up, but monitor it as usage grows.
 - **Gemini API quota exhaustion:** confirm resource summarization still degrades
-  gracefully (falls back without crashing the upload) if the Gemini quota is hit —
+  gracefully (falls back without crashing the upload) if the Gemini quota is hit -
   confirm this fallback still holds after any Gemini-related code changes.
 - **SMTP credential revocation:** confirm the app doesn't crash if SMTP
-  auth fails — per the notification service design, this should log a warning and
+  auth fails - per the notification service design, this should log a warning and
   continue, not throw an unhandled error that takes down a request.
 - **Rate limiting under real traffic:** limits were chosen for expected low-volume
   campus usage (see specific numbers in `docs/CHANGELOG.md`); if usage grows,
   revisit whether limits are too aggressive (blocking real users) or too loose.
 - **Username/email uniqueness collisions:** the `username` field is auto-generated
-  from email local-part — confirm the generation logic actually handles a
+  from email local-part - confirm the generation logic actually handles a
   theoretical collision (two different email prefixes producing the same username),
   even if unlikely with SSN's email format.
 - **Anonymity leak surfaces are cumulative, not one-time:** every new feature that
@@ -463,23 +464,23 @@ the recommendation.
 **Vercel:**
 1. Dashboard → your project → **Deployments** tab.
 2. Find the last known-good deployment → click the `...` menu → **Promote to
-   Production** (this is Vercel's instant rollback — no rebuild needed).
+   Production** (this is Vercel's instant rollback - no rebuild needed).
 
 **Database:** MongoDB Atlas does not auto-rollback schema/data changes. If a bad
-migration script ran against production, there is no automatic undo — restore from
+migration script ran against production, there is no automatic undo - restore from
 an Atlas backup (if enabled on your tier) or manually reverse the change.
 
 ---
 
 ## 10. Monitoring & Health Checks
 
-- `GET /api/health` — returns
+- `GET /api/health` - returns
   `{ status, db: connected/disconnected }`. This checks a live DB
   ping, not just that the server process is up.
 - UptimeRobot should be pointed at the **production Render URL's** `/api/health`,
   checked every 5-10 minutes, with alerting enabled (email at minimum) so a real
   outage is noticed, not just prevented from cold-starting.
-- **Render logs** — check periodically (not just after a reported bug) for
+- **Render logs** - check periodically (not just after a reported bug) for
   recurring warnings; a warning appearing once is worth investigating before it
   becomes a pattern.
 - **No error-tracking/APM tool is currently integrated** (e.g. Sentry). This means
@@ -499,21 +500,21 @@ an Atlas backup (if enabled on your tier) or manually reverse the change.
   This remains required while OAuth/session requests may involve the Vercel/Render
   proxy boundary; do not change it without re-testing production OAuth on Safari/iOS.
 - [ ] CORS origin is restricted to specific allowed origins (production + preview
-  pattern) — never a wildcard `*` alongside `credentials: true`.
+  pattern) - never a wildcard `*` alongside `credentials: true`.
 - [ ] No `.env` file, real credential, or API key has ever been committed to git
   history (check history, not just current `.gitignore`).
 - [ ] **No hardcoded secrets in utility scripts:** Ensure that files like `server/check-db.cjs`,
   `seed.js`, and migration scripts read from `process.env` and do not contain hardcoded `mongodb+srv://`
   or similar credentials.
-- [ ] S3 bucket policy does not allow public write access — only presigned-URL
+- [ ] S3 bucket policy does not allow public write access - only presigned-URL
   scoped uploads.
 - [ ] Rate limiting (`express-rate-limit`) is actually applied to post/comment/
   message/report creation routes, and actually triggers under test.
 - [ ] Centralized error middleware does not leak stack traces when
   `NODE_ENV=production`.
 - [ ] Anonymous post/comment `authorId` stripping is verified across every response
-  surface — posts, comments, moderation queue, notifications, notification emails
-  (per MASTER_PLAN §13.1 — this has already had two real leaks found and fixed;
+  surface - posts, comments, moderation queue, notifications, notification emails
+  (per MASTER_PLAN §13.1 - this has already had two real leaks found and fixed;
   treat any new feature touching posts/users as a fresh risk).
 - [ ] Alumni whitelist / invite-token system cannot be bypassed by a crafted request
   (server re-verifies domain/whitelist status regardless of client-supplied data,
@@ -521,7 +522,7 @@ an Atlas backup (if enabled on your tier) or manually reverse the change.
 
 ---
 
-## 12. Quick Reference — Common Error Messages → Fix
+## 12. Quick Reference - Common Error Messages → Fix
 
 | Error message fragment | Likely cause | Fix |
 |---|---|---|
@@ -551,23 +552,30 @@ Run this every time, not just when something breaks:
   anonymity model (§11)
 
 **After every deploy:**
-- [ ] Hard-refresh 2-3 deep routes directly (not just navigate from home) — confirms
+- [ ] Hard-refresh 2-3 deep routes directly (not just navigate from home) - confirms
   §7.4 hasn't regressed
 - [ ] Full login flow works on the production URL
 - [ ] Browser console shows no CORS errors on at least 3 different pages
-- [ ] Render logs show clean boot — no MemoryStore warning, no Atlas connection
+- [ ] Render logs show clean boot - no MemoryStore warning, no Atlas connection
   error
 - [ ] `GET /api/health` returns healthy status
 - [ ] If any seed/migration script was added this cycle, confirm it was run against
   production Atlas, not just locally
 
-## 8. End-to-End Testing (Playwright)
+## 14. Production Logging & Render Observability
 
-The Playwright E2E suite requires the backend to mint valid session cookies via a dedicated backdoor route (POST /api/auth/test-session) to bypass Google OAuth which cannot be automated in CI.
+1. **Live Render Log Viewer**:
+   - Access live backend logs via the **Logs** tab in your Render dashboard (`https://dashboard.render.com`).
+   - Standard output and error streams are captured as formatted JSON logs via Pino (`server/utils/logger.js`).
 
-To ensure production safety, this route is strictly dual-gated. It requires BOTH:
-1. process.env.NODE_ENV !== 'production'
-2. process.env.ALLOW_TEST_SESSION === 'true'
+2. **Dual-Layer Logging Model**:
+   - **System Errors & Network Events**: CORS rejections, MongoDB connection states, OAuth callback flows, and 500-level HTTP errors output structured Pino logs (`logger.info`, `logger.warn`, `logger.error`).
+   - **Activity Audit Trail**: All domain mutations (creating posts/comments, uploading resources, listing marketplace items, reporting content, approving alumni) pass through `logActivity` in `server/services/activityLogger.js`. This writes audit records to the MongoDB `ActivityLog` collection AND streams `[ActivityLog]` lines to Render logs.
 
-Neither condition alone is sufficient. When running tests, you must explicitly pass ALLOW_TEST_SESSION=true to the backend process.
+3. **Log Search & Filtering on Render**:
+   - Filter Render logs by string prefix or level:
+     - `CORS request rejected`: View origin mismatch attempts.
+     - `Google OAuth`: Trace authentication and user creation steps.
+     - `[ActivityLog]`: Stream real-time platform user activity.
+     - `sendEmail`: Monitor SendGrid email delivery events.
 

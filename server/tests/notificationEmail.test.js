@@ -4,7 +4,8 @@ describe('notification email rendering', () => {
   const originalClientUrl = process.env.CLIENT_URL;
 
   beforeEach(() => {
-    process.env.CLIENT_URL = 'https://takeuforward.vercel.app/';
+    // process.env.CLIENT_URL = 'https://takeuforward.vercel.app/';
+    process.env.CLIENT_URL = 'https://takeuforward.blastorz.fun/';
   });
 
   afterAll(() => {
@@ -30,7 +31,8 @@ describe('notification email rendering', () => {
     );
 
     expect(email.subject).toBe('You were mentioned on TakeUForward');
-    expect(email.html).toContain('href="https://takeuforward.vercel.app/community/abc123?post=post123&comment=comment123"');
+    // expect(email.html).toContain('href="https://takeuforward.vercel.app/community/abc123?post=post123&comment=comment123"');
+    expect(email.html).toContain('href="https://takeuforward.blastorz.fun/community/abc123?post=post123&comment=comment123"');
     expect(email.html).toContain('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt; @recipient');
     expect(email.html).not.toContain('<script>');
   });

@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, MessageSquare, AtSign, Reply, Info, X } from 'lucide-react';
 
 const typeConfig = {
-  mention:  { icon: AtSign,        color: 'var(--primary)',  label: 'Mentioned you' },
-  reply:    { icon: Reply,         color: 'var(--success)',  label: 'Replied to you' },
-  comment:  { icon: MessageSquare, color: 'var(--info)',     label: 'New comment' },
-  message:  { icon: MessageSquare, color: 'var(--accent)',   label: 'New message' },
+  mention: { icon: AtSign, color: 'var(--primary)', label: 'Mentioned you' },
+  reply: { icon: Reply, color: 'var(--success)', label: 'Replied to you' },
+  comment: { icon: MessageSquare, color: 'var(--info)', label: 'New comment' },
+  message: { icon: MessageSquare, color: 'var(--accent)', label: 'New message' },
 };
 
 const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
@@ -27,7 +27,7 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
 
   useEffect(() => {
     fetchNotifications();
-    // 60s polling — acceptable latency for notifications, halves background requests vs 30s
+    // 60s polling - acceptable latency for notifications, halves background requests vs 30s
     const interval = setInterval(fetchNotifications, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -156,10 +156,10 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
                 const displayName = notif.isAnonymousSender ? 'Someone' : (notif.actorName || 'Someone');
                 let dynamicLabel = <span>{cfg.label}</span>;
                 if (notif.actorName || notif.isAnonymousSender || notif.type === 'message') {
-                  if (notif.type === 'mention') dynamicLabel = <><strong style={{color:'var(--text-primary)'}}>{displayName}</strong> mentioned you</>;
-                  else if (notif.type === 'reply') dynamicLabel = <><strong style={{color:'var(--text-primary)'}}>{displayName}</strong> replied to you</>;
-                  else if (notif.type === 'comment') dynamicLabel = <><strong style={{color:'var(--text-primary)'}}>{displayName}</strong> commented on your post</>;
-                  else if (notif.type === 'message') dynamicLabel = <strong style={{color:'var(--text-primary)', fontSize: '13px'}}>{displayName}</strong>;
+                  if (notif.type === 'mention') dynamicLabel = <><strong style={{ color: 'var(--text-primary)' }}>{displayName}</strong> mentioned you</>;
+                  else if (notif.type === 'reply') dynamicLabel = <><strong style={{ color: 'var(--text-primary)' }}>{displayName}</strong> replied to you</>;
+                  else if (notif.type === 'comment') dynamicLabel = <><strong style={{ color: 'var(--text-primary)' }}>{displayName}</strong> commented on your post</>;
+                  else if (notif.type === 'message') dynamicLabel = <strong style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{displayName}</strong>;
                 }
 
                 return (
@@ -196,9 +196,9 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
                         {dynamicLabel}
                       </p>
                       {notif.contentPreview && (
-                        <p style={{ 
-                          margin: '4px 0 0 0', 
-                          fontSize: 'var(--text-xs)', 
+                        <p style={{
+                          margin: '4px 0 0 0',
+                          fontSize: 'var(--text-xs)',
                           color: notif.type === 'message' ? 'var(--text-primary)' : 'var(--text-secondary)',
                           display: '-webkit-box',
                           WebkitLineClamp: 2,
@@ -219,7 +219,7 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
               })
             )}
           </div>
-          
+
           {/* Footer */}
           {notifications.length > 0 && (
             <div style={{

@@ -16,7 +16,7 @@ axiosClient.interceptors.response.use(
   (error) => {
     // Prevent infinite loop if we are already on the login page
     if (error.response && error.response.status === 401) {
-      const publicAuthPaths = ['/login', '/pending-approval', '/alumni-invite'];
+      const publicAuthPaths = ['/login', '/pending-approval', '/alumni-invite', '/about'];
       const isPublicAuthPath = publicAuthPaths.some(path => window.location.pathname.startsWith(path));
 
       if (!isPublicAuthPath) {

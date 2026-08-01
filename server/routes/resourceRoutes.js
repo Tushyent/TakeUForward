@@ -6,7 +6,6 @@ import { summarizeResource } from '../services/geminiService.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { getPaginationParams } from '../utils/paginationUtils.js';
 import { logger } from '../utils/logger.js';
-import { requireSystemAdmin } from '../middleware/requireSystemAdmin.js';
 import { logActivity } from '../services/activityLogger.js';
 
 const router = express.Router();

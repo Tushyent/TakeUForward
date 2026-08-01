@@ -39,7 +39,7 @@ const seedAnnouncement = async () => {
     const content = [
       "Welcome to TakeUForward SSN! 👋",
       "",
-      "Hey everyone! Welcome to TakeUForward SSN — a space built by students, for students.",
+      "Hey everyone! Welcome to TakeUForward SSN - a space built by students, for students.",
       "",
       "We know how it feels: the fear of missing out on the right electives, not knowing who to ask about a company's interview rounds, notes disappearing the moment a senior graduates, or just feeling like everyone else already knows something you don't. TakeUForward exists to fix exactly that.",
       "",
@@ -51,10 +51,10 @@ const seedAnnouncement = async () => {
       "- Find teammates for hackathons and projects",
       "- Post lost & found items, buy/sell things on the marketplace, and more",
       "",
-      "This platform only works because of what students put into it. If something's missing, broken, or could be better — tell us. This is a community-driven platform, so don't be shy to start. Let's grow this together.",
+      "This platform only works because of what students put into it. If something's missing, broken, or could be better - tell us. This is a community-driven platform, so don't be shy to start. Let's grow this together.",
       "",
       "Welcome aboard!",
-      "— The TakeUForward SSN Team"
+      "- The TakeUForward SSN Team"
     ].join('\n');
 
     await Post.create({

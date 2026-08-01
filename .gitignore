@@ -27,15 +27,12 @@ tmp-*.log
 .vscode/
 .idea/
 
-# Others
-docs/
-refactor_admin.js
-
-# Scratch / one-off dev scripts (never commit these)
+# One-off dev scripts & scratch files (never commit these)
 scratch_*.js
 scratch_*.cjs
 capture_*.js
 check-db.cjs
+refactor_admin.js
 migrations/
 
 # Local test HTML files

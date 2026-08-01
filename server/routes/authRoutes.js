@@ -20,14 +20,20 @@ router.get(
   '/google/callback',
   (req, res, next) => {
     const getClientUrl = () => (process.env.CLIENT_URL || 'http://localhost:5173').replace(/\/+$/, '');
+    logger.info({ ip: req.ip, host: req.headers.host }, 'OAuth Google callback request received');
 
     passport.authenticate('google', (err, user) => {
       const clientUrl = getClientUrl();
       if (err || !user) {
+        logger.warn({ err: err?.message, clientUrl }, 'OAuth Google authentication failed or rejected');
         return res.redirect(clientUrl + '/login?error=domain');
       }
       req.logIn(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          logger.error({ err: err.message, userId: user._id }, 'OAuth req.logIn session creation failed');
+          return next(err);
+        }
+        logger.info({ userId: user._id, email: user.email, role: user.role, clientUrl }, 'OAuth login successful');
         // Render HTML with a client-side redirect instead of using a 302.
         // Chrome on Android drops Set-Cookie on 302 responses that are part
         // of the OAuth bounce chain. A 200 response + script redirect breaks

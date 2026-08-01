@@ -306,18 +306,12 @@ For AWS S3/Supabase, Gemini API, Nodemailer/SMTP, and Google OAuth:
 
 ## 10. Logging & observability
 
-- No `console.log` in committed code (AGENTS.md rule) — use whatever real
-  logger is established in the codebase; if none exists yet, that's a gap
-  to flag explicitly, not silently work around with more `console.log`.
-- Log server-side errors with enough structured context to actually debug
-  a production incident (route, user ID where relevant and safe to log,
-  error message/stack) — but never log full request bodies containing
-  sensitive data (passwords, tokens, full session objects) or PII beyond
-  what's needed.
-- The health check endpoint should verify actual dependency health (e.g.
-  MongoDB connection state), not just return a static `200 OK` — a health
-  check that always passes regardless of real DB connectivity provides
-  false confidence during an incident.
+- **Dual-Layer Production Logging Architecture**:
+  1. **Render Console Logging**: Structured JSON Pino logs (`logger.info`, `logger.warn`, `logger.error`) streamed directly to standard output for live PaaS monitoring on Render. Redacts sensitive credentials, authorization headers, passwords, and tokens.
+  2. **Activity Audit Stream**: Mutating domain operations (post/comment creation, resource upload, referral request, mock interview, item listing, moderation, user approval/deletion) pass through `logActivity` in `server/services/activityLogger.js`. This persists audit logs to MongoDB (`ActivityLog` collection) and simultaneously emits structured `logger.info` logs to Render standard output.
+- **No `console.log` in committed code** (AGENTS.md rule) — use `logger` from `server/utils/logger.js`.
+- Log server-side errors with enough structured context to actually debug a production incident (route, user ID where relevant and safe, error message/stack) — but never log full request bodies containing sensitive data (passwords, tokens, full session objects).
+- The health check endpoints (`/health` and `/api/health`) verify real MongoDB connection state and email provider status, ignored by `pinoHttp` auto-logging to prevent log spam.
 - Distinguish expected/handled errors (a 400 validation failure — normal,
   don't alarm-log it) from genuinely unexpected errors (a 500 — this is
   the class of thing that should be loud in logs) — don't treat every

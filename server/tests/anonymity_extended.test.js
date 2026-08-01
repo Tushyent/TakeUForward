@@ -10,7 +10,7 @@
  *                                      the underlying Post is. The bookmarkRoutes already
  *                                      apply applyAnonymity() to the populated post itemId.
  *                                      A bookmark does not expose a new `authorId` that
- *                                      could leak — it only has a `userId` (the bookmarker).
+ *                                      could leak - it only has a `userId` (the bookmarker).
  *                                      No new anonymity test required for the Bookmark container
  *                                      itself; it is tested indirectly via Post anonymity.
  *  - LostFoundItem model:              NO isAnonymous field. Not designed for anonymity.
@@ -153,7 +153,7 @@ describe('Anonymity Engine (Review Routes)', () => {
 });
 
 // ─── Moderation Queue Anonymity (Admin View) ──────────────────────────────────
-describe('Anonymity Engine (Moderation Queue — Admin View)', () => {
+describe('Anonymity Engine (Moderation Queue - Admin View)', () => {
   let adminUser;
   let communityId;
 
@@ -337,7 +337,7 @@ describe('Anonymity Engine (Bookmarks)', () => {
     const bookmarkItem = getRes.body[0];
     expect(bookmarkItem.itemType).toBe('post');
     expect(bookmarkItem.itemId).toBeDefined();
-    
+
     // CRITICAL ASSERTION: The populated post MUST NOT contain authorId
     expect(bookmarkItem.itemId.isAnonymous).toBe(true);
     expect(bookmarkItem.itemId).not.toHaveProperty('authorId');

@@ -3,13 +3,13 @@ import { FileQuestion } from 'lucide-react';
 import Button from './Button';
 
 /**
- * EmptyState — polished empty/zero-data placeholder.
+ * EmptyState - polished empty/zero-data placeholder.
  * Props:
- *   icon       — Lucide icon component (default: FileQuestion)
- *   title      — bold primary message (required)
- *   message    — optional sub-description
- *   action     — { label, onClick } for an optional CTA button
- *   style      — override styles
+ *   icon       - Lucide icon component (default: FileQuestion)
+ *   title      - bold primary message (required)
+ *   message    - optional sub-description
+ *   action     - { label, onClick } for an optional CTA button
+ *   style      - override styles
  */
 const EmptyState = ({
   icon: Icon = FileQuestion,

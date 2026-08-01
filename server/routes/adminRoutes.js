@@ -1,3 +1,10 @@
+/**
+ * @file adminRoutes.js
+ * @description System Admin management endpoints.
+ * Handles platform analytics, user management, content deletion, community & club CRUD,
+ * email testing, marketing campaigns, and global activity audit logs.
+ */
+
 import express from 'express';
 import mongoose from 'mongoose';
 import User from '../models/User.js';
@@ -103,7 +110,7 @@ router.post('/marketing-email', requireSystemAdmin, async (req, res, next) => {
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
         <h1 style="color:#7C6AF7;font-size:24px;">Welcome to TakeUForward!</h1>
         <p style="font-size:16px;color:#333;line-height:1.6;">Hi there,</p>
-        <p style="font-size:16px;color:#333;line-height:1.6;">You have been invited to explore <strong>TakeUForward</strong> — the exclusive campus community for SSN students and alumni.</p>
+        <p style="font-size:16px;color:#333;line-height:1.6;">You have been invited to explore <strong>TakeUForward</strong> - the exclusive campus community for SSN students and alumni.</p>
         <p style="font-size:16px;color:#333;line-height:1.6;">Connect with peers, access academic resources, discover placement insights, and guide your juniors. We would love to have you on board!</p>
         <div style="text-align:center;margin:30px 0;">
           <a href="${clientUrl}" style="display:inline-block;background:#7C6AF7;color:#fff;text-decoration:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;">Explore TakeUForward</a>
@@ -422,7 +429,7 @@ router.delete('/communities/:id', requireSystemAdmin, async (req, res, next) => 
 });
 
 // ──────────────────────────────────────────────
-// Posts — list and delete for admin
+// Posts - list and delete for admin
 // ──────────────────────────────────────────────
 
 router.get('/posts', requireSystemAdmin, async (req, res, next) => {
@@ -499,7 +506,7 @@ router.get('/activity', requireSystemAdmin, async (req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// Email Status — verify SendGrid configuration
+// Email Status - verify SendGrid configuration
 // ──────────────────────────────────────────────
 
 router.get('/email-status', requireSystemAdmin, async (req, res, next) => {
@@ -517,7 +524,7 @@ router.get('/email-status', requireSystemAdmin, async (req, res, next) => {
 });
 
 // ──────────────────────────────────────────────
-// Email Test — send a real email and return SendGrid response
+// Email Test - send a real email and return SendGrid response
 // ──────────────────────────────────────────────
 
 router.post('/test-email', requireSystemAdmin, async (req, res) => {

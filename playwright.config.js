@@ -15,7 +15,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './e2e',
-  fullyParallel: false, // Run sequentially — tests share a DB user state
+  fullyParallel: false, // Run sequentially - tests share a DB user state
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   timeout: 30000,

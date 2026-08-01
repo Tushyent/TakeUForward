@@ -41,7 +41,7 @@ const seedCommunities = async () => {
         communities.push({
           name: `${dept.short}'${String(batch).slice(2)}`,
           type: 'batch',
-          description: `${dept.full} — batch of ${batch}.`,
+          description: `${dept.full} - batch of ${batch}.`,
         });
       }
     }

@@ -9,6 +9,8 @@ import { Input } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import { AlertTriangle, Users, Search, X } from 'lucide-react';
 
+const PRIORITY_CLUBS = ["ssn coding club", "ssn acm", "ssn acm-w", "ssn ieee cs"];
+
 function ClubsList() {
   const [clubs, setClubs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,15 +48,13 @@ function ClubsList() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const priorityList = ["ssn coding club", "ssn acm", "ssn acm-w", "ssn ieee cs"];
-  
   const sortedClubs = React.useMemo(() => {
     return [...clubs].sort((a, b) => {
       const aName = a.name.toLowerCase();
       const bName = b.name.toLowerCase();
-      const aIndex = priorityList.indexOf(aName);
-      const bIndex = priorityList.indexOf(bName);
-      
+      const aIndex = PRIORITY_CLUBS.indexOf(aName);
+      const bIndex = PRIORITY_CLUBS.indexOf(bName);
+
       if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
       if (aIndex !== -1) return -1;
       if (bIndex !== -1) return 1;
@@ -64,9 +64,9 @@ function ClubsList() {
 
   const filtered = query.trim()
     ? sortedClubs.filter(c =>
-        c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.description?.toLowerCase().includes(query.toLowerCase())
-      )
+      c.name.toLowerCase().includes(query.toLowerCase()) ||
+      c.description?.toLowerCase().includes(query.toLowerCase())
+    )
     : sortedClubs;
 
   const paginatedFiltered = filtered.slice(0, visibleCount);
@@ -98,7 +98,7 @@ function ClubsList() {
         <EmptyState
           icon={Search}
           title="No clubs yet"
-          message="This is a community-driven platform — don't be shy to start. Let's grow this together."
+          message="This is a community-driven platform - don't be shy to start. Let's grow this together."
         />
       );
     }
@@ -133,11 +133,11 @@ function ClubsList() {
                 </Card>
               ))}
             </div>
-            
+
             {filtered.length > visibleCount && (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--space-8)' }}>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setVisibleCount(prev => prev + 5)}
                   style={{ minWidth: '200px' }}
                 >

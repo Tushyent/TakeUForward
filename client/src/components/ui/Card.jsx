@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Card — surface container component.
+ * Card - surface container component.
  * variant: default | elevated | glass | highlight
  * lift: adds hover lift animation (sets cursor:pointer)
  * noHover: explicitly disable hover effects when lift is true

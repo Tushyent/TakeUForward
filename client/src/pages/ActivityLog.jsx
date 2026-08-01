@@ -36,7 +36,7 @@ const ActivityLog = () => {
               <History size={22} /> Activity Log
             </h1>
             <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-              Every user and admin action across the platform — visible to admins only.
+              Every user and admin action across the platform - visible to admins only.
             </p>
           </div>
           <Button variant="secondary" onClick={loadLogs}>
@@ -61,15 +61,15 @@ const ActivityLog = () => {
               <div style={{
                 width: 32, height: 32, borderRadius: 'var(--radius-sm)', flexShrink: 0,
                 background: log.action === 'delete' ? 'var(--danger-bg, rgba(239,68,68,0.1))' :
-                             log.action === 'create' ? 'var(--success-bg, rgba(34,197,94,0.1))' :
-                             log.action === 'report' ? 'var(--warning-bg, rgba(234,179,8,0.1))' :
-                             'var(--bg-input)',
+                  log.action === 'create' ? 'var(--success-bg, rgba(34,197,94,0.1))' :
+                    log.action === 'report' ? 'var(--warning-bg, rgba(234,179,8,0.1))' :
+                      'var(--bg-input)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 'var(--text-xs)', fontWeight: 600,
                 color: log.action === 'delete' ? 'var(--danger)' :
-                       log.action === 'create' ? 'var(--success)' :
-                       log.action === 'report' ? 'var(--warning)' :
-                       'var(--text-secondary)',
+                  log.action === 'create' ? 'var(--success)' :
+                    log.action === 'report' ? 'var(--warning)' :
+                      'var(--text-secondary)',
               }}>
                 {log.action === 'create' ? '+' : log.action === 'delete' ? '×' : log.action === 'update' ? '~' : '•'}
               </div>

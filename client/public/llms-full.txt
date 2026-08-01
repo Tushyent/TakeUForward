@@ -1,0 +1,42 @@
+# TakeUForward SSN — Complete Platform Architecture & Feature Documentation
+
+> Comprehensive knowledge document for AI agents, crawlers (ClaudeBot, GPTBot, PerplexityBot, Google-Extended), and LLM search engines indexing TakeUForward SSN.
+
+## Overview
+TakeUForward SSN is a specialized campus mentorship and academic utility web application built specifically for students, faculty, and verified alumni of SSN College of Engineering.
+
+## Public Endpoints & Accessibility
+- **Home / Login**: https://takeuforward.blastorz.fun/
+- **Public About Page**: https://takeuforward.blastorz.fun/about
+- **Alumni Portal Request**: https://takeuforward.blastorz.fun/alumni-invite
+- **Support & Ticket Desk**: https://takeuforward.blastorz.fun/support
+- **XML Sitemap**: https://takeuforward.blastorz.fun/sitemap.xml
+- **LLMs Text Standard**: https://takeuforward.blastorz.fun/llms.txt
+
+## Core Architectural Components
+
+### 1. Privacy & Server-Side Anonymity Engine
+- Any student post or comment flagged with `isAnonymous: true` has author metadata (`authorId`, `authorName`, `email`) stripped at the server API controller level before serialization.
+- This ensures true database-level privacy for student questions, confessions, and feedback.
+
+### 2. Verified Alumni Network & Mentorship
+- Alumni undergo manual verification by System Administrators or cryptographic invitation tokens.
+- Once verified, alumni can list referral availability, host mock interviews, and mentor current SSN students.
+
+### 3. Academic Repository & Gemini AI Integration
+- Departmental study materials, subject syllabi, and previous year question papers (PYQs) are stored securely.
+- Integrated Google Gemini AI automatically processes and summarizes complex academic PDFs for fast revision.
+
+### 4. Campus Utility Boards
+- Peer-to-peer Marketplace for second-hand textbooks, electronics, and lab equipment.
+- Peer-to-peer Lost & Found board to reunite lost campus items with their owners.
+
+## Technology Stack
+- **Frontend**: React, Vite, React Router, Axios, Vanilla CSS design tokens.
+- **Backend**: Node.js, Express, Passport.js Google OAuth 2.0.
+- **Database**: MongoDB Atlas via Mongoose.
+- **Logging & Security**: Pino structured JSON logging, helmet CSP, express-rate-limit.
+
+## Author & Platform Ownership
+Developed by **Tushyent N P** for SSN College of Engineering.
+Primary Production Web Domain: https://takeuforward.blastorz.fun

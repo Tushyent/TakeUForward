@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Spinner — loading indicator.
+ * Spinner - loading indicator.
  * Replaces the old spinner div with a centered, well-spaced loading block.
  * For page-level loading, also exports SkeletonCard for shimmer placeholders.
  */
@@ -47,7 +47,7 @@ const Spinner = ({ text = 'Loading...', center = true, size = 'md' }) => {
 };
 
 /**
- * SkeletonCard — shimmer placeholder for content loading.
+ * SkeletonCard - shimmer placeholder for content loading.
  * Use in place of real cards while data is fetching.
  */
 export const SkeletonCard = ({ lines = 3 }) => (

@@ -1,3 +1,11 @@
+/**
+ * @file logger.js
+ * @description Centralized Pino logger instance for structured application logging.
+ * Produces structured JSON output in production for PaaS log ingestion (Render)
+ * and formatted colorized logs during local development.
+ * Automatically redacts sensitive authentication keys and authorization headers.
+ */
+
 import pino from 'pino';
 
 const isProduction = process.env.NODE_ENV === 'production';

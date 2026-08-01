@@ -1,0 +1,32 @@
+{
+  "name": "TakeUForward SSN Campus Community",
+  "short_name": "TakeUForward",
+  "description": "The ultimate campus mentorship, academic utility, and placement preparation platform for SSN College of Engineering.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0D0E14",
+  "theme_color": "#7C6AF7",
+  "categories": ["education", "social", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

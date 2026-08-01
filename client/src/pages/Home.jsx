@@ -71,7 +71,7 @@ const renderGrid = (title, items, icon) => (
               justifyContent: 'center',
               marginBottom: 'var(--space-5)',
             }}
-            className="grid-card-icon"
+              className="grid-card-icon"
             >
               <Icon size={24} color={color} />
             </div>
@@ -107,7 +107,7 @@ const communityBg = (type) => {
 };
 
 /* ---------------------------------------------------------------
-   INITIALS AVATAR — fallback for users without a picture
+   INITIALS AVATAR - fallback for users without a picture
    --------------------------------------------------------------- */
 const InitialsAvatar = ({ name, size = 44 }) => {
   const initials = (name || 'U')
@@ -168,7 +168,7 @@ function Home() {
         });
         setCommunities(relevant);
       } catch {
-        // silently fail — communities are supplementary on home
+        // silently fail - communities are supplementary on home
       } finally {
         setLoading(false);
       }
@@ -196,7 +196,7 @@ function Home() {
   if (loading) {
     return (
       <div className="page-transition">
-                <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
+        <div className="page-col page-col-feed" style={{ paddingBlock: 'var(--space-8)' }}>
           <SkeletonCard lines={2} />
           <SkeletonCard lines={3} />
           <SkeletonCard lines={4} />
@@ -208,22 +208,22 @@ function Home() {
   /* ---------- Full page ---------- */
   return (
     <div className="page-transition">
-      
+
       <div className="page-col page-col-wide" style={{ paddingBlock: 'var(--space-8)' }}>
 
-        <div 
+        <div
           onClick={() => navigate('/settings/profile')}
           style={{
-          position: 'relative',
-          borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-8)',
-          marginBottom: 'var(--space-6)',
-          background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
-          border: '1px solid rgba(124,106,247,0.25)',
-          boxShadow: '0 0 40px rgba(124,106,247,0.10)',
-          overflow: 'hidden',
-          cursor: 'pointer',
-        }}>
+            position: 'relative',
+            borderRadius: 'var(--radius-xl)',
+            padding: 'var(--space-8)',
+            marginBottom: 'var(--space-6)',
+            background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
+            border: '1px solid rgba(124,106,247,0.25)',
+            boxShadow: '0 0 40px rgba(124,106,247,0.10)',
+            overflow: 'hidden',
+            cursor: 'pointer',
+          }}>
           {/* Decorative gradient blob */}
           <div style={{
             position: 'absolute',
@@ -261,7 +261,7 @@ function Home() {
               )}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                    <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>
+                  <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>
                     Hey, {user?.name?.split(' ')[0] || 'there'} 👋
                   </h1>
                 </div>
@@ -282,7 +282,7 @@ function Home() {
               margin: 0,
               lineHeight: 1.7,
             }}>
-              Welcome back to <strong style={{ color: 'var(--text-primary)' }} className="home-brand-name">TakeUForward</strong> — your campus community for academics, placements, and everything in between.
+              Welcome back to <strong style={{ color: 'var(--text-primary)' }} className="home-brand-name">TakeUForward</strong> - your campus community for academics, placements, and everything in between.
             </p>
           </div>
         </div>
@@ -396,7 +396,7 @@ function Home() {
             lineHeight: 1.7,
           }}>
             TakeUForward SSN is built and improved by students like you. Spot a bug, have an idea,
-            or just want to tell us what's missing? Share it with us — every bit of feedback helps
+            or just want to tell us what's missing? Share it with us - every bit of feedback helps
             us make this better for everyone.
           </p>
           <Link to="/support" style={{ textDecoration: 'none' }}>

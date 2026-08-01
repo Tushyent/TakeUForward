@@ -6,7 +6,7 @@ import { sendDigestEmail } from '../config/mailer.js';
 import { logger } from '../utils/logger.js';
 
 export const generateAndSendWeeklyDigests = async () => {
-  logger.info('Weekly digest is currently on hold — not sending.');
+  logger.info('Weekly digest is currently on hold - not sending.');
   return { sentCount: 0, skippedCount: 0, errorCount: 0 };
 
   try {
@@ -41,7 +41,8 @@ export const generateAndSendWeeklyDigests = async () => {
 
     // Compute shared content pools ONCE
     const pipeline = [
-      { $match: {
+      {
+        $match: {
           isHidden: { $ne: true },
           communityId: { $in: communityIds },
           createdAt: { $gte: sevenDaysAgo }
@@ -54,14 +55,14 @@ export const generateAndSendWeeklyDigests = async () => {
           ageHours: {
             $max: [
               1,
-              { $divide: [ { $subtract: [ new Date(), "$createdAt" ] }, 3600000 ] }
+              { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 3600000] }
             ]
           }
         }
       },
       {
         $addFields: {
-          hotScore: { $divide: [ { $add: ["$upvoteCount", "$commentCount"] }, "$ageHours" ] }
+          hotScore: { $divide: [{ $add: ["$upvoteCount", "$commentCount"] }, "$ageHours"] }
         }
       },
       { $sort: { hotScore: -1, createdAt: -1 } },
@@ -95,7 +96,7 @@ export const generateAndSendWeeklyDigests = async () => {
       }
       const relevantIdStrs = relevantCommunityIds.map(id => id.toString());
 
-      // Filter shared pools to only this user's communities — in memory, no DB query
+      // Filter shared pools to only this user's communities - in memory, no DB query
       const topPosts = allTopPosts
         .filter(p => relevantIdStrs.includes(p.communityId?.toString()))
         .slice(0, 5);

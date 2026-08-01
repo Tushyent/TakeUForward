@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 /* ============================================================
-   DESIGN TOKENS — TakeUForward Design System v2
+   DESIGN TOKENS - TakeUForward Design System v2
    Dark-first, campus-social aesthetic.
    All custom properties live here. Never redeclare in components.
    ============================================================ */
@@ -13,7 +13,7 @@
   --bg-elevated:   #1E1F2E;
   --bg-input:      #1A1B28;
 
-  /* Legacy aliases (used by existing components — kept for compatibility) */
+  /* Legacy aliases (used by existing components - kept for compatibility) */
   --bg:            var(--bg-base);
   --social-bg:     var(--bg-surface);
   --code-bg:       var(--bg-elevated);
@@ -24,7 +24,7 @@
   --primary-active:#6455E8;
   --primary-glow:  rgba(124, 106, 247, 0.20);
 
-  /* --- BRAND: Accent (Orange — warm counterpoint) --- */
+  /* --- BRAND: Accent (Orange - warm counterpoint) --- */
   --accent:        #F97316;
   --accent-bg:     rgba(249, 115, 22, 0.12);
   --accent-border: rgba(249, 115, 22, 0.35);
@@ -155,14 +155,14 @@ html {
 
 body {
   margin: 0;
-  /* Body inherits html background — no separate color needed */
+  /* Body inherits html background - no separate color needed */
   background: transparent;
   min-height: 100svh;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
-/* #root fills the FULL viewport width — no artificial cap here.
+/* #root fills the FULL viewport width - no artificial cap here.
    Per-page centering is done inside each page via .page-col-* classes.
    This was the root cause of the blank black column bug on wide displays. */
 #root {
@@ -228,7 +228,7 @@ code, .counter {
 
 /* ============================================================
    SHARED COMPONENT CLASSES
-   (Components also use inline styles via JS — these are CSS-class
+   (Components also use inline styles via JS - these are CSS-class
    versions for elements that benefit from :hover/:focus/:active)
    ============================================================ */
 
@@ -426,7 +426,7 @@ code, .counter {
 .btn-sm { padding: 7px 14px; font-size: var(--text-xs); }
 .btn-lg { padding: 13px 24px; font-size: var(--text-base); }
 
-/* Grid card icon hover — scales on parent hover */
+/* Grid card icon hover - scales on parent hover */
 .grid-card-icon {
   transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
@@ -1239,7 +1239,7 @@ code, .counter {
     overflow-wrap: break-word;
   }
 
-  /* Larger navbar on mobile — brand, icons, controls */
+  /* Larger navbar on mobile - brand, icons, controls */
   .navbar-brand-name {
     font-size: var(--text-lg);
   }
@@ -1266,7 +1266,7 @@ code, .counter {
 }
 
 @media (max-width: 375px) {
-  /* Smallest phone — tighten padding further */
+  /* Smallest phone - tighten padding further */
   .page-col {
     padding-inline: var(--space-3);
   }

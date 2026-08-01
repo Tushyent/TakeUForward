@@ -4,7 +4,7 @@
  * PART 4c: Rate limiting behavior tests.
  *
  * Verifies that upvoteLimiter (max: 30/min) and reportLimiter (max: 5/10min)
- * actually engage at their configured thresholds — i.e., the (N+1)th request
+ * actually engage at their configured thresholds - i.e., the (N+1)th request
  * returns 429, not a silent pass-through.
  *
  * NOTE: Because express-rate-limit keys by IP and supertest uses 127.0.0.1,
@@ -30,7 +30,7 @@ function createTestApp({ upvoteMax = 30, reportMax = 5 } = {}) {
     message: { error: { message: 'Too many upvotes, please slow down' } },
     standardHeaders: true,
     legacyHeaders: false,
-    // Use memory store (default) — fresh per instance
+    // Use memory store (default) - fresh per instance
   });
 
   const testReportLimiter = rateLimit({

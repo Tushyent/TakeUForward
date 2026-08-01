@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Input, Textarea, Select — shared form elements.
+ * Input, Textarea, Select - shared form elements.
  * All use the .input CSS class with :focus pseudo-class for styling.
  */
 export const Input = React.forwardRef(({ className = '', style, ...props }, ref) => {

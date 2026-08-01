@@ -19,11 +19,19 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       setErrorMsg(null);
     } catch (err) {
+      const publicAuthPaths = ['/login', '/pending-approval', '/alumni-invite', '/about'];
+      const isPublicAuthPath = publicAuthPaths.some(path => window.location.pathname.startsWith(path));
+
       if (err.response && err.response.status === 401) {
         setIsAuthenticated(false);
         setUser(null);
+      } else if (isPublicAuthPath) {
+        // Allow public pages like /about, /login to render gracefully without full-screen error overlay
+        setIsAuthenticated(false);
+        setUser(null);
+        setErrorMsg(null);
       } else {
-        // Network or 500 errors
+        // Network or server connectivity errors on protected pages
         setErrorMsg(err.message || 'Cannot connect to the server.');
         setIsAuthenticated(false);
       }

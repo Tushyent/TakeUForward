@@ -13,7 +13,7 @@ function CompleteProfile() {
 
   const [dept, setDept] = useState('CSE');
   const [year, setYear] = useState('2028');
-  
+
   // Alumni specific
   const [graduationYear, setGraduationYear] = useState('2024');
   const [currentCompany, setCurrentCompany] = useState('');
@@ -46,7 +46,7 @@ function CompleteProfile() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    
+
     try {
       let payload = {};
       if (role === 'alumni') {
@@ -60,7 +60,7 @@ function CompleteProfile() {
       const profileRes = await axiosClient.patch('/auth/profile', payload);
       const totalUsers = profileRes.data?.totalUsers;
       if (totalUsers) {
-        toast.success(`Welcome to TUF SSN! You're member #${totalUsers} — share it with your peers 🎉`, { duration: 5000 });
+        toast.success(`Welcome to TUF SSN! You're member #${totalUsers} - share it with your peers 🎉`, { duration: 5000 });
       } else {
         toast.success('Profile completed successfully!');
       }
@@ -84,7 +84,7 @@ function CompleteProfile() {
       <Card style={{ width: '100%' }}>
         <h1 style={{ marginTop: 0, marginBottom: '10px' }}>Complete Your Profile</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Please provide these details to continue.</p>
-        
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           {role === 'alumni' ? (

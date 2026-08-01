@@ -1,11 +1,24 @@
+/**
+ * @file errorMiddleware.js
+ * @description Centralized Express error handling middleware.
+ * Formats error responses securely without leaking stack traces in production,
+ * and emits structured Pino log entries for 4xx warnings and 5xx unexpected server errors.
+ */
+
 import { logger } from '../utils/logger.js';
 
+/**
+ * 404 Not Found fallback handler for unmatched routes.
+ */
 export const notFound = (req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 };
 
+/**
+ * Global Express error handling middleware.
+ */
 // eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, req, res, next) => {
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;

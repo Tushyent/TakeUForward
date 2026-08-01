@@ -47,8 +47,15 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
+// Middleware & Security Headers
 app.use(helmet()); // Default strict CSP is enabled; authRoutes handles its own nonce
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  next();
+});
 app.use(compression()); // GZIP compression for faster API responses
 app.use(express.json());
 app.use(pinoHttp({
@@ -81,6 +88,8 @@ app.use(cors({
 
     const allowedOrigins = [
       clientUrl,
+      'https://takeuforward.blastorz.fun',
+      // 'https://takeuforward-ssn.vercel.app',
       'http://localhost:5173',
       'http://127.0.0.1:5173'
     ];
@@ -99,6 +108,7 @@ app.use(cors({
       return callback(null, true);
     }
 
+    logger.warn({ origin }, 'CORS request rejected for origin');
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
