@@ -1,7 +1,7 @@
 {
-  "name": "TakeUForward SSN Campus Community",
-  "short_name": "TakeUForward",
-  "description": "The ultimate campus mentorship, academic utility, and placement preparation platform for SSN College of Engineering.",
+  "name": "TakeUForward SSN - One-Stop Campus Mate",
+  "short_name": "TUF SSN",
+  "description": "TakeUForward SSN (TUF SSN) is the premier one-stop campus mate and mentorship platform for SSN College of Engineering students.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

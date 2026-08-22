@@ -8,8 +8,11 @@ import { logger } from '../utils/logger.js';
 import { logActivity } from '../services/activityLogger.js';
 import { isSystemAdminEmail, isSystemAdminUser, syncUserIdentity } from '../utils/userIdentity.js';
 import { sendWelcomeEmail } from '../config/mailer.js';
+import { authLimiter, alumniRequestLimiter } from '../middleware/rateLimiter.js';
+import { sanitizeUser } from '../utils/sanitizeUser.js';
 
 const router = express.Router();
+router.use(authLimiter);
 
 router.get(
   '/google',
@@ -38,7 +41,6 @@ router.get(
         // Chrome on Android drops Set-Cookie on 302 responses that are part
         // of the OAuth bounce chain. A 200 response + script redirect breaks
         // that detection and the cookie is stored correctly.
-        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
         
         // Generate a cryptographically secure nonce for the inline script
         const nonce = crypto.randomBytes(16).toString('base64');
@@ -85,15 +87,17 @@ router.get('/me', (req, res) => {
       profileComplete = !!(req.user.dept && req.user.year);
     }
     const isApproved = req.user.isApproved !== false;
-    res.status(200).json({ user: req.user, profileComplete, isApproved });
+    // Use sanitizeUser to ensure only safe, intentional fields are sent.
+    // googleId, pushSubscriptions (VAPID keys), and internal metadata are excluded.
+    res.status(200).json({ user: sanitizeUser(req.user), profileComplete, isApproved });
   } else {
-    res.status(401).json({ error: 'Not authenticated' });
+    res.status(401).json({ error: { message: 'Not authenticated' } });
   }
 });
 
 router.patch('/profile', async (req, res, next) => {
   if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ error: { message: 'Not authenticated' } });
   }
 
   try {
@@ -106,7 +110,7 @@ router.patch('/profile', async (req, res, next) => {
 
     if (req.user.role === 'alumni') {
       if (!dept || !graduationYear || !currentCompany) {
-        return res.status(400).json({ error: 'Dept, graduation year, and current company are required' });
+        return res.status(400).json({ error: { message: 'Dept, graduation year, and current company are required' } });
       }
       req.user.dept = dept;
       req.user.graduationYear = parseInt(graduationYear, 10);
@@ -116,7 +120,7 @@ router.patch('/profile', async (req, res, next) => {
     } else if (req.user.role === 'club_admin') {
       const { clubName, clubDescription } = req.body;
       if (!clubName || !clubDescription) {
-        return res.status(400).json({ error: 'Club Name and Description are required' });
+        return res.status(400).json({ error: { message: 'Club Name and Description are required' } });
       }
       
       const Club = (await import('../models/Club.js')).default;
@@ -138,7 +142,7 @@ router.patch('/profile', async (req, res, next) => {
       req.user.clubId = club._id;
     } else {
       if (!dept || !year) {
-        return res.status(400).json({ error: 'Dept and year are required' });
+        return res.status(400).json({ error: { message: 'Dept and year are required' } });
       }
       req.user.dept = dept;
       req.user.year = parseInt(year, 10);
@@ -166,7 +170,8 @@ router.patch('/profile', async (req, res, next) => {
       });
     }
 
-    res.status(200).json({ message: 'Profile updated', user: req.user, profileComplete: true, totalUsers });
+    // Use sanitizeUser to ensure only safe fields are returned after profile update.
+    res.status(200).json({ message: 'Profile updated', user: sanitizeUser(req.user), profileComplete: true, totalUsers });
   } catch (err) {
     logger.error('Error updating profile:', err);
     next(err);
@@ -186,25 +191,26 @@ router.get('/logout', (req, res, next) => {
 
 router.post('/alumni/invite', async (req, res, next) => {
   if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Must be logged in to invite alumni' });
+    return res.status(401).json({ error: { message: 'Must be logged in to invite alumni' } });
   }
   if (!isSystemAdminUser(req.user)) {
-    return res.status(403).json({ error: 'Only the system admin can generate invites' });
+    return res.status(403).json({ error: { message: 'Only the system admin can generate invites' } });
   }
 
   try {
     const { email, currentCompany } = req.body;
     if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+      return res.status(400).json({ error: { message: 'Email is required' } });
     }
 
     const inviteToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(inviteToken).digest('hex');
     
     const record = await ApprovedAlumniEmail.create({
       email,
       currentCompany,
       invitedBy: req.user._id,
-      inviteToken,
+      inviteToken: hashedToken,
       status: 'pending'
     });
     await logActivity({ action: 'create', resource: 'ApprovedAlumniEmail', resourceId: record._id, description: `Admin invited alumni ${email}`, req });
@@ -214,7 +220,7 @@ router.post('/alumni/invite', async (req, res, next) => {
     res.status(201).json({ inviteLink });
   } catch (err) {
     if (err.code === 11000) {
-      return res.status(400).json({ error: 'Email already invited or token collision' });
+      return res.status(400).json({ error: { message: 'Email already invited or token collision' } });
     }
     next(err);
   }
@@ -223,14 +229,15 @@ router.post('/alumni/invite', async (req, res, next) => {
 router.get('/alumni/invite/:token', async (req, res, next) => {
   try {
     const { token } = req.params;
-    const invite = await ApprovedAlumniEmail.findOne({ inviteToken: token });
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const invite = await ApprovedAlumniEmail.findOne({ inviteToken: hashedToken });
 
     if (!invite) {
-      return res.status(400).json({ error: 'Invalid invite token' });
+      return res.status(400).json({ error: { message: 'Invalid invite token' } });
     }
 
     if (invite.status === 'verified') {
-      return res.status(400).json({ error: 'Invite token already used' });
+      return res.status(400).json({ error: { message: 'Invite token already used' } });
     }
 
     invite.status = 'verified';
@@ -251,7 +258,7 @@ if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_SESSION === 
     try {
       const User = (await import('../models/User.js')).default;
       const { email } = req.body;
-      if (!email) return res.status(400).json({ error: 'email required' });
+      if (!email) return res.status(400).json({ error: { message: 'email required' } });
       let user = await User.findOne({ email });
 
       if (!user) {
@@ -279,12 +286,54 @@ if (process.env.NODE_ENV !== 'production' && process.env.ALLOW_TEST_SESSION === 
 
 // POST /api/auth/alumni/request
 // Public route for alumni to request access without a pre-approved email
-router.post('/alumni/request', async (req, res, next) => {
+router.post('/alumni/request', alumniRequestLimiter, async (req, res, next) => {
   try {
+    // Honeypot field check
+    if (req.body.website) {
+      return res.status(201).json({ message: 'Request submitted successfully. Admins will review your request.' });
+    }
+
     const { name, email, dept, graduationYear, currentCompany, proofLink, message } = req.body;
     
     if (!name || !email || !dept || !graduationYear || !proofLink) {
       return res.status(400).json({ error: { message: 'Missing required fields' } });
+    }
+
+    // Strict input validations
+    const trimmedName = String(name).trim();
+    if (trimmedName.length < 2 || trimmedName.length > 100) {
+      return res.status(400).json({ error: { message: 'Invalid name length' } });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: { message: 'Invalid email format' } });
+    }
+
+    const allowedDepts = ['EEE', 'ECE', 'CSE', 'IT', 'Mechanical', 'Chemical', 'Biomedical', 'Civil', 'English'];
+    if (!allowedDepts.includes(dept)) {
+      return res.status(400).json({ error: { message: 'Invalid department select' } });
+    }
+
+    const gradYearNum = parseInt(graduationYear, 10);
+    if (isNaN(gradYearNum) || gradYearNum < 2000 || gradYearNum > 2029) {
+      return res.status(400).json({ error: { message: 'Invalid graduation year (must be 2000-2029)' } });
+    }
+
+    try {
+      const url = new URL(proofLink);
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        throw new Error();
+      }
+      if (proofLink.length > 500) {
+        return res.status(400).json({ error: { message: 'Proof link is too long' } });
+      }
+    } catch {
+      return res.status(400).json({ error: { message: 'Invalid proof URL format' } });
+    }
+
+    if (message && String(message).length > 1000) {
+      return res.status(400).json({ error: { message: 'Message is too long' } });
     }
 
     const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
@@ -296,10 +345,10 @@ router.post('/alumni/request', async (req, res, next) => {
     }
 
     await AlumniRegistrationRequest.create({
-      name,
+      name: trimmedName,
       email,
       dept,
-      graduationYear,
+      graduationYear: gradYearNum,
       currentCompany,
       proofLink,
       message,
@@ -308,6 +357,21 @@ router.post('/alumni/request', async (req, res, next) => {
     res.status(201).json({ message: 'Request submitted successfully. Admins will review your request.' });
   } catch (err) {
     logger.error('Error submitting alumni request:', err);
+    next(err);
+  }
+});
+
+// GET /api/auth/alumni/request-status
+// Checks if current logged-in user has already submitted a request
+router.get('/alumni/request-status', async (req, res, next) => {
+  try {
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+      return res.status(401).json({ error: { message: 'Not authenticated' } });
+    }
+    const AlumniRegistrationRequest = (await import('../models/AlumniRegistrationRequest.js')).default;
+    const request = await AlumniRegistrationRequest.findOne({ email: req.user.email });
+    res.json({ hasRequest: !!request, status: request ? request.status : null });
+  } catch (err) {
     next(err);
   }
 });

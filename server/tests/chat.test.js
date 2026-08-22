@@ -118,4 +118,36 @@ describe('1:1 Chat Messaging & Notifications', () => {
     expect(notifsForA[0].targetPath).toBe(`/chat/${userB._id}`);
     expect(notifsForA[0].contentPreview).toBe('Hey User A, got your message!');
   });
+
+  it('caps the embedded messages array at 1000 items to prevent document size limit crashes', async () => {
+    mockUser = userA;
+    // Create a chat document directly in DB with 999 messages
+    const dummyMessages = Array.from({ length: 999 }, (_, i) => ({
+      senderId: userA._id,
+      text: `Message ${i}`,
+      createdAt: new Date()
+    }));
+
+    await Chat.create({
+      participants: [userA._id, userB._id],
+      messages: dummyMessages
+    });
+
+    // Send another message via route (making it 1000 messages)
+    const res1 = await request(app)
+      .post(`/api/chats/${userB._id}/message`)
+      .send({ text: 'Message 1000' })
+      .expect(201);
+    expect(res1.body.messages.length).toBe(1000);
+
+    // Send another message via route (making it 1001 messages -> should be trimmed to 1000)
+    const res2 = await request(app)
+      .post(`/api/chats/${userB._id}/message`)
+      .send({ text: 'Message 1001' })
+      .expect(201);
+    expect(res2.body.messages.length).toBe(1000);
+    // Verify it trimmed the first message ("Message 0") and kept the new ones
+    expect(res2.body.messages[0].text).toBe('Message 1');
+    expect(res2.body.messages[999].text).toBe('Message 1001');
+  });
 });

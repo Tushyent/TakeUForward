@@ -10,9 +10,9 @@ function About() {
   const { user } = useAuth();
 
   useSEO({
-    title: 'About - TakeUForward SSN Campus Community',
-    description: 'Learn why TakeUForward was built for SSN College of Engineering. Centralizing academic resources, Gemini AI notes summarization, server-side anonymity engine, and verified alumni mentorship.',
-    keywords: 'SSN College of Engineering, TakeUForward About, SSN Alumni Network, College Mentorship, Academic Resources, Anonymous Discussions',
+    title: 'About | TakeUForward SSN - One-Stop Campus Mate',
+    description: 'TakeUForward SSN (TUF SSN) is the official one-stop campus mate and mentorship platform for SSN College of Engineering. Learn why we built this centralized portal.',
+    keywords: 'TakeUForward SSN, TUF SSN, One Stop Campus Mate, SSN Mentorship Platform, Campus Mate SSN, SSN College of Engineering, Mentorship, Placements',
     canonical: 'https://takeuforward.blastorz.fun/about'
   });
   const features = [
@@ -124,14 +124,14 @@ function About() {
               style={{ width: 80, height: 80, marginBottom: 'var(--space-4)', filter: 'drop-shadow(0 0 20px var(--primary-glow))' }} 
             />
             <h1 style={{ margin: '0 0 var(--space-3) 0', fontSize: '2.5rem', background: 'linear-gradient(to right, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              TakeUForward SSN
+              TakeUForward SSN — One-Stop Campus Mate
             </h1>
             
             <p style={{
               fontSize: 'var(--text-lg)', color: 'var(--text-secondary)',
               lineHeight: 1.7, margin: '0 auto', maxWidth: '700px'
             }}>
-              The ultimate platform connecting juniors, seniors, and alumni. 
+              TUF SSN is the premier one-stop campus mate and mentorship platform connecting juniors, seniors, and alumni. 
               We are centralizing academic knowledge, standardizing mentorship, and building a secure, thriving campus community for SSN College of Engineering.
             </p>
           </div>

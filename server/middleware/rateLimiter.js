@@ -58,3 +58,20 @@ export const supportTicketLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
+  message: { error: { message: 'Too many authentication attempts, please try again after 15 minutes.' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const alumniRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  skipFailedRequests: true, // Failed validation attempts do not count against rate limit
+  message: { error: { message: 'Too many alumni registration requests submitted, please try again after 15 minutes.' } },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

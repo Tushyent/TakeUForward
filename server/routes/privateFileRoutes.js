@@ -3,6 +3,7 @@ import PrivateFile from '../models/PrivateFile.js';
 import { generatePrivateUploadUrl, generatePrivateDownloadUrl, validateObjectSize, deleteObjectByKey } from '../config/s3.js';
 import { postCreationLimiter } from '../middleware/rateLimiter.js';
 import { logActivity } from '../services/activityLogger.js';
+import { logger } from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -32,6 +33,50 @@ router.post('/upload-url', postCreationLimiter, async (req, res, next) => {
     const { fileName, fileType } = req.body;
     if (!fileName || !fileType) return res.status(400).json({ error: { message: 'Missing file details' } });
 
+    const allowedTypes = [
+      'application/pdf', 
+      'image/jpeg', 
+      'image/png', 
+      'image/webp',
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/zip',
+      'application/x-rar-compressed',
+      'text/plain',
+      'text/csv',
+      'application/json'
+    ];
+    if (!allowedTypes.includes(fileType)) {
+      return res.status(400).json({ error: { message: 'Invalid file type. Only standard documents, images, text, and zip archives are allowed.' } });
+    }
+
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    const mimeToExtMap = {
+      'application/pdf': ['pdf'],
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/png': ['png'],
+      'image/webp': ['webp'],
+      'application/msword': ['doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
+      'application/vnd.ms-excel': ['xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
+      'application/vnd.ms-powerpoint': ['ppt'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
+      'application/zip': ['zip'],
+      'application/x-rar-compressed': ['rar'],
+      'text/plain': ['txt'],
+      'text/csv': ['csv'],
+      'application/json': ['json']
+    };
+    const allowedExts = mimeToExtMap[fileType];
+    if (!allowedExts || !allowedExts.includes(ext)) {
+      return res.status(400).json({ error: { message: 'File extension does not match the content type.' } });
+    }
+
     // Enforce 100MB total storage quota per user
     const totalSizeData = await PrivateFile.aggregate([
       { $match: { ownerId: req.user._id } },
@@ -57,6 +102,11 @@ router.post('/confirm', async (req, res, next) => {
     const { key, fileName, fileType, size } = req.body;
     if (!key || !fileName || !fileType) return res.status(400).json({ error: { message: 'Missing metadata' } });
 
+    const userPrefix = `private/${req.user._id.toString()}/`;
+    if (!key.startsWith(userPrefix) || key.includes('..') || key.includes('\\') || key.includes('//')) {
+      return res.status(403).json({ error: { message: 'Unauthorized key path' } });
+    }
+
     // Enforce 20MB limit for personal drive file
     const validation = await validateObjectSize(key, 20 * 1024 * 1024);
     if (!validation.valid) {
@@ -73,7 +123,7 @@ router.post('/confirm', async (req, res, next) => {
     const currentTotalSize = totalSizeData.length > 0 ? totalSizeData[0].totalSize : 0;
     if (currentTotalSize + fileSize > 100 * 1024 * 1024) {
       // Clean up the rejected file from S3
-      await deleteObjectByKey(key).catch(err => console.error("Cleanup failed:", err));
+      await deleteObjectByKey(key).catch(err => logger.error({ err }, 'S3 quota-rejected file cleanup failed'));
       return res.status(403).json({ error: { message: 'This upload exceeds your total storage quota of 100MB. Please delete some files first.' } });
     }
 

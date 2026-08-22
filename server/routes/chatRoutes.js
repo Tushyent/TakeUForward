@@ -86,6 +86,7 @@ router.post('/:userId/message', chatCreationLimiter, async (req, res, next) => {
   try {
     const { text } = req.body;
     if (!text || !text.trim()) return res.status(400).json({ error: { message: 'Message text is required' } });
+    if (text.length > 2000) return res.status(400).json({ error: { message: 'Message text must be 2000 characters or fewer' } });
 
     const targetUserId = req.params.userId;
     if (targetUserId === req.user._id.toString()) {
@@ -107,6 +108,12 @@ router.post('/:userId/message', chatCreationLimiter, async (req, res, next) => {
       senderId: req.user._id,
       text
     });
+
+    // Short-term safety limit to prevent document size limit crash.
+    // Trims the array to keep only the 1,000 most recent messages.
+    if (chat.messages.length > 1000) {
+      chat.messages = chat.messages.slice(-1000);
+    }
 
     await chat.save();
 

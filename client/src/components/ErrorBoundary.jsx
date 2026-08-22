@@ -42,13 +42,9 @@ class ErrorBoundary extends React.Component {
             <h1 style={{ color: 'var(--danger)', marginBottom: '16px' }}>Something went wrong</h1>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
               We encountered an unexpected error while rendering this page.
+              Your session and data are safe.
             </p>
-            {this.state.error && (
-              <pre style={{ background: 'var(--bg-elevated)', padding: '12px', borderRadius: '8px', overflowX: 'auto', textAlign: 'left', fontSize: '0.85rem', marginBottom: '24px', color: 'var(--text-muted)' }}>
-                {this.state.error.toString()}
-              </pre>
-            )}
-            <Button onClick={() => window.location.reload()}>
+            <Button id="error-boundary-reload" onClick={() => window.location.reload()}>
               Reload Page
             </Button>
           </Card>

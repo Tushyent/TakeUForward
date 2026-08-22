@@ -1,6 +1,7 @@
 import { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import dotenv from 'dotenv';
+import { logger } from '../utils/logger.js';
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ const s3Client = new S3Client({
 
 export const generatePresignedUrl = async (fileName, fileType) => {
   if (!process.env.AWS_ACCESS_KEY_ID) {
-    console.warn('AWS_ACCESS_KEY_ID is missing. Falling back to local mock S3 upload.');
+    logger.warn('AWS_ACCESS_KEY_ID is missing. Falling back to local mock S3 upload.');
     return {
       uploadUrl: '/api/drive/mock-s3-upload',
       fileUrl: `http://localhost:5000/mock-s3/${Date.now()}-${fileName}`,
@@ -44,7 +45,7 @@ export const generatePresignedUrl = async (fileName, fileType) => {
 
 export const generatePrivateUploadUrl = async (fileName, fileType, userId) => {
   if (!process.env.AWS_ACCESS_KEY_ID) {
-    console.warn('AWS_ACCESS_KEY_ID is missing. Falling back to local mock S3 private upload.');
+    logger.warn('AWS_ACCESS_KEY_ID is missing. Falling back to local mock S3 private upload.');
     return {
       uploadUrl: '/api/drive/mock-s3-upload',
       key: `private/mock/${userId}/${Date.now()}-${fileName}`

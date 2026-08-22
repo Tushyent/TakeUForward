@@ -98,9 +98,12 @@ test.describe('Critical Path E2E', () => {
 
     // Navigate to home page - should be authenticated now
     await page.goto('/home');
-    // ── STEP 2: User A navigates to a community and posts an anonymous question ─
-    // Fetch a community ID directly from the backend to guarantee navigation
-    const commRes = await axios.get(`${API_BASE}/communities`);
+    // Fetch a community ID directly from the backend to guarantee navigation (authenticated request)
+    const commRes = await axios.get(`${API_BASE}/communities`, {
+      headers: {
+        Cookie: setCookieHeaders.map(c => c.split(';')[0]).join('; ')
+      }
+    });
     const targetCommunity = commRes.data[0];
     if (!targetCommunity) throw new Error("No communities found in DB!");
 

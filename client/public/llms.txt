@@ -1,6 +1,6 @@
-# TakeUForward SSN — Campus Community & Mentorship Platform
+# TakeUForward SSN (TUF SSN) — One-Stop Campus Mate & Mentorship Platform
 
-> The ultimate campus community connecting students, seniors, and alumni at SSN College of Engineering.
+> The premier one-stop campus mate and mentorship platform connecting students, seniors, and alumni at SSN College of Engineering.
 
 ## Public Links
 - Main Landing / Sign In: https://takeuforward.blastorz.fun/login

@@ -70,6 +70,13 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       return res.status(400).json({ error: { message: 'Required fields missing or empty' } });
     }
 
+    if (itemName.trim().length > 200) {
+      return res.status(400).json({ error: { message: 'Item name must be 200 characters or fewer' } });
+    }
+    if (description.trim().length > 2000) {
+      return res.status(400).json({ error: { message: 'Description must be 2000 characters or fewer' } });
+    }
+
     const item = await LostFoundItem.create({
       authorId: req.user._id,
       type,
@@ -121,7 +128,8 @@ router.post('/:id/resolve', async (req, res, next) => {
     next(err);
   }
 });
-// DELETE /api/lost-found/:id
+
+// DELETE /api/lost-found/:id
 router.delete('/:id', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
@@ -130,13 +138,13 @@ router.delete('/:id', async (req, res, next) => {
     if (!item) return res.status(404).json({ error: { message: 'Item not found' } });
 
     // Allow deletion if the user is a platform admin OR the original reporter
-    if (!req.user.isPlatformAdmin && item.reporterId.toString() !== req.user._id.toString()) {
+    if (!req.user.isPlatformAdmin && item.authorId.toString() !== req.user._id.toString()) {
       return res.status(403).json({ error: { message: 'Unauthorized to delete this item' } });
     }
 
     await LostFoundItem.findByIdAndDelete(req.params.id);
     
-    const actionDesc = req.user.isPlatformAdmin && item.reporterId.toString() !== req.user._id.toString() 
+    const actionDesc = req.user.isPlatformAdmin && item.authorId.toString() !== req.user._id.toString() 
       ? 'Admin deleted a lost/found item' 
       : 'User deleted their own lost/found item';
     await logActivity({ action: 'delete', resource: 'LostFoundItem', resourceId: req.params.id, description: actionDesc, req });
@@ -149,6 +157,7 @@ router.delete('/:id', async (req, res, next) => {
     next(err);
   }
 });
+
 // POST /api/lost-found/:id/report - Report item
 router.post('/:id/report', reportLimiter, async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });

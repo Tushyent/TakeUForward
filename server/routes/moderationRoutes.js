@@ -200,13 +200,14 @@ router.post('/alumni-requests/:id/approve', requireSystemAdmin, async (req, res,
 
     // 2. Generate invite token
     const inviteToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(inviteToken).digest('hex');
     
     // 3. Add to approved emails
     await ApprovedAlumniEmail.findOneAndUpdate(
       { email: request.email },
       { 
         email: request.email, 
-        inviteToken, 
+        inviteToken: hashedToken, 
         status: 'verified',
         currentCompany: request.currentCompany 
       },

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Zap, ArrowRight, BookOpen, Users, Briefcase } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import Button from '../components/ui/Button';
-import { Input, Textarea } from '../components/ui/Input';
+import { Input, Textarea, Select } from '../components/ui/Input';
 import { useSEO } from '../hooks/useSEO';
 
 /* ---------------------------------------------------------------
@@ -60,15 +60,15 @@ function Login() {
   const navigate = useNavigate();
 
   useSEO({
-    title: 'Sign In - TakeUForward SSN Campus Community',
-    description: 'Sign in to TakeUForward SSN using your @ssn.edu.in account to access campus communities, alumni mentorship, placement notes, and referral requests.',
-    keywords: 'SSN Login, TakeUForward Sign In, SSN Mentorship Login, Campus Community SSN',
+    title: 'Login | TakeUForward SSN - One-Stop Campus Mate',
+    description: 'Sign in to TakeUForward SSN (TUF SSN), the premier one-stop campus mate and mentorship platform for SSN College of Engineering. Connect for placement prep, electives reviews, and alumni referrals.',
+    keywords: 'TakeUForward SSN, TUF SSN, One Stop Campus Mate, SSN Mentorship Platform, Campus Mate SSN, SSN Login, TakeUForward Sign In',
     canonical: 'https://takeuforward.blastorz.fun/login'
   });
 
   const [showAlumniForm, setShowAlumniForm] = useState(false);
   const [alumniFormData, setAlumniFormData] = useState({
-    name: '', email: '', dept: '', graduationYear: '',
+    name: '', email: '', dept: 'CSE', graduationYear: new Date().getFullYear() - 2,
     currentCompany: '', proofLink: '', message: ''
   });
   const [submittingRequest, setSubmittingRequest] = useState(false);
@@ -89,11 +89,14 @@ function Login() {
     e.preventDefault();
     setSubmittingRequest(true);
     try {
-      await axiosClient.post('/auth/alumni/request', alumniFormData);
+      await axiosClient.post('/auth/alumni/request', {
+        ...alumniFormData,
+        graduationYear: parseInt(alumniFormData.graduationYear, 10) || 2024
+      });
       toast.success('Request submitted successfully! Admins will review it soon.');
       setShowAlumniForm(false);
     } catch (err) {
-      toast.error(err.response?.data?.error?.message || 'Failed to submit request');
+      toast.error(err.response?.data?.error || 'Failed to submit request');
     } finally {
       setSubmittingRequest(false);
     }
@@ -274,8 +277,22 @@ function Login() {
             <form onSubmit={handleAlumniSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
               <Input placeholder="Full Name" required value={alumniFormData.name} onChange={e => setAlumniFormData({ ...alumniFormData, name: e.target.value })} />
               <Input type="email" placeholder="Email Address" required value={alumniFormData.email} onChange={e => setAlumniFormData({ ...alumniFormData, email: e.target.value })} />
-              <Input placeholder="Department (e.g. CSE)" required value={alumniFormData.dept} onChange={e => setAlumniFormData({ ...alumniFormData, dept: e.target.value })} />
-              <Input type="number" placeholder="Graduation Year (e.g. 2020)" required value={alumniFormData.graduationYear} onChange={e => setAlumniFormData({ ...alumniFormData, graduationYear: e.target.value })} />
+              <Select
+                required
+                value={alumniFormData.dept}
+                onChange={e => setAlumniFormData({ ...alumniFormData, dept: e.target.value })}
+              >
+                <option value="CSE">CSE</option>
+                <option value="ECE">ECE</option>
+                <option value="EEE">EEE</option>
+                <option value="IT">IT</option>
+                <option value="Mechanical">Mechanical</option>
+                <option value="Chemical">Chemical</option>
+                <option value="Biomedical">Biomedical</option>
+                <option value="Civil">Civil</option>
+                <option value="English">English</option>
+              </Select>
+              <Input type="number" min="2000" max="2029" placeholder="Graduation Year (e.g. 2020)" required value={alumniFormData.graduationYear} onChange={e => setAlumniFormData({ ...alumniFormData, graduationYear: e.target.value })} />
               <Input placeholder="Current Company / Masters Uni" value={alumniFormData.currentCompany} onChange={e => setAlumniFormData({ ...alumniFormData, currentCompany: e.target.value })} />
               <Input placeholder="Proof Link (LinkedIn/Drive)" required value={alumniFormData.proofLink} onChange={e => setAlumniFormData({ ...alumniFormData, proofLink: e.target.value })} />
               <Textarea placeholder="Optional message to admins..." value={alumniFormData.message} onChange={e => setAlumniFormData({ ...alumniFormData, message: e.target.value })} />

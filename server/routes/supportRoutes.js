@@ -11,16 +11,27 @@ const router = express.Router();
 
 // POST /api/support/upload-url
 router.post('/upload-url', supportTicketLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { fileName, fileType } = req.body;
     if (!fileName || !fileType) {
-      return res.status(400).json({ error: 'fileName and fileType are required' });
+      return res.status(400).json({ error: { message: 'fileName and fileType are required' } });
     }
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(fileType)) {
-      return res.status(400).json({ error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed for screenshots.' });
+      return res.status(400).json({ error: { message: 'Invalid file type. Only JPEG, PNG, and WebP are allowed for screenshots.' } });
+    }
+
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    const mimeToExtMap = {
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/png': ['png'],
+      'image/webp': ['webp']
+    };
+    const allowedExts = mimeToExtMap[fileType];
+    if (!allowedExts || !allowedExts.includes(ext)) {
+      return res.status(400).json({ error: { message: 'File extension does not match the content type.' } });
     }
 
     const { uploadUrl, fileUrl } = await generatePresignedUrl(fileName, fileType);
@@ -33,17 +44,29 @@ router.post('/upload-url', supportTicketLimiter, async (req, res, next) => {
 
 // POST /api/support
 router.post('/', supportTicketLimiter, async (req, res, next) => {
-  if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+  if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
     const { title, description, category, pageContext, screenshotUrls, displayNamePublicly } = req.body;
     if (!title || !description || !category) {
-      return res.status(400).json({ error: 'title, description, and category are required' });
+      return res.status(400).json({ error: { message: 'title, description, and category are required' } });
+    }
+
+    if (typeof title !== 'string' || typeof description !== 'string' || typeof category !== 'string') {
+      return res.status(400).json({ error: { message: 'Invalid field types' } });
+    }
+
+    if (title.length > 200) {
+      return res.status(400).json({ error: { message: 'Title must be 200 characters or fewer' } });
+    }
+
+    if (description.length > 5000) {
+      return res.status(400).json({ error: { message: 'Description must be 5000 characters or fewer' } });
     }
 
     if (screenshotUrls && Array.isArray(screenshotUrls) && screenshotUrls.length > 0) {
       if (screenshotUrls.length > 4) {
-        return res.status(400).json({ error: 'Maximum 4 screenshots allowed.' });
+        return res.status(400).json({ error: { message: 'Maximum 4 screenshots allowed.' } });
       }
       for (const url of screenshotUrls) {
         // Extract S3 key from fileUrl
@@ -53,7 +76,7 @@ router.post('/', supportTicketLimiter, async (req, res, next) => {
           const MAX_SIZE = 5 * 1024 * 1024; // 5MB limit for screenshots
           const sizeValidation = await validateObjectSize(key, MAX_SIZE);
           if (!sizeValidation.valid) {
-            return res.status(400).json({ error: sizeValidation.error || 'A file size exceeds the 5MB limit. Upload discarded.' });
+            return res.status(400).json({ error: { message: sizeValidation.error || 'A file size exceeds the 5MB limit. Upload discarded.' } });
           }
         }
       }
@@ -140,12 +163,12 @@ router.patch('/:id/status', requireSystemAdmin, async (req, res, next) => {
     const { status, adminNotes } = req.body;
     
     if (!status) {
-      return res.status(400).json({ error: 'status is required' });
+      return res.status(400).json({ error: { message: 'status is required' } });
     }
 
     const validStatuses = ['open', 'in_progress', 'resolved', 'wont_fix'];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Invalid status' });
+      return res.status(400).json({ error: { message: 'Invalid status' } });
     }
 
     const updateData = { status };
@@ -160,7 +183,7 @@ router.patch('/:id/status', requireSystemAdmin, async (req, res, next) => {
     ).populate('authorId', 'name username handle email role');
 
     if (!ticket) {
-      return res.status(404).json({ error: 'Ticket not found' });
+      return res.status(404).json({ error: { message: 'Ticket not found' } });
     }
 
     await logActivity({ action: 'update', resource: 'SupportTicket', resourceId: ticket._id, description: `Updated ticket status to ${req.body.status}`, req });
@@ -178,19 +201,19 @@ router.post('/:id/reply', requireSystemAdmin, async (req, res, next) => {
     const { replyText, updateStatusTo } = req.body;
     
     if (!replyText) {
-      return res.status(400).json({ error: 'replyText is required' });
+      return res.status(400).json({ error: { message: 'replyText is required' } });
     }
 
     const ticket = await SupportTicket.findById(req.params.id)
       .populate('authorId', 'name email');
 
     if (!ticket) {
-      return res.status(404).json({ error: 'Ticket not found' });
+      return res.status(404).json({ error: { message: 'Ticket not found' } });
     }
 
     const recipientEmail = ticket.authorId?.email;
     if (!recipientEmail) {
-      return res.status(400).json({ error: 'Ticket author has no email address' });
+      return res.status(400).json({ error: { message: 'Ticket author has no email address' } });
     }
 
     // Attempt to send in-app notification
@@ -242,7 +265,7 @@ router.delete('/:id', requireSystemAdmin, async (req, res, next) => {
   try {
     const ticket = await SupportTicket.findByIdAndDelete(req.params.id);
     if (!ticket) {
-      return res.status(404).json({ error: 'Ticket not found' });
+      return res.status(404).json({ error: { message: 'Ticket not found' } });
     }
     
     await logActivity({ 

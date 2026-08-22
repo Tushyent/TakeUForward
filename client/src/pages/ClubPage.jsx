@@ -10,6 +10,7 @@ import Badge from '../components/ui/Badge';
 import { Input, Textarea, Select } from '../components/ui/Input';
 import EmptyState from '../components/ui/EmptyState';
 import { AlertCircle, BellOff } from 'lucide-react';
+import useSEO from '../hooks/useSEO';
 
 function ClubPage() {
   const { id } = useParams();
@@ -26,6 +27,13 @@ function ClubPage() {
   const [newContent, setNewContent] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useSEO({
+    title: club ? `${club.name}` : 'Loading Club... - TakeUForward SSN',
+    description: club ? club.description : 'SSN student club profile and announcements.',
+    keywords: club ? `${club.name}, SSN Clubs, ${club.name} Announcements` : 'SSN Clubs',
+    canonical: `https://takeuforward.blastorz.fun/clubs/${id}`
+  });
 
   const fetchData = React.useCallback(async () => {
     try {

@@ -15,6 +15,7 @@ import { ThumbsUp, Send, Bookmark, Flag, MessageSquare, Trash2 } from 'lucide-re
 import { useAuth } from '../context/auth-context';
 import EmptyState from '../components/ui/EmptyState';
 import ReportModal from '../components/ui/ReportModal';
+import useSEO from '../hooks/useSEO';
 
 function CommunityPosts() {
   const { id } = useParams();
@@ -23,6 +24,7 @@ function CommunityPosts() {
   const searchParams = React.useMemo(() => new URLSearchParams(location.search), [location.search]);
   const targetPostId = searchParams.get('post');
   const targetCommentId = searchParams.get('comment');
+
   const [community, setCommunity] = useState(null);
   const [posts, setPosts] = useState([]);
   const [newPostContent, setNewPostContent] = useState('');
@@ -33,6 +35,13 @@ function CommunityPosts() {
   const [loading, setLoading] = useState(true);
   const [reportingId, setReportingId] = useState(null);
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
+
+  useSEO({
+    title: community ? `${community.name} Feed` : 'Community Feed - TakeUForward SSN',
+    description: community ? `Read discussions, ask questions, and share information inside the ${community.name} community feed.` : 'SSN community discussion posts.',
+    keywords: community ? `${community.name}, SSN Communities, Q&A, Class Discussion` : 'SSN Communities',
+    canonical: `https://takeuforward.blastorz.fun/community/${id}`
+  });
 
   const fetchPosts = React.useCallback(async () => {
     try {

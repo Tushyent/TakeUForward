@@ -37,3 +37,6 @@ migrations/
 
 # Local test HTML files
 client/public/test-*.html
+
+# Workspace reference documents
+docs/

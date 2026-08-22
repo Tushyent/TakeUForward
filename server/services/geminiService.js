@@ -2,6 +2,7 @@ import { getGeminiModel } from '../config/gemini.js';
 import axios from 'axios';
 import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { logger } from '../utils/logger.js';
+import { validateS3Url } from '../utils/urlValidator.js';
 
 /**
  * Summarizes an academic resource using Google Gemini API.
@@ -18,8 +19,16 @@ export const summarizeResource = async (title, courseCode, tags, fileUrl) => {
     let extractedText = '';
 
     if (isPdf) {
+      if (!validateS3Url(fileUrl)) {
+        throw new Error('SSRF Blocked: URL does not match approved S3 bucket domain');
+      }
       try {
-        const response = await axios.get(fileUrl, { responseType: 'arraybuffer' });
+        const response = await axios.get(fileUrl, { 
+          responseType: 'arraybuffer',
+          timeout: 5000, // 5 seconds timeout
+          maxRedirects: 0, // Prevent redirect-based SSRF bypass
+          maxContentLength: 10 * 1024 * 1024 // Limit to 10MB to prevent OOM/DOS
+        });
         const pdfData = await pdfParse(response.data);
         
         extractedText = pdfData.text || '';

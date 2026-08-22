@@ -40,48 +40,86 @@ const CAMPUS_LINKS = [
 
 const renderGrid = (title, items, icon) => (
   <div style={{ marginBottom: 'var(--space-8)' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 'var(--space-5)' }}>
-      {icon}
-      <h3 style={{ fontSize: 'var(--text-lg)', margin: 0 }}>{title}</h3>
+    <div style={{ marginBottom: 'var(--space-5)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{
+          width: 32,
+          height: 32,
+          borderRadius: 'var(--radius-md)',
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'var(--primary)',
+          flexShrink: 0
+        }}>
+          {icon}
+        </div>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em', color: '#fff' }}>
+          {title}
+        </h3>
+      </div>
     </div>
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(155px, 1fr))',
-      gap: 'var(--space-4)',
-    }}>
+    <div className="dashboard-grid">
       {items.map(({ to, icon: Icon, label, desc, color }) => (
         <Link to={to} key={label} style={{ textDecoration: 'none' }}>
-          <Card
-            lift
-            accent={color}
+          <div
+            className="dashboard-grid-card"
             style={{
-              height: '100%',
-              display: 'flex',
-              flexDirection: 'column',
+              '--card-accent-color': color,
+              '--card-accent-color-glow': `${color}1c`,
             }}
           >
+            {/* Background color glow effect on card */}
+            <div style={{
+              position: 'absolute',
+              top: -40,
+              right: -40,
+              width: 100,
+              height: 100,
+              borderRadius: '50%',
+              background: `radial-gradient(circle, ${color}12 0%, transparent 70%)`,
+              pointerEvents: 'none'
+            }} />
+
+            {/* Glowing Icon Capsule */}
             <div style={{
               width: 44,
               height: 44,
-              borderRadius: 'var(--radius-md)',
-              background: `${color}28`,
-              border: `1px solid ${color}55`,
+              borderRadius: 'var(--radius-lg)',
+              background: `linear-gradient(135deg, ${color}1c 0%, ${color}04 100%)`,
+              border: `1px solid ${color}33`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: 'var(--space-5)',
+              transition: 'transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s',
             }}
-              className="grid-card-icon"
+              className="grid-icon-glow"
             >
-              <Icon size={24} color={color} />
+              <Icon size={22} color={color} />
             </div>
-            <p style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
+            
+            <h4 style={{ 
+              fontSize: 'var(--text-sm)', 
+              fontWeight: 650, 
+              color: '#fff', 
+              margin: '0 0 6px 0',
+              letterSpacing: '-0.01em'
+            }}>
               {label}
-            </p>
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', margin: 0, lineHeight: 1.5 }}>
+            </h4>
+            
+            <p style={{ 
+              fontSize: 'var(--text-xs)', 
+              color: 'var(--text-secondary)', 
+              margin: 0, 
+              lineHeight: 1.45 
+            }}>
               {desc}
             </p>
-          </Card>
+          </div>
         </Link>
       ))}
     </div>
@@ -121,7 +159,8 @@ const InitialsAvatar = ({ name, size = 44 }) => {
       width: size,
       height: size,
       borderRadius: 'var(--radius-full)',
-      background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
+      background: 'var(--primary)',
+      border: '1.5px solid var(--border-strong)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -213,64 +252,40 @@ function Home() {
 
         <div
           onClick={() => navigate('/settings/profile')}
-          style={{
-            position: 'relative',
-            borderRadius: 'var(--radius-xl)',
-            padding: 'var(--space-8)',
-            marginBottom: 'var(--space-6)',
-            background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
-            border: '1px solid rgba(124,106,247,0.25)',
-            boxShadow: '0 0 40px rgba(124,106,247,0.10)',
-            overflow: 'hidden',
-            cursor: 'pointer',
-          }}>
-          {/* Decorative gradient blob */}
-          <div style={{
-            position: 'absolute',
-            top: -60,
-            right: -60,
-            width: 220,
-            height: 220,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(124,106,247,0.25) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }} />
-          <div style={{
-            position: 'absolute',
-            bottom: -40,
-            left: 80,
-            width: 160,
-            height: 160,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(249,115,22,0.12) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }} />
-
+          className="dashboard-welcome-card"
+        >
           {/* Content */}
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-5)' }}>
+            <div className="dashboard-welcome-header">
               {user?.picture ? (
                 <img
                   src={user.picture}
                   alt={user.name}
                   referrerPolicy="no-referrer"
-                  style={{ width: 52, height: 52, borderRadius: 'var(--radius-full)', border: '2px solid var(--primary)', objectFit: 'cover' }}
+                  style={{
+                    width: 54,
+                    height: 54,
+                    borderRadius: 'var(--radius-full)',
+                    border: '1.5px solid var(--border-strong)',
+                    objectFit: 'cover',
+                    flexShrink: 0
+                  }}
                 />
               ) : (
-                <InitialsAvatar name={user?.name} size={52} />
+                <InitialsAvatar name={user?.name} size={54} />
               )}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                  <h1 style={{ fontSize: 'var(--text-2xl)', margin: 0 }}>
+                  <h1 style={{ fontSize: 'var(--text-xl)', margin: 0, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
                     Hey, {user?.name?.split(' ')[0] || 'there'} 👋
                   </h1>
                 </div>
-                <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-2)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 'var(--space-2)', marginTop: 'var(--space-3)', flexWrap: 'wrap' }}>
                   <Badge variant={user?.isPlatformAdmin ? 'danger' : user?.role === 'alumni' ? 'accent' : 'primary'}>
                     {user?.role?.replace('_', ' ')}
                   </Badge>
                   {user?.dept && <Badge variant="secondary">{user.dept}</Badge>}
-                  {user?.year && <Badge variant="secondary">Class of {user.year}</Badge>}
+                  {user?.year && <Badge variant="secondary">{user.year}</Badge>}
                   {user?.currentCompany && <Badge variant="success">{user.currentCompany}</Badge>}
                 </div>
               </div>
@@ -280,9 +295,9 @@ function Home() {
               color: 'var(--text-secondary)',
               fontSize: 'var(--text-sm)',
               margin: 0,
-              lineHeight: 1.7,
+              lineHeight: 1.6,
             }}>
-              Welcome back to <strong style={{ color: 'var(--text-primary)' }} className="home-brand-name">TakeUForward</strong> - your campus community for academics, placements, and everything in between.
+              Welcome back to <strong style={{ color: 'var(--primary)', fontWeight: 700 }}>TakeUForward</strong> — your campus community for academics, placements, and everything in between.
             </p>
           </div>
         </div>

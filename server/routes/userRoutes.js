@@ -1,6 +1,7 @@
 import express from 'express';
 import { logActivity } from '../services/activityLogger.js';
 import User from '../models/User.js';
+import { sanitizeUser } from '../utils/sanitizeUser.js';
 
 const router = express.Router();
 
@@ -46,16 +47,25 @@ router.get('/contacts', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 
   try {
-    const users = await User.find({
+    const usersData = await User.find({
       _id: { $ne: req.user._id },
       $or: [
         { email: { $regex: /@ssn\.edu\.in$/i } },
         { isPlatformAdmin: true }
       ]
     })
-      .select('name handle email dept role isVerifiedAlumni isPlatformAdmin')
+      .select('name handle email dept role isVerifiedAlumni isPlatformAdmin profileVisibility')
       .sort({ isPlatformAdmin: -1, name: 1 })
       .lean();
+
+    const users = usersData.map(u => {
+      const uObj = { ...u };
+      if (uObj.profileVisibility && uObj.profileVisibility.showEmail === false) {
+        delete uObj.email;
+      }
+      delete uObj.profileVisibility;
+      return uObj;
+    });
 
     res.json(users);
   } catch (err) {
@@ -134,7 +144,8 @@ router.patch('/me/profile', async (req, res, next) => {
 
     await user.save();
     await logActivity({ action: 'update', resource: 'User', resourceId: req.user._id, description: 'Updated user profile', req, details: { updatedFields: Object.keys(req.body) } });
-    res.json(user);
+    // Use sanitizeUser to avoid returning googleId, pushSubscriptions, or other internals.
+    res.json(sanitizeUser(user));
   } catch (err) {
     next(err);
   }

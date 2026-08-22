@@ -1,4 +1,14 @@
-export const SYSTEM_ADMIN_EMAIL = 'takeuforwardssn@gmail.com';
+import { logger } from './logger.js';
+
+// Read from environment for rotation without a code deploy.
+// The embedded fallback maintains backward compatibility — set SYSTEM_ADMIN_EMAIL in production.
+export const SYSTEM_ADMIN_EMAIL = (
+  process.env.SYSTEM_ADMIN_EMAIL || 'takeuforwardssn@gmail.com'
+).trim().toLowerCase();
+
+if (process.env.NODE_ENV === 'production' && !process.env.SYSTEM_ADMIN_EMAIL) {
+  logger.warn('SYSTEM_ADMIN_EMAIL env var not set. Using embedded default. Set it for easy rotation without redeploy.');
+}
 
 export const normalizeEmail = (email = '') => String(email).trim().toLowerCase();
 

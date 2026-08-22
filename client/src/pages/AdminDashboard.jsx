@@ -40,23 +40,35 @@ const TabButton = ({ active, label, icon: Icon, onClick }) => (
   </button>
 );
 
-const StatCard = ({ icon: Icon, label, value, variant = 'primary' }) => (
-  <Card>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-      <div style={{
-        width: 40, height: 40, borderRadius: 'var(--radius-sm)',
-        background: 'var(--bg-input)', display: 'flex',
-        alignItems: 'center', justifyContent: 'center',
-      }}>
-        <Icon size={18} color={`var(--${variant})`} />
+const StatCard = ({ icon: Icon, label, value, variant = 'primary' }) => {
+  const bgColors = {
+    primary: 'rgba(124, 106, 247, 0.08)',
+    info: 'rgba(96, 165, 250, 0.08)',
+    danger: 'rgba(248, 113, 113, 0.08)',
+    warning: 'rgba(251, 191, 36, 0.08)',
+    secondary: 'rgba(156, 163, 175, 0.08)',
+  };
+  return (
+    <Card style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: 'var(--space-5)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 'var(--radius-md)',
+          background: bgColors[variant] || bgColors.primary,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <Icon size={20} color={`var(--${variant})`} />
+        </div>
+        <div>
+          <p style={{ margin: '0 0 2px 0', color: 'var(--text-secondary)', fontSize: 'var(--text-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</p>
+          <strong style={{ fontSize: 'var(--text-xl)', color: '#fff', fontWeight: 800 }}>{value}</strong>
+        </div>
       </div>
-      <div>
-        <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>{label}</p>
-        <strong style={{ fontSize: 'var(--text-xl)' }}>{value}</strong>
-      </div>
-    </div>
-  </Card>
-);
+    </Card>
+  );
+};
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -343,7 +355,7 @@ const AdminDashboard = () => {
 
   const renderOverview = () => (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+      <div className="admin-stats-grid">
         <StatCard icon={Users} label="Users" value={overview?.users ?? '-'} />
         <StatCard icon={FileText} label="Posts" value={overview?.posts ?? '-'} />
         <StatCard icon={BookOpen} label="Resources" value={overview?.resources ?? '-'} variant="info" />

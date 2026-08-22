@@ -8,10 +8,19 @@ import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 import EmptyState from '../components/ui/EmptyState';
 import { UserX, MessageSquare, FileText, Briefcase } from 'lucide-react';
 import Button from '../components/ui/Button';
+import useSEO from '../hooks/useSEO';
 
 function PublicProfile() {
   const { username } = useParams();
   const [profile, setProfile] = useState(null);
+
+  useSEO({
+    title: profile ? `${profile.name} (@${profile.username})` : 'Public Profile - TakeUForward SSN',
+    description: profile ? `View public academic profile, skills, and projects of ${profile.name} (@${profile.username}) on the TakeUForward SSN campus network.` : 'SSN campus public profile.',
+    keywords: profile ? `${profile.name}, @${profile.username}, SSN Profile, SSN Alumni, SSN Student` : 'SSN Profile',
+    canonical: `https://takeuforward.blastorz.fun/profile/${username}`
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [myUsername, setMyUsername] = useState(null);

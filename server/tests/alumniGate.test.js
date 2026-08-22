@@ -5,7 +5,7 @@ describe('requireApprovedUser middleware', () => {
     // We call the middleware directly since supertest can't inject req.user
     const mockReq = {
       isAuthenticated: () => true,
-      user: { role: 'alumni', isVerifiedAlumni: false },
+      user: { role: 'alumni', isVerifiedAlumni: false, isApproved: true, isPlatformAdmin: false },
       originalUrl: '/api/posts/test'
     };
     const mockRes = {
@@ -25,7 +25,7 @@ describe('requireApprovedUser middleware', () => {
     let calledNext = false;
     const mockReq = {
       isAuthenticated: () => true,
-      user: { role: 'alumni', isVerifiedAlumni: false },
+      user: { role: 'alumni', isVerifiedAlumni: false, isApproved: true, isPlatformAdmin: false },
       originalUrl: '/api/auth/me'
     };
     requireApprovedUser(mockReq, { status: () => ({ json: () => {} }) }, () => {
@@ -38,7 +38,7 @@ describe('requireApprovedUser middleware', () => {
     let calledNext = false;
     const mockReq = {
       isAuthenticated: () => true,
-      user: { role: 'alumni', isVerifiedAlumni: true },
+      user: { role: 'alumni', isVerifiedAlumni: true, isApproved: true, isPlatformAdmin: false },
       originalUrl: '/api/posts/test'
     };
     requireApprovedUser(mockReq, { status: () => ({ json: () => {} }) }, () => {
@@ -51,7 +51,7 @@ describe('requireApprovedUser middleware', () => {
     let calledNext = false;
     const mockReq = {
       isAuthenticated: () => true,
-      user: { role: 'student', isVerifiedAlumni: false },
+      user: { role: 'student', isVerifiedAlumni: false, isApproved: true, isPlatformAdmin: false },
       originalUrl: '/api/posts/test'
     };
     requireApprovedUser(mockReq, { status: () => ({ json: () => {} }) }, () => {
@@ -64,12 +64,71 @@ describe('requireApprovedUser middleware', () => {
     let calledNext = false;
     const mockReq = {
       isAuthenticated: () => true,
-      user: { role: 'club_admin', isVerifiedAlumni: false },
+      user: { role: 'club_admin', isVerifiedAlumni: false, isApproved: true, isPlatformAdmin: false },
       originalUrl: '/api/posts/test'
     };
     requireApprovedUser(mockReq, { status: () => ({ json: () => {} }) }, () => {
       calledNext = true;
     });
     expect(calledNext).toBe(true);
+  });
+});
+
+describe('alumni request-status route handler', () => {
+  const mockStatusHandler = async (req, res, next, mockFindOne) => {
+    try {
+      if (!req.isAuthenticated || !req.isAuthenticated()) {
+        return res.status(401).json({ error: { message: 'Not authenticated' } });
+      }
+      const request = await mockFindOne({ email: req.user.email });
+      res.json({ hasRequest: !!request, status: request ? request.status : null });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  it('rejects unauthenticated requests with 401', async () => {
+    const mockReq = {
+      isAuthenticated: () => false
+    };
+    const mockRes = {
+      status: (code) => {
+        expect(code).toBe(401);
+        return {
+          json: (body) => {
+            expect(body.error.message).toBe('Not authenticated');
+          }
+        };
+      }
+    };
+    await mockStatusHandler(mockReq, mockRes, () => {}, () => null);
+  });
+
+  it('returns hasRequest false when no request exists', async () => {
+    const mockReq = {
+      isAuthenticated: () => true,
+      user: { email: 'newalumni@gmail.com' }
+    };
+    const mockRes = {
+      json: (body) => {
+        expect(body.hasRequest).toBe(false);
+        expect(body.status).toBeNull();
+      }
+    };
+    await mockStatusHandler(mockReq, mockRes, () => {}, () => null);
+  });
+
+  it('returns hasRequest true and its status when a request exists', async () => {
+    const mockReq = {
+      isAuthenticated: () => true,
+      user: { email: 'pendingalumni@gmail.com' }
+    };
+    const mockRes = {
+      json: (body) => {
+        expect(body.hasRequest).toBe(true);
+        expect(body.status).toBe('pending');
+      }
+    };
+    await mockStatusHandler(mockReq, mockRes, () => {}, async () => ({ email: 'pendingalumni@gmail.com', status: 'pending' }));
   });
 });

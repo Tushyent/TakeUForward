@@ -1,3 +1,4 @@
+import './config/env.js'; // Validate environment variables immediately
 import express from 'express';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
@@ -12,8 +13,11 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
 import pinoHttp from 'pino-http';
 import { logger } from './utils/logger.js';
+import { sanitizeQuery } from './middleware/sanitizeQuery.js';
 import mongoose from 'mongoose';
 import './config/passport.js'; // initialize passport
+import { requireAuth } from './middleware/requireAuth.js';
+import { csrfProtection } from './middleware/csrfProtection.js';
 
 import authRoutes from './routes/authRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
@@ -45,6 +49,17 @@ import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
+// ─── Production startup guards ───────────────────────────────────────────────
+// Fail fast on missing critical secrets rather than silently running insecure.
+if (process.env.NODE_ENV === 'production') {
+  const requiredProdVars = ['SESSION_SECRET', 'MONGODB_URI', 'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
+  const missing = requiredProdVars.filter(v => !process.env[v]);
+  if (missing.length > 0) {
+    console.error(`FATAL: Missing required production environment variables: ${missing.join(', ')}. Exiting.`);
+    process.exit(1);
+  }
+}
+
 const app = express();
 
 // Middleware & Security Headers
@@ -57,7 +72,11 @@ app.use((req, res, next) => {
   next();
 });
 app.use(compression()); // GZIP compression for faster API responses
-app.use(express.json());
+// Explicit body size limit prevents storage/bandwidth-DOS from oversized payloads.
+// Field-level content limits are enforced per-route in addition to this.
+app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: true, limit: '100kb' }));
+app.use(sanitizeQuery);
 app.use(pinoHttp({
   logger,
   serializers: {
@@ -103,8 +122,8 @@ app.use(cors({
       return callback(null, true);
     }
 
-    // Allow Vercel preview deployments for this project (e.g. *-tushyents-projects.vercel.app)
-    if (/^https:\/\/takeuforward.*\.vercel\.app$/.test(origin)) {
+    // Allow Vercel preview deployments for this project (strictly under the tushyents-projects scope)
+    if (/^https:\/\/takeuforward-[a-z0-9\-]+-tushyents-projects\.vercel\.app$/.test(origin)) {
       return callback(null, true);
     }
 
@@ -116,9 +135,12 @@ app.use(cors({
 
 // Session Middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev_secret',
+  // SESSION_SECRET must be set in production (enforced above in startup guards).
+  // The dev fallback is only reached in development/test environments.
+  secret: process.env.SESSION_SECRET || 'dev_secret_change_me_in_production',
   resave: false,
   saveUninitialized: false,
+  rolling: true,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/takeuforward_dev',
     dbName: process.env.MONGODB_DB_NAME || (process.env.NODE_ENV === 'production' ? 'takeuforward' : 'takeuforward_dev'),
@@ -136,9 +158,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Enforce CSRF origin checks on state-changing requests globally
+app.use('/api', csrfProtection);
+
 // Routes
 app.use('/api', apiLimiter);
 app.use('/api/auth', authRoutes);
+
+// Enforce authentication on all /api routes.
+// Per-route isAuthenticated() checks below are defense-in-depth; this is the primary gate.
+app.use('/api', requireAuth);
 
 // Block unverified alumni from accessing any API except auth routes
 import { requireApprovedUser } from './middleware/requireApprovedUser.js';

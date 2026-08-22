@@ -16,7 +16,11 @@ router.get('/', async (req, res, next) => {
     const query = {};
     if (category) query.category = category;
     if (status) query.status = status;
-    if (search) query.title = { $regex: search, $options: 'i' };
+    if (search) {
+      // Escape user-controlled regex metacharacters to prevent ReDoS.
+      const safeSearch = String(search).slice(0, 200).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.title = { $regex: new RegExp(safeSearch, 'i') };
+    }
 
     const items = await MarketplaceItem.find(query)
       .populate('sellerId', 'name username dept year handle')
@@ -38,6 +42,13 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
     
     if (!title || !description || !category || price === undefined || !condition) {
       return res.status(400).json({ error: { message: 'All fields are required' } });
+    }
+
+    if (title.length > 200) {
+      return res.status(400).json({ error: { message: 'Title must be 200 characters or fewer' } });
+    }
+    if (description.length > 2000) {
+      return res.status(400).json({ error: { message: 'Description must be 2000 characters or fewer' } });
     }
 
     const validCategories = ['book', 'cycle', 'electronics', 'other'];
@@ -133,7 +144,8 @@ router.post('/:id/report', reportLimiter, async (req, res, next) => {
     next(err);
   }
 });
-// DELETE /api/marketplace/:id
+
+// DELETE /api/marketplace/:id
 router.delete('/:id', async (req, res, next) => {
   if (!req.isAuthenticated()) return res.status(401).json({ error: { message: 'Not authenticated' } });
 

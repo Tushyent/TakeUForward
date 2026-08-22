@@ -1,0 +1,58 @@
+name: TakeUForward CI
+
+on:
+  push:
+    branches: [ main, master, dev ]
+  pull_request:
+    branches: [ main, master, dev ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Root Dependencies
+        run: npm install
+
+      - name: Install Server Dependencies
+        working-directory: ./server
+        run: npm ci
+
+      - name: Install Client Dependencies
+        working-directory: ./client
+        run: npm ci
+
+      - name: Run Server Linter
+        working-directory: ./server
+        run: npm run lint
+
+      - name: Run Server Tests
+        working-directory: ./server
+        run: npm test
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://localhost:27017/takeuforward_test
+          SESSION_SECRET: ci_test_session_secret_long_enough_32_characters
+
+      - name: Run Client Linter
+        working-directory: ./client
+        run: npm run lint
+
+      - name: Build Client SPA
+        working-directory: ./client
+        run: npm run build

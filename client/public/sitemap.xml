@@ -23,13 +23,6 @@
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
-  <!-- Alumni Invite & Verification Portal -->
-  <url>
-    <loc>https://takeuforward.blastorz.fun/alumni-invite</loc>
-    <lastmod>2026-08-01</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
   <!-- Support & Helpdesk -->
   <url>
     <loc>https://takeuforward.blastorz.fun/support</loc>

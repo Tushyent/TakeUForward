@@ -6,6 +6,8 @@ import { useAuth } from './context/auth-context';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
 import Spinner from './components/ui/Spinner';
+import SEOManager from './components/SEOManager';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const Login = lazy(() => import('./pages/Login'));
 const PendingApproval = lazy(() => import('./pages/PendingApproval'));
@@ -55,6 +57,8 @@ function App() {
       <Toaster position="top-right" />
       <AuthProvider>
         <Router>
+          <SEOManager />
+          <ErrorBoundary>
           <Suspense fallback={<Spinner text="Loading page..." />}>
             <Routes>
               {/* Public Routes */}
@@ -106,6 +110,7 @@ function App() {
               } />
             </Routes>
           </Suspense>
+          </ErrorBoundary>
         </Router>
       </AuthProvider>
     </>

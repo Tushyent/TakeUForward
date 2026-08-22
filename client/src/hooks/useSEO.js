@@ -10,7 +10,9 @@ import { useEffect } from 'react';
  * @param {string} [options.canonical] - Dynamic canonical URL
  * @param {string} [options.ogImage] - Dynamic OpenGraph image URL
  */
-export function useSEO({ title, description, keywords, canonical, ogImage }) {
+export function useSEO({ title, description, keywords, canonical, ogImage, structuredData }) {
+  const serializedData = structuredData ? JSON.stringify(structuredData) : '';
+
   useEffect(() => {
     // 1. Update document title
     if (title) {
@@ -55,7 +57,28 @@ export function useSEO({ title, description, keywords, canonical, ogImage }) {
       }
       canonicalElement.setAttribute('href', canonical);
     }
-  }, [title, description, keywords, canonical, ogImage]);
+
+    // 7. Update Dynamic JSON-LD Structured Data
+    if (serializedData) {
+      const existingData = document.getElementById('seo-structured-data');
+      if (existingData) {
+        existingData.remove();
+      }
+      const ldJsonElement = document.createElement('script');
+      ldJsonElement.setAttribute('type', 'application/ld+json');
+      ldJsonElement.setAttribute('id', 'seo-structured-data');
+      ldJsonElement.textContent = serializedData;
+      document.head.appendChild(ldJsonElement);
+    }
+
+    return () => {
+      // Clean up dynamic structured data
+      const existingData = document.getElementById('seo-structured-data');
+      if (existingData) {
+        existingData.remove();
+      }
+    };
+  }, [title, description, keywords, canonical, ogImage, serializedData]);
 }
 
 export default useSEO;

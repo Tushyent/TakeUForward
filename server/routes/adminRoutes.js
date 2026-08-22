@@ -99,7 +99,7 @@ router.post('/marketing-email', requireSystemAdmin, async (req, res, next) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+      return res.status(400).json({ error: { message: 'Email is required' } });
     }
 
     const { sendEmail, buildEmailFooter } = await import('../config/mailer.js');

@@ -8,16 +8,26 @@ import { Input } from '../components/ui/Input';
 import VerifiedAlumniBadge from '../components/VerifiedAlumniBadge';
 import EmptyState from '../components/ui/EmptyState';
 import { AlertCircle } from 'lucide-react';
+import useSEO from '../hooks/useSEO';
 
 function ChatThread() {
   const { userId } = useParams();
   const [chat, setChat] = useState(null);
+
   const [text, setText] = useState('');
   const [error, setError] = useState(null);
   const [myUserId, setMyUserId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const messagesEndRef = useRef(null);
+
+  const otherUser = chat?.participants?.find(p => p._id !== myUserId);
+
+  useSEO({
+    title: otherUser ? `Chat with ${otherUser.name}` : 'Private Conversation - TakeUForward SSN',
+    description: otherUser ? `Private chat conversation with ${otherUser.name} on TakeUForward SSN.` : 'SSN campus private chat thread.',
+    keywords: otherUser ? `Chat, Messages, ${otherUser.name}, TakeUForward` : 'SSN Chat',
+    canonical: `https://takeuforward.blastorz.fun/chat/${userId}`
+  });
 
   useEffect(() => {
     axiosClient.get('/auth/me').then(res => setMyUserId(res.data.user._id)).catch(console.error);
@@ -63,7 +73,7 @@ function ChatThread() {
   if (error) return <div><EmptyState icon={AlertCircle} title="Error" message={error} action={{ label: 'Retry', onClick: fetchChat }} style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} /></div>;
   if (!chat) return <div><Spinner text="Loading chat..." /></div>;
 
-  const otherUser = chat.participants.find(p => p._id !== myUserId);
+  // otherUser defined above using optional chaining to support initial state
 
   return (
     <div className="page-transition">

@@ -28,6 +28,10 @@ router.post('/', postCreationLimiter, async (req, res, next) => {
       return res.status(400).json({ error: { message: 'communityId and content are required' } });
     }
 
+    if (content.length > 5000) {
+      return res.status(400).json({ error: { message: 'Post content must be 5000 characters or fewer' } });
+    }
+
     const communityExists = await Community.findById(communityId);
     if (!communityExists) {
       return res.status(400).json({ error: { message: 'Invalid communityId' } });
@@ -190,6 +194,7 @@ router.post('/:id/comment', postCreationLimiter, async (req, res, next) => {
   try {
     const { text, isAnonymous } = req.body;
     if (!text || !text.trim()) return res.status(400).json({ error: { message: 'Comment text is required' } });
+    if (text.length > 2000) return res.status(400).json({ error: { message: 'Comment text must be 2000 characters or fewer' } });
 
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ error: { message: 'Post not found' } });
