@@ -118,7 +118,7 @@ const PendingApproval = () => {
                 }}>
                   <UserCheck size={32} color="var(--primary)" />
                 </div>
-                <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: '0 0 8px 0', color: '#fff' }}>
+                <h1 style={{ fontSize: 'var(--text-xl)', fontWeight: 700, margin: '0 0 8px 0', color: 'var(--text-primary)' }}>
                   Alumni Access Request
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', margin: 0, lineHeight: 1.5 }}>
@@ -242,7 +242,7 @@ const PendingApproval = () => {
                 <Clock size={36} color="var(--warning)" />
               </div>
 
-              <h1 style={{ marginBottom: 'var(--space-2)', fontSize: 'var(--text-xl)', color: '#fff', fontWeight: 700 }}>
+              <h1 style={{ marginBottom: 'var(--space-2)', fontSize: 'var(--text-xl)', color: 'var(--text-primary)', fontWeight: 700 }}>
                 Verification Request Pending
               </h1>
 

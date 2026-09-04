@@ -120,7 +120,7 @@ function MockInterviews() {
             }}>
               <UserCheck size={20} />
             </div>
-            <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: '#fff' }}>
+            <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
               Mock Interview & Resume Pairing
             </h1>
           </div>
@@ -133,10 +133,10 @@ function MockInterviews() {
         {isStudent && (
           <Card style={{ 
             marginBottom: 'var(--space-8)', 
-            border: '1px solid rgba(124, 106, 247, 0.2)', 
+            border: '1px solid var(--border)', 
             background: 'var(--bg-surface)' 
           }}>
-            <h3 style={{ marginTop: 0, marginBottom: 'var(--space-4)', fontSize: 'var(--text-base)', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <h3 style={{ marginTop: 0, marginBottom: 'var(--space-4)', fontSize: 'var(--text-base)', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Plus size={16} color="var(--primary)" />
               Request Interview/Resume Prep
             </h3>
@@ -171,7 +171,7 @@ function MockInterviews() {
         {/* --- My Requests Section (Students only) --- */}
         {isStudent && myRequests.length > 0 && (
           <div style={{ marginBottom: 'var(--space-8)' }}>
-            <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)', color: '#fff' }}>
+            <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, marginBottom: 'var(--space-4)', color: 'var(--text-primary)' }}>
               My Requests
             </h2>
             <div className="responsive-card-grid-320">
@@ -194,7 +194,7 @@ function MockInterviews() {
                         width: 32,
                         height: 32,
                         borderRadius: 'var(--radius-sm)',
-                        background: 'rgba(255,255,255,0.03)',
+                        background: 'var(--bg-elevated)',
                         border: '1px solid var(--border)',
                         display: 'flex',
                         alignItems: 'center',
@@ -203,7 +203,7 @@ function MockInterviews() {
                       }}>
                         <BookOpen size={14} />
                       </div>
-                      <h3 style={{ margin: 0, fontSize: 'var(--text-md)', fontWeight: 700, color: '#fff' }}>{req.targetCompany}</h3>
+                      <h3 style={{ margin: 0, fontSize: 'var(--text-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{req.targetCompany}</h3>
                     </div>
                     <Badge variant={req.status === 'open' ? 'primary' : req.status === 'matched' ? 'success' : 'secondary'}>
                       {req.status}
@@ -227,7 +227,7 @@ function MockInterviews() {
                         <span style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--success)' }}>Matched with Mentor</span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-                        <span style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ fontWeight: 600, fontSize: 'var(--text-sm)', color: 'var(--text-primary)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                           {req.matchedMentorId.name} <VerifiedAlumniBadge isVerifiedAlumni={true} />
                         </span>
                         <Link to={`/chat/${req.matchedMentorId._id}`} style={{ textDecoration: 'none' }}>
@@ -259,7 +259,7 @@ function MockInterviews() {
 
         {/* --- Open Requests Header & Filter --- */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)', marginBottom: 'var(--space-5)' }}>
-          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, margin: 0, color: '#fff' }}>
+          <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
             Open Requests
           </h2>
           
@@ -306,7 +306,7 @@ function MockInterviews() {
                         width: 32,
                         height: 32,
                         borderRadius: 'var(--radius-sm)',
-                        background: 'rgba(255,255,255,0.03)',
+                        background: 'var(--bg-elevated)',
                         border: '1px solid var(--border)',
                         display: 'flex',
                         alignItems: 'center',
@@ -315,7 +315,7 @@ function MockInterviews() {
                       }}>
                         <BookOpen size={14} />
                       </div>
-                      <h3 style={{ margin: 0, fontSize: 'var(--text-md)', fontWeight: 700, color: '#fff' }}>{req.targetCompany}</h3>
+                      <h3 style={{ margin: 0, fontSize: 'var(--text-md)', fontWeight: 700, color: 'var(--text-primary)' }}>{req.targetCompany}</h3>
                     </div>
                     <Badge variant="primary">OPEN</Badge>
                   </div>

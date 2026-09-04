@@ -38,5 +38,8 @@ TakeUForward SSN (TUF SSN) is a specialized one-stop campus mate, mentorship, an
 - **Logging & Security**: Pino structured JSON logging, helmet CSP, express-rate-limit.
 
 ## Author & Platform Ownership
-Developed by **Tushyent N P** for SSN College of Engineering.
-Primary Production Web Domain: https://takeuforward.blastorz.fun
+Architected and developed by **Tushyent** (Tushyent N P) for SSN College of Engineering.
+- Portfolio: https://tushyent-portfolio.vercel.app/
+- GitHub: https://github.com/Tushyent
+- Primary Production Web Domain: https://takeuforward.blastorz.fun
+

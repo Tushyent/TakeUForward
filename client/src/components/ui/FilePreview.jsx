@@ -13,7 +13,7 @@ const FilePreview = ({ fileUrl, fileName, fileType }) => {
   const renderInlinePreview = () => {
     if (isImage) {
       return (
-        <div style={{ position: 'relative', width: '100%', maxWidth: '300px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border)', cursor: 'zoom-in', backgroundColor: 'var(--bg-main)' }} onClick={() => setIsLightboxOpen(true)}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: '300px', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)', cursor: 'zoom-in', backgroundColor: 'var(--bg-elevated)' }} onClick={() => setIsLightboxOpen(true)}>
           <img src={fileUrl} alt={fileName || 'Preview'} style={{ width: '100%', display: 'block', objectFit: 'cover' }} />
           <div style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(0,0,0,0.5)', color: '#fff', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Maximize2 size={14} />
@@ -24,7 +24,7 @@ const FilePreview = ({ fileUrl, fileName, fileType }) => {
     
     if (isPdf) {
       return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'var(--bg-main)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--bg-elevated)' }}>
           <FileText size={24} color="var(--primary)" />
           <div style={{ flex: 1, overflow: 'hidden' }}>
             <div style={{ fontWeight: 500, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName || 'PDF Document'}</div>
@@ -36,7 +36,7 @@ const FilePreview = ({ fileUrl, fileName, fileType }) => {
 
     // Fallback for docs, zip, etc.
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', border: '1px solid var(--border)', borderRadius: '8px', backgroundColor: 'var(--bg-main)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--bg-elevated)' }}>
         <Download size={24} color="var(--text-muted)" />
         <div style={{ flex: 1, overflow: 'hidden' }}>
           <div style={{ fontWeight: 500, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fileName || 'Download File'}</div>
@@ -78,7 +78,7 @@ const FilePreview = ({ fileUrl, fileName, fileType }) => {
             target="_blank" 
             rel="noreferrer"
             onClick={e => e.stopPropagation()}
-            style={{ position: 'absolute', bottom: 20, right: 20, color: '#fff', textDecoration: 'none', background: 'var(--primary)', padding: '8px 16px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem' }}
+            style={{ position: 'absolute', bottom: 20, right: 20, color: 'var(--primary-ink)', textDecoration: 'none', background: 'var(--primary)', padding: '8px 16px', borderRadius: '4px', display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.9rem', fontWeight: 600 }}
           >
             <ExternalLink size={16} /> Open Original
           </a>

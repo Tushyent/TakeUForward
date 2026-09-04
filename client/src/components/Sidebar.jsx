@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
+import ThemeToggle from './ThemeToggle';
 import { LogOut, Zap, X, User } from 'lucide-react';
 import { NAV_PRIMARY, NAV_CAREERS, NAV_COMMUNITY, NAV_ADMIN } from '../constants/navigation';
 import { useAuth } from '../context/auth-context';
@@ -43,7 +44,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       <div className="sidebar-brand">
         <Link to="/home" onClick={onClose} className="sidebar-brand-link">
           <div className="sidebar-logo">
-            <Zap size={18} color="white" fill="white" />
+            <Zap size={18} color="#FFFFFF" fill="#FFFFFF" />
           </div>
           <div>
             <span className="sidebar-brand-name">TakeUForward</span>
@@ -56,7 +57,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       <nav className="sidebar-nav">
         {sections.map(({ label, items }) => (
-          <div key={label}>
+          <div key={label} className="sidebar-section">
             <span className="sidebar-section-label">{label}</span>
             {items.map(({ to, icon, label: itemLabel }) => (
               <SidebarItem key={to} to={to} icon={icon} label={itemLabel} isActive={isActive(to)} onClick={onClose} />
@@ -76,6 +77,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </Link>
 
         <div className="sidebar-footer-actions">
+          <ThemeToggle />
           <NotificationsDropdown placement="top-left" />
           <button
             title="Logout"
@@ -90,6 +92,53 @@ const Sidebar = ({ isOpen, onClose }) => {
             <LogOut size={16} />
           </button>
         </div>
+      </div>
+
+      <div style={{
+        padding: '6px 14px 2px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontSize: '0.72rem',
+        color: 'var(--text-muted)',
+      }}>
+        <a 
+          href="https://tushyent-portfolio.vercel.app/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            color: 'var(--text-muted)',
+            textDecoration: 'none',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            transition: 'color var(--transition-fast)',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--primary)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+        >
+          Built with <span style={{ color: 'var(--danger)', fontSize: '0.75rem' }}>❤️</span> by <strong style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Tushyent</strong>
+        </a>
+        <Link 
+          to="/tech" 
+          onClick={onClose}
+          style={{
+            color: 'var(--text-muted)',
+            textDecoration: 'none',
+            fontSize: '0.68rem',
+            padding: '2px 6px',
+            borderRadius: 'var(--radius-xs)',
+            border: '1px solid var(--border-subtle)',
+            background: 'var(--bg-elevated)',
+            fontWeight: 500,
+            transition: 'all var(--transition-fast)',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--primary)'; e.currentTarget.style.color = 'var(--primary)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-subtle)'; e.currentTarget.style.color = 'var(--text-muted)'; }}
+          title="System Architecture & Interview Reference"
+        >
+          /tech
+        </Link>
       </div>
     </>
   );

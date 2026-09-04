@@ -100,7 +100,7 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
           ...(placement.endsWith('left') ? { left: 0 } : { right: 0 }),
           width: 'min(320px, calc(100vw - 32px))',
           maxWidth: 'calc(100vw - 32px)',
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-elevated)',
           border: '1px solid var(--border-strong)',
           borderRadius: 'var(--radius-md)',
           boxShadow: 'var(--shadow-lg)',
@@ -123,7 +123,7 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
               {unreadCount > 0 && (
                 <span style={{
                   background: 'var(--primary)',
-                  color: 'white',
+                  color: 'var(--primary-ink)',
                   fontSize: 10,
                   fontWeight: 700,
                   padding: '1px 6px',
@@ -171,13 +171,13 @@ const NotificationsDropdown = ({ placement = 'bottom-right' }) => {
                       gap: 'var(--space-3)',
                       padding: 'var(--space-3) var(--space-5)',
                       cursor: 'pointer',
-                      background: notif.isRead ? 'transparent' : 'rgba(124,106,247,0.05)',
+                      background: notif.isRead ? 'transparent' : 'color-mix(in srgb, var(--primary) 8%, transparent)',
                       borderBottom: '1px solid var(--border-subtle)',
                       borderLeft: notif.isRead ? '3px solid transparent' : '3px solid var(--primary)',
                       transition: 'background var(--transition-fast)',
                     }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-elevated)'}
-                    onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : 'rgba(124,106,247,0.05)'}
+                    onMouseLeave={e => e.currentTarget.style.background = notif.isRead ? 'transparent' : 'color-mix(in srgb, var(--primary) 8%, transparent)'}
                   >
                     <div style={{
                       width: 32,

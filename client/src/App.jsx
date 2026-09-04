@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { useAuth } from './context/auth-context';
 import ProtectedRoute from './components/ProtectedRoute';
 import AppLayout from './components/AppLayout';
@@ -38,6 +39,7 @@ const LostFound = lazy(() => import('./pages/LostFound'));
 const Marketplace = lazy(() => import('./pages/Marketplace'));
 const PersonalDrive = lazy(() => import('./pages/PersonalDrive'));
 const About = lazy(() => import('./pages/About'));
+const TechDocs = lazy(() => import('./pages/TechDocs'));
 const Support = lazy(() => import('./pages/Support'));
 const AdminSupportQueue = lazy(() => import('./pages/AdminSupportQueue'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -55,64 +57,67 @@ function App() {
   return (
     <>
       <Toaster position="top-right" />
-      <AuthProvider>
-        <Router>
-          <SEOManager />
-          <ErrorBoundary>
-          <Suspense fallback={<Spinner text="Loading page..." />}>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/about" element={<About />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/pending-approval" element={<PendingApproval />} />
-              <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <Router>
+            <SEOManager />
+            <ErrorBoundary>
+            <Suspense fallback={<Spinner text="Loading page..." />}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/about" element={<About />} />
+                <Route path="/tech" element={<TechDocs />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/pending-approval" element={<PendingApproval />} />
+                <Route path="/alumni-invite/:token" element={<AlumniInvite />} />
 
-              {/* Protected Routes inside AppLayout */}
-              <Route path="/*" element={
-                <ProtectedRoute>
-                  <AppLayout>
-                    <Routes>
-                      <Route path="/complete-profile" element={<CompleteProfile />} />
-                      <Route path="/community" element={<CommunityBrowse />} />
-                      <Route path="/community/:id" element={<CommunityPosts />} />
-                      <Route path="/resources" element={<Resources />} />
-                      <Route path="/clubs" element={<ClubsList />} />
-                      <Route path="/clubs/:id" element={<ClubPage />} />
-                      <Route path="/announcements" element={<Announcements />} />
-                      <Route path="/alumni" element={<AlumniDirectory />} />
-                      <Route path="/referrals" element={<ReferralBoard />} />
-                      <Route path="/mock-interviews" element={<MockInterviews />} />
-                      <Route path="/interview-experiences" element={<InterviewExperiences />} />
-                      <Route path="/team-finder" element={<TeamFinder />} />
-                      <Route path="/electives" element={<Electives />} />
-                      <Route path="/career-roadmaps" element={<CareerRoadmaps />} />
-                      <Route path="/lost-found" element={<LostFound />} />
-                      <Route path="/marketplace" element={<Marketplace />} />
-                      <Route path="/drive" element={<PersonalDrive />} />
-                      <Route path="/reviews" element={<Reviews />} />
-                      <Route path="/bookmarks" element={<Bookmarks />} />
-                      <Route path="/notifications" element={<NotificationsPage />} />
-                      <Route path="/moderation" element={<AdminOnly><ModerationQueue /></AdminOnly>} />
-                      <Route path="/support" element={<Support />} />
-                      <Route path="/activity" element={<AdminOnly><ActivityLog /></AdminOnly>} />
-                      <Route path="/admin" element={<AdminOnly><AdminDashboard /></AdminOnly>} />
-                      <Route path="/admin/support" element={<AdminOnly><AdminSupportQueue /></AdminOnly>} />
-                      <Route path="/chats" element={<Chats />} />
-                      <Route path="/chat/:userId" element={<ChatThread />} />
-                      <Route path="/profile/:username" element={<PublicProfile />} />
-                      <Route path="/settings/profile" element={<ProfileSettings />} />
-                      <Route path="/home" element={<Home />} />
-                      <Route path="/" element={<Navigate to="/home" replace />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </AppLayout>
-                </ProtectedRoute>
-              } />
-            </Routes>
-          </Suspense>
-          </ErrorBoundary>
-        </Router>
-      </AuthProvider>
+                {/* Protected Routes inside AppLayout */}
+                <Route path="/*" element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Routes>
+                        <Route path="/complete-profile" element={<CompleteProfile />} />
+                        <Route path="/community" element={<CommunityBrowse />} />
+                        <Route path="/community/:id" element={<CommunityPosts />} />
+                        <Route path="/resources" element={<Resources />} />
+                        <Route path="/clubs" element={<ClubsList />} />
+                        <Route path="/clubs/:id" element={<ClubPage />} />
+                        <Route path="/announcements" element={<Announcements />} />
+                        <Route path="/alumni" element={<AlumniDirectory />} />
+                        <Route path="/referrals" element={<ReferralBoard />} />
+                        <Route path="/mock-interviews" element={<MockInterviews />} />
+                        <Route path="/interview-experiences" element={<InterviewExperiences />} />
+                        <Route path="/team-finder" element={<TeamFinder />} />
+                        <Route path="/electives" element={<Electives />} />
+                        <Route path="/career-roadmaps" element={<CareerRoadmaps />} />
+                        <Route path="/lost-found" element={<LostFound />} />
+                        <Route path="/marketplace" element={<Marketplace />} />
+                        <Route path="/drive" element={<PersonalDrive />} />
+                        <Route path="/reviews" element={<Reviews />} />
+                        <Route path="/bookmarks" element={<Bookmarks />} />
+                        <Route path="/notifications" element={<NotificationsPage />} />
+                        <Route path="/moderation" element={<AdminOnly><ModerationQueue /></AdminOnly>} />
+                        <Route path="/support" element={<Support />} />
+                        <Route path="/activity" element={<AdminOnly><ActivityLog /></AdminOnly>} />
+                        <Route path="/admin" element={<AdminOnly><AdminDashboard /></AdminOnly>} />
+                        <Route path="/admin/support" element={<AdminOnly><AdminSupportQueue /></AdminOnly>} />
+                        <Route path="/chats" element={<Chats />} />
+                        <Route path="/chat/:userId" element={<ChatThread />} />
+                        <Route path="/profile/:username" element={<PublicProfile />} />
+                        <Route path="/settings/profile" element={<ProfileSettings />} />
+                        <Route path="/home" element={<Home />} />
+                        <Route path="/" element={<Navigate to="/home" replace />} />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </AppLayout>
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </Suspense>
+            </ErrorBoundary>
+          </Router>
+        </AuthProvider>
+      </ThemeProvider>
     </>
   );
 }

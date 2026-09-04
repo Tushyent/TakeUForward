@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import NotificationsDropdown from './NotificationsDropdown';
+import ThemeToggle from './ThemeToggle';
 import { LogOut, Zap, Menu, X, Settings } from 'lucide-react';
 import { NAV_PRIMARY, NAV_CAREERS, NAV_COMMUNITY, ALL_NAV_ITEMS } from '../constants/navigation';
 
@@ -69,6 +70,7 @@ const Navbar = () => {
         </div>
 
         <div className="navbar-actions">
+          <ThemeToggle />
           <NotificationsDropdown />
           <Link to="/settings/profile" title="Profile Settings" className="navbar-settings-btn">
             <Settings size={16} />
@@ -129,6 +131,7 @@ const Navbar = () => {
             Profile Settings
           </Link>
           <div className="nav-drawer-account-actions">
+            <ThemeToggle />
             <NotificationsDropdown placement="top-right" />
             <button
               title="Logout"

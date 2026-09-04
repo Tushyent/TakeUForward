@@ -97,7 +97,7 @@ const AdminSupportQueue = () => {
                 <MessageSquare size={20} />
               </div>
               <div>
-                <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: '#fff' }}>
+                <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
                   Support Queue
                 </h1>
                 <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: 'var(--text-sm)' }}>
@@ -193,7 +193,7 @@ const TicketCard = ({ ticket, onUpdate, onDelete }) => {
               {formatDistanceToNow(new Date(ticket.createdAt), { addSuffix: true })}
             </span>
           </div>
-          <h3 style={{ margin: 0, color: '#fff', fontSize: 'var(--text-md)', fontWeight: 700 }}>{ticket.title}</h3>
+          <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: 'var(--text-md)', fontWeight: 700 }}>{ticket.title}</h3>
         </div>
         {!isEditing && !isReplying && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -259,7 +259,7 @@ const TicketCard = ({ ticket, onUpdate, onDelete }) => {
       {/* Editing section */}
       {isEditing && (
         <div style={{ marginTop: '20px', padding: '15px', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)' }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: 'var(--text-sm)', color: '#fff' }}>Update Ticket Status</h4>
+          <h4 style={{ margin: '0 0 12px 0', fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>Update Ticket Status</h4>
           
           <div style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: 'var(--text-xs)', color: 'var(--text-secondary)' }}>Status</label>
@@ -281,7 +281,7 @@ const TicketCard = ({ ticket, onUpdate, onDelete }) => {
               value={adminNotes}
               onChange={(e) => setAdminNotes(e.target.value)}
               placeholder="Add internal debugging or lookup notes here..."
-              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: '#fff', fontSize: 'var(--text-sm)' }}
+              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-elevated)', color: 'var(--text-primary)', fontSize: 'var(--text-sm)' }}
               rows={3}
             />
           </div>
@@ -306,7 +306,7 @@ const TicketCard = ({ ticket, onUpdate, onDelete }) => {
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               placeholder="Type your reply to the user here..."
-              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: '#fff', fontSize: 'var(--text-sm)', lineHeight: 1.5 }}
+              style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-surface)', color: 'var(--text-primary)', fontSize: 'var(--text-sm)', lineHeight: 1.5 }}
               rows={4}
             />
           </div>

@@ -58,9 +58,9 @@ const ReportModal = ({ isOpen, onClose, onSubmit, title = 'Report', placeholder 
           zIndex: 9999,
           width: '90vw',
           maxWidth: 400,
-          background: 'var(--bg-surface)',
+          background: 'var(--bg-elevated)',
           borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--border)',
+          border: '1px solid var(--border-strong)',
           boxShadow: 'var(--shadow-lg)',
           padding: 'var(--space-6)',
         }}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import MobileBottomNav from './MobileBottomNav';
 import NotificationsDropdown from './NotificationsDropdown';
+import ThemeToggle from './ThemeToggle';
 import { Menu, Zap } from 'lucide-react';
 
 const AppLayout = ({ children }) => {
@@ -23,13 +24,14 @@ const AppLayout = ({ children }) => {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Zap size={13} color="white" fill="white" />
+              <Zap size={13} color="#FFFFFF" fill="#FFFFFF" />
             </div>
             <div style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--text-primary)', lineHeight: 1.2 }}>
               TakeUForward
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ThemeToggle />
             <NotificationsDropdown placement="bottom-right" />
             <button 
               className="hamburger-btn"

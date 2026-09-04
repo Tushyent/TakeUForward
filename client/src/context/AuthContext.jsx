@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
           style={{
             padding: '10px 20px',
             background: 'var(--primary)',
-            color: 'white',
+            color: 'var(--primary-ink)',
             border: 'none',
             borderRadius: 'var(--radius-sm)',
             cursor: 'pointer',

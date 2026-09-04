@@ -94,7 +94,7 @@ const ModerationQueue = () => {
             }}>
               <ShieldAlert size={20} />
             </div>
-            <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: '#fff' }}>
+            <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
               Moderation Dashboard
             </h1>
           </div>
@@ -110,7 +110,7 @@ const ModerationQueue = () => {
               padding: '8px 16px', 
               background: activeTab === 'reported' ? 'var(--bg-surface)' : 'transparent', 
               border: activeTab === 'reported' ? '1px solid var(--border)' : '1px solid transparent', 
-              color: activeTab === 'reported' ? '#fff' : 'var(--text-secondary)', 
+              color: activeTab === 'reported' ? 'var(--text-primary)' : 'var(--text-secondary)', 
               fontWeight: 600, 
               cursor: 'pointer', 
               fontFamily: 'inherit',
@@ -127,7 +127,7 @@ const ModerationQueue = () => {
               padding: '8px 16px', 
               background: activeTab === 'alumni' ? 'var(--bg-surface)' : 'transparent', 
               border: activeTab === 'alumni' ? '1px solid var(--border)' : '1px solid transparent', 
-              color: activeTab === 'alumni' ? '#fff' : 'var(--text-secondary)', 
+              color: activeTab === 'alumni' ? 'var(--text-primary)' : 'var(--text-secondary)', 
               fontWeight: 600, 
               cursor: 'pointer', 
               fontFamily: 'inherit',
@@ -173,28 +173,28 @@ const ModerationQueue = () => {
                     {post.type === 'post' && post.content}
                     {post.type === 'review' && (
                       <>
-                        <strong style={{ color: '#fff' }}>{post.courseCode} - {post.professorName} ({post.semester})</strong>
+                        <strong style={{ color: 'var(--text-primary)' }}>{post.courseCode} - {post.professorName} ({post.semester})</strong>
                         <br /><span style={{ color: 'var(--warning)', fontWeight: 600 }}>Rating: {post.rating}/5</span><br />
                         <p style={{ margin: '8px 0 0 0', fontStyle: 'italic' }}>"{post.comment}"</p>
                       </>
                     )}
                     {post.type === 'interview_experience' && (
                       <>
-                        <strong style={{ color: '#fff' }}>{post.company} - {post.role} ({post.batchYear})</strong>
+                        <strong style={{ color: 'var(--text-primary)' }}>{post.company} - {post.role} ({post.batchYear})</strong>
                         <br /><span style={{ color: 'var(--success)' }}>Outcome: {post.overallOutcome}</span><br />
                         Rounds: {post.rounds?.length}
                       </>
                     )}
                     {post.type === 'elective_suggestion' && (
                       <>
-                        <strong style={{ color: '#fff' }}>{post.courseCode} - {post.courseName}</strong> ({post.semester})
+                        <strong style={{ color: 'var(--text-primary)' }}>{post.courseCode} - {post.courseName}</strong> ({post.semester})
                         <br />Platform: {post.platform} | Recommendation: {post.recommendation}
                         <br /><p style={{ margin: '8px 0 0 0', fontStyle: 'italic' }}>"{post.comment}"</p>
                       </>
                     )}
                     {post.type === 'career_roadmap' && (
                       <>
-                        <strong style={{ color: '#fff' }}>{post.title}</strong>
+                        <strong style={{ color: 'var(--text-primary)' }}>{post.title}</strong>
                         <br />Path: {post.careerPath} | Steps: {post.steps?.length}
                       </>
                     )}
@@ -236,7 +236,7 @@ const ModerationQueue = () => {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
               {alumniRequests.map(req => (
-                <Card key={req._id} style={{ border: '1px solid rgba(124, 106, 247, 0.25)', background: 'var(--bg-surface)' }}>
+                <Card key={req._id} style={{ border: '1px solid var(--border)', background: 'var(--bg-surface)' }}>
                   <div style={{ display: 'flex', gap: 'var(--space-2)', marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
                     <Badge variant="primary">Access Verification Request</Badge>
                   </div>
@@ -254,11 +254,11 @@ const ModerationQueue = () => {
                       <tbody>
                         <tr>
                           <td style={{ padding: '6px 0', color: 'var(--text-secondary)', width: '160px', fontWeight: 600 }}>Full Name:</td>
-                          <td style={{ padding: '6px 0', color: '#fff', fontWeight: 700 }}>{req.name}</td>
+                          <td style={{ padding: '6px 0', color: 'var(--text-primary)', fontWeight: 700 }}>{req.name}</td>
                         </tr>
                         <tr>
                           <td style={{ padding: '6px 0', color: 'var(--text-secondary)', fontWeight: 600 }}>Google Email:</td>
-                          <td style={{ padding: '6px 0', color: '#fff' }}>{req.email}</td>
+                          <td style={{ padding: '6px 0', color: 'var(--text-primary)' }}>{req.email}</td>
                         </tr>
                         <tr>
                           <td style={{ padding: '6px 0', color: 'var(--text-secondary)', fontWeight: 600 }}>Department:</td>
@@ -270,7 +270,7 @@ const ModerationQueue = () => {
                         </tr>
                         <tr>
                           <td style={{ padding: '6px 0', color: 'var(--text-secondary)', fontWeight: 600 }}>Current Employer:</td>
-                          <td style={{ padding: '6px 0', color: '#fff' }}>{req.currentCompany || <em style={{ color: 'var(--text-muted)' }}>Not Specified</em>}</td>
+                          <td style={{ padding: '6px 0', color: 'var(--text-primary)' }}>{req.currentCompany || <em style={{ color: 'var(--text-muted)' }}>Not Specified</em>}</td>
                         </tr>
                         <tr>
                           <td style={{ padding: '6px 0', color: 'var(--text-secondary)', fontWeight: 600 }}>Proof URL:</td>

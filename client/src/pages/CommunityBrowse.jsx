@@ -178,7 +178,7 @@ function CommunityBrowse() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {sortedGroupKeys.map(groupKey => (
-              <div key={groupKey} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--bg-main)' }}>
+              <div key={groupKey} style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden', background: 'var(--bg-surface)' }}>
                 <div 
                   onClick={() => setOpenGroup(openGroup === groupKey ? null : groupKey)}
                   style={{
@@ -225,7 +225,7 @@ function CommunityBrowse() {
                             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                               <div style={{
                                 width: 32, height: 32, borderRadius: 'var(--radius-sm)',
-                                background: 'rgba(124,106,247,0.12)',
+                                background: 'color-mix(in srgb, var(--primary) 12%, transparent)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                               }}>
                                 <Hash size={14} color="var(--primary)" />

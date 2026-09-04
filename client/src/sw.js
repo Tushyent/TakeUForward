@@ -57,8 +57,8 @@ setCatchHandler(async ({ event }) => {
         <style>
           body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #0D0E14;
-            color: #EEEEF0;
+            background: #0D0D0B;
+            color: #EDE8DE;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -69,18 +69,19 @@ setCatchHandler(async ({ event }) => {
           }
           .offline-container { max-width: 400px; }
           h1 { font-size: 1.5rem; margin-bottom: 12px; }
-          p { color: #9293A4; line-height: 1.6; }
+          p { color: #A49D90; line-height: 1.6; }
           button {
             margin-top: 24px;
             padding: 12px 24px;
-            background: #7C6AF7;
-            color: white;
+            background: #E3A44E;
+            color: #221403;
+            font-weight: 600;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
             cursor: pointer;
           }
-          button:hover { background: #9585F9; }
+          button:hover { background: #F0B45E; }
         </style>
       </head>
       <body>

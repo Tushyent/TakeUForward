@@ -46,8 +46,8 @@ const renderGrid = (title, items, icon) => (
           width: 32,
           height: 32,
           borderRadius: 'var(--radius-md)',
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -56,7 +56,7 @@ const renderGrid = (title, items, icon) => (
         }}>
           {icon}
         </div>
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em', color: '#fff' }}>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
           {title}
         </h3>
       </div>
@@ -104,7 +104,7 @@ const renderGrid = (title, items, icon) => (
             <h4 style={{ 
               fontSize: 'var(--text-sm)', 
               fontWeight: 650, 
-              color: '#fff', 
+              color: 'var(--text-primary)', 
               margin: '0 0 6px 0',
               letterSpacing: '-0.01em'
             }}>
@@ -164,7 +164,7 @@ const InitialsAvatar = ({ name, size = 44 }) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: 'white',
+      color: 'var(--primary-ink)',
       fontSize: size * 0.38,
       fontWeight: 700,
       letterSpacing: '-0.02em',
@@ -276,7 +276,7 @@ function Home() {
               )}
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                  <h1 style={{ fontSize: 'var(--text-xl)', margin: 0, fontWeight: 700, color: '#fff', letterSpacing: '-0.01em' }}>
+                  <h1 style={{ fontSize: 'var(--text-xl)', margin: 0, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
                     Hey, {user?.name?.split(' ')[0] || 'there'} 👋
                   </h1>
                 </div>
@@ -381,7 +381,7 @@ function Home() {
             transition: 'box-shadow 0.3s ease',
           }}
           onMouseEnter={e => {
-            e.currentTarget.style.boxShadow = '0 0 30px var(--primary-glow), 0 0 60px rgba(124,106,247,0.10)';
+            e.currentTarget.style.boxShadow = '0 0 30px var(--primary-glow), 0 0 60px color-mix(in srgb, var(--primary) 10%, transparent)';
           }}
           onMouseLeave={e => {
             e.currentTarget.style.boxShadow = 'none';
@@ -392,7 +392,7 @@ function Home() {
             height: 48,
             borderRadius: 'var(--radius-full)',
             background: 'var(--primary-glow)',
-            border: '1px solid rgba(124,106,247,0.3)',
+            border: '1px solid color-mix(in srgb, var(--primary) 30%, transparent)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

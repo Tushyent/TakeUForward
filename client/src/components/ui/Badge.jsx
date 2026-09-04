@@ -25,13 +25,13 @@ const Badge = ({ children, variant = 'primary', size = 'md', style }) => {
   };
 
   const variants = {
-    primary: { background: 'rgba(124,106,247,0.15)', color: 'var(--primary)', borderColor: 'rgba(124,106,247,0.30)' },
+    primary: { background: 'color-mix(in srgb, var(--primary) 12%, transparent)', color: 'var(--primary)', borderColor: 'color-mix(in srgb, var(--primary) 28%, transparent)' },
     secondary: { background: 'var(--bg-elevated)', color: 'var(--text-secondary)', borderColor: 'var(--border)' },
     accent: { background: 'var(--accent-bg)', color: 'var(--accent)', borderColor: 'var(--accent-border)' },
-    danger: { background: 'var(--danger-bg)', color: 'var(--danger)', borderColor: 'rgba(248,113,113,0.30)' },
-    success: { background: 'var(--success-bg)', color: 'var(--success)', borderColor: 'rgba(52,211,153,0.30)' },
-    warning: { background: 'var(--warning-bg)', color: 'var(--warning)', borderColor: 'rgba(251,191,36,0.30)' },
-    info: { background: 'var(--info-bg)', color: 'var(--info)', borderColor: 'rgba(96,165,250,0.30)' },
+    danger: { background: 'var(--danger-bg)', color: 'var(--danger)', borderColor: 'color-mix(in srgb, var(--danger) 28%, transparent)' },
+    success: { background: 'var(--success-bg)', color: 'var(--success)', borderColor: 'color-mix(in srgb, var(--success) 28%, transparent)' },
+    warning: { background: 'var(--warning-bg)', color: 'var(--warning)', borderColor: 'color-mix(in srgb, var(--warning) 28%, transparent)' },
+    info: { background: 'var(--info-bg)', color: 'var(--info)', borderColor: 'color-mix(in srgb, var(--info) 28%, transparent)' },
   };
 
   return (

@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
   <defs>
     <linearGradient id="s" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#7C6AF7"/>
-      <stop offset="100%" stop-color="#6455E8"/>
+      <stop offset="0%" stop-color="#E3A44E"/>
+      <stop offset="100%" stop-color="#C98D3B"/>
     </linearGradient>
   </defs>
   <path d="M60 8L110 32V56c0 28-20.5 51.5-50 56-29.5-4.5-50-28-50-56V32L60 8z" fill="url(#s)" opacity="0.15"/>
-  <path d="M60 12L106 34V56c0 26-19 47.5-46 52-27-4.5-46-26-46-52V34L60 12z" stroke="#7C6AF7" stroke-width="1.5" fill="none" opacity="0.6"/>
+  <path d="M60 12L106 34V56c0 26-19 47.5-46 52-27-4.5-46-26-46-52V34L60 12z" stroke="#E3A44E" stroke-width="1.5" fill="none" opacity="0.6"/>
   <text x="60" y="58" text-anchor="middle" dominant-baseline="central" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-weight="700" font-size="26" fill="#EEEEF0" letter-spacing="-0.02">SSN</text>
   <text x="60" y="85" text-anchor="middle" dominant-baseline="central" font-family="'Plus Jakarta Sans',system-ui,sans-serif" font-weight="500" font-size="8" fill="#9293A4" letter-spacing="0.15">EST. 1996</text>
 </svg>

@@ -7,7 +7,12 @@ const routeMetadata = {
   '/home': {
     title: 'Dashboard | TakeUForward SSN - One-Stop Campus Mate',
     description: 'Access your TUF SSN dashboard. Check centralized announcements, batch communities, saved bookmarks, mock interview requests, and placement assistance.',
-    keywords: 'TakeUForward SSN, TUF SSN, One Stop Campus Mate, SSN Mentorship Platform, Campus Mate SSN, SSN Dashboard',
+    keywords: 'TakeUForward SSN, TUF SSN, Tushyent, One Stop Campus Mate, SSN Mentorship Platform, Campus Mate SSN, SSN Dashboard',
+  },
+  '/tech': {
+    title: 'Technical Architecture & Engineering Reference | TakeUForward SSN',
+    description: 'Deep-dive technical system architecture, software design patterns, engineering tradeoffs, security models, and interview preparation guide for TakeUForward SSN, architected by Tushyent.',
+    keywords: 'Tushyent, Tushyent Portfolio, System Architecture, Full Stack Engineering, Software Design Patterns, TakeUForward Technical Specs, Node.js Express Architecture, React Vite Design System, Anonymity Engine',
   },
   '/community': {
     title: 'Communities - TakeUForward SSN',

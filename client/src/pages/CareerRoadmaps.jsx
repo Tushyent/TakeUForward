@@ -250,7 +250,7 @@ function CareerRoadmaps() {
                 <div style={{ padding: '15px 0', borderTop: '1px solid var(--border)' }}>
                   {roadmap.steps?.map((step, idx) => (
                     <div key={step.order || idx} style={{ marginBottom: idx === (roadmap.steps?.length || 0) - 1 ? 0 : '15px', display: 'flex', gap: '15px' }}>
-                      <div style={{ background: 'var(--primary)', color: 'white', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 'bold' }}>
+                      <div style={{ background: 'var(--primary)', color: 'var(--primary-ink)', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontWeight: 'bold' }}>
                         {step.order}
                       </div>
                       <div>

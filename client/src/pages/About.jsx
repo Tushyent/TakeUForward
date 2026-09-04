@@ -5,6 +5,7 @@ import Button from '../components/ui/Button';
 import { Users, Shield, Search, Heart, Sparkles, BookOpen, LogIn, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/auth-context';
 import { useSEO } from '../hooks/useSEO';
+import ThemeToggle from '../components/ThemeToggle';
 
 function About() {
   const { user } = useAuth();
@@ -53,9 +54,9 @@ function About() {
         position: 'sticky',
         top: 0,
         zIndex: 100,
-        background: 'rgba(13, 14, 20, 0.85)',
+        background: 'var(--glass-bg)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        borderBottom: '1px solid var(--border)',
         padding: 'var(--space-3) var(--space-6)',
         display: 'flex',
         alignItems: 'center',
@@ -63,12 +64,13 @@ function About() {
       }}>
         <Link to={user ? "/home" : "/login"} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', textDecoration: 'none' }}>
           <img src="/favicon.svg" alt="TakeUForward Logo" style={{ width: 36, height: 36 }} />
-          <span style={{ fontWeight: 700, fontSize: '1.2rem', color: '#fff', letterSpacing: '-0.02em' }}>
+          <span style={{ fontWeight: 700, fontSize: '1.2rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
             TakeUForward <span style={{ color: 'var(--primary)', fontSize: '0.85rem', fontWeight: 600 }}>SSN</span>
           </span>
         </Link>
 
-        <div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+          <ThemeToggle />
           {user ? (
             <Link to="/home" style={{ textDecoration: 'none' }}>
               <Button variant="primary" size="sm">
@@ -94,8 +96,8 @@ function About() {
           padding: 'var(--space-8) var(--space-6)',
           marginBottom: 'var(--space-8)',
           background: 'linear-gradient(135deg, var(--bg-input) 0%, var(--bg-surface) 60%, var(--bg-base) 100%)',
-          border: '1px solid rgba(124,106,247,0.2)',
-          boxShadow: '0 0 40px rgba(124,106,247,0.08)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-md)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -105,14 +107,14 @@ function About() {
           {/* Decorative Gradients */}
           <div style={{
             position: 'absolute', top: -50, right: -50,
-            width: 200, height: 200, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(124,106,247,0.2) 0%, transparent 70%)',
+            width: 220, height: 220, borderRadius: '50%',
+            background: 'radial-gradient(circle, color-mix(in srgb, var(--primary) 15%, transparent) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
           <div style={{
             position: 'absolute', bottom: -30, left: 60,
-            width: 140, height: 140, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(249,115,22,0.10) 0%, transparent 70%)',
+            width: 160, height: 160, borderRadius: '50%',
+            background: 'radial-gradient(circle, color-mix(in srgb, var(--success) 12%, transparent) 0%, transparent 70%)',
             pointerEvents: 'none',
           }} />
 
@@ -123,8 +125,8 @@ function About() {
               alt="TakeUForward Logo" 
               style={{ width: 80, height: 80, marginBottom: 'var(--space-4)', filter: 'drop-shadow(0 0 20px var(--primary-glow))' }} 
             />
-            <h1 style={{ margin: '0 0 var(--space-3) 0', fontSize: '2.5rem', background: 'linear-gradient(to right, #fff, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              TakeUForward SSN — One-Stop Campus Mate
+            <h1 style={{ margin: '0 0 var(--space-3) 0', fontSize: '2.5rem', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--text-primary)' }}>
+              TakeUForward <span style={{ color: 'var(--primary)' }}>SSN</span> — One-Stop Campus Mate
             </h1>
             
             <p style={{
@@ -169,10 +171,10 @@ function About() {
               </div>
               
               <div style={{ 
-                background: 'rgba(255,255,255,0.03)', 
+                background: 'var(--bg-elevated)', 
                 padding: 'var(--space-4)', 
                 borderRadius: 'var(--radius-md)',
-                border: '1px solid rgba(255,255,255,0.05)'
+                border: '1px solid var(--border-subtle)'
               }}>
                 <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.7, fontSize: 'var(--text-base)' }}>
                   <strong style={{ color: 'var(--text-primary)' }}>Why:</strong> {item.why}
@@ -275,18 +277,31 @@ function About() {
           textAlign: 'center',
           padding: 'var(--space-8) var(--space-6)',
           borderStyle: 'dashed',
-          borderColor: 'rgba(255,255,255,0.1)',
+          borderColor: 'var(--border)',
           background: 'transparent'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 'var(--space-3)' }}>
             <Heart size={24} color="var(--danger)" fill="var(--danger)" className="animate-pulse" />
           </div>
           <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: '1.5rem', color: 'var(--text-primary)' }}>
             Built with <span style={{ color: 'var(--danger)' }}>&lt;3</span> for SSN
           </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: 0 }}>
-            by <strong>Tushyent N P</strong>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', margin: '0 0 var(--space-4) 0' }}>
+            by <a href="https://tushyent-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 700 }}>Tushyent</a>
           </p>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 'var(--space-4)', flexWrap: 'wrap', fontSize: 'var(--text-sm)' }}>
+            <a href="https://tushyent-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color var(--transition-fast)' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+              Portfolio ↗
+            </a>
+            <span style={{ color: 'var(--border-strong)' }}>&middot;</span>
+            <a href="https://github.com/Tushyent" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-muted)', textDecoration: 'none', transition: 'color var(--transition-fast)' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--primary)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>
+              GitHub ↗
+            </a>
+            <span style={{ color: 'var(--border-strong)' }}>&middot;</span>
+            <Link to="/tech" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              System Architecture & Tech Specs →
+            </Link>
+          </div>
         </Card>
 
       </div>

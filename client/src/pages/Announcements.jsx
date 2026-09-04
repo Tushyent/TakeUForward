@@ -90,9 +90,9 @@ function Announcements() {
                 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: 'var(--radius-sm)',
-                    background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%)',
+                    background: 'var(--primary)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, fontSize: 'var(--text-lg)', fontWeight: 700, color: '#fff',
+                    flexShrink: 0, fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--primary-ink)',
                   }}>
                     {(post.clubId?.name || '?')[0].toUpperCase()}
                   </div>

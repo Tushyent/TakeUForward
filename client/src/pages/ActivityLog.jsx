@@ -47,13 +47,13 @@ const ActivityLog = () => {
   const getLogIconColor = (action) => {
     switch (action) {
       case 'create':
-        return { bg: 'rgba(52, 211, 153, 0.08)', color: 'var(--success)', border: 'rgba(52, 211, 153, 0.2)' };
+        return { bg: 'color-mix(in srgb, var(--success) 10%, transparent)', color: 'var(--success)', border: 'color-mix(in srgb, var(--success) 22%, transparent)' };
       case 'delete':
-        return { bg: 'rgba(248, 113, 113, 0.08)', color: 'var(--danger)', border: 'rgba(248, 113, 113, 0.2)' };
+        return { bg: 'color-mix(in srgb, var(--danger) 10%, transparent)', color: 'var(--danger)', border: 'color-mix(in srgb, var(--danger) 22%, transparent)' };
       case 'report':
-        return { bg: 'rgba(251, 191, 36, 0.08)', color: 'var(--warning)', border: 'rgba(251, 191, 36, 0.2)' };
+        return { bg: 'color-mix(in srgb, var(--warning) 10%, transparent)', color: 'var(--warning)', border: 'color-mix(in srgb, var(--warning) 22%, transparent)' };
       default:
-        return { bg: 'rgba(124, 106, 247, 0.08)', color: 'var(--primary)', border: 'rgba(124, 106, 247, 0.2)' };
+        return { bg: 'color-mix(in srgb, var(--primary) 10%, transparent)', color: 'var(--primary)', border: 'color-mix(in srgb, var(--primary) 22%, transparent)' };
     }
   };
 
@@ -77,7 +77,7 @@ const ActivityLog = () => {
               }}>
                 <History size={20} />
               </div>
-              <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: '#fff' }}>
+              <h1 style={{ margin: 0, fontSize: 'var(--text-2xl)', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
                 Activity Log
               </h1>
             </div>
@@ -145,7 +145,7 @@ const ActivityLog = () => {
                   
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap', marginBottom: 4 }}>
-                      <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', color: '#fff' }}>{log.userName}</span>
+                      <span style={{ fontWeight: 700, fontSize: 'var(--text-sm)', color: 'var(--text-primary)' }}>{log.userName}</span>
                       <Badge variant={log.action === 'delete' ? 'danger' : log.action === 'create' ? 'success' : 'secondary'} size="sm">
                         {log.action}
                       </Badge>

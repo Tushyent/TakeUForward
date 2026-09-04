@@ -42,11 +42,11 @@ const TabButton = ({ active, label, icon: Icon, onClick }) => (
 
 const StatCard = ({ icon: Icon, label, value, variant = 'primary' }) => {
   const bgColors = {
-    primary: 'rgba(124, 106, 247, 0.08)',
-    info: 'rgba(96, 165, 250, 0.08)',
-    danger: 'rgba(248, 113, 113, 0.08)',
-    warning: 'rgba(251, 191, 36, 0.08)',
-    secondary: 'rgba(156, 163, 175, 0.08)',
+    primary: 'color-mix(in srgb, var(--primary) 10%, transparent)',
+    info: 'color-mix(in srgb, var(--info) 10%, transparent)',
+    danger: 'color-mix(in srgb, var(--danger) 10%, transparent)',
+    warning: 'color-mix(in srgb, var(--warning) 10%, transparent)',
+    secondary: 'color-mix(in srgb, var(--text-secondary) 10%, transparent)',
   };
   return (
     <Card style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', padding: 'var(--space-5)' }}>
@@ -63,7 +63,7 @@ const StatCard = ({ icon: Icon, label, value, variant = 'primary' }) => {
         </div>
         <div>
           <p style={{ margin: '0 0 2px 0', color: 'var(--text-secondary)', fontSize: 'var(--text-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</p>
-          <strong style={{ fontSize: 'var(--text-xl)', color: '#fff', fontWeight: 800 }}>{value}</strong>
+          <strong style={{ fontSize: 'var(--text-xl)', color: 'var(--text-primary)', fontWeight: 800 }}>{value}</strong>
         </div>
       </div>
     </Card>
@@ -389,13 +389,14 @@ const AdminDashboard = () => {
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 padding: 'var(--space-2) var(--space-3)',
                 borderRadius: 'var(--radius-sm)',
-                background: 'var(--bg-card)',
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-subtle)',
                 fontSize: 'var(--text-sm)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                   <div style={{
                     width: 28, height: 28, borderRadius: '50%',
-                    background: 'var(--accent)', color: '#fff',
+                    background: 'var(--accent)', color: 'var(--primary-ink)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 'var(--text-xs)', fontWeight: 600, flexShrink: 0,
                   }}>

@@ -32,6 +32,8 @@ scratch_*.js
 scratch_*.cjs
 capture_*.js
 check-db.cjs
+server/check-db.cjs
+**/check-db.cjs
 refactor_admin.js
 migrations/
 

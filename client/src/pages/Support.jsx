@@ -159,18 +159,19 @@ const Support = () => {
             Found a bug? Have a feature request? Let the admins know.
           </p>
         </div>
-        <div style={{ display: 'flex', background: 'var(--bg-main)', padding: 4, borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', background: 'var(--bg-surface)', padding: 4, borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
           <button 
             onClick={() => setActiveTab('submit')}
             style={{ 
               padding: '8px 16px', 
               border: 'none', 
-              background: activeTab === 'submit' ? 'var(--bg-card)' : 'transparent',
-              color: activeTab === 'submit' ? 'var(--text-main)' : 'var(--text-muted)',
-              borderRadius: 'calc(var(--radius) - 2px)',
+              background: activeTab === 'submit' ? 'var(--bg-elevated)' : 'transparent',
+              color: activeTab === 'submit' ? 'var(--text-primary)' : 'var(--text-secondary)',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
-              fontWeight: activeTab === 'submit' ? 600 : 400,
-              boxShadow: activeTab === 'submit' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+              fontWeight: activeTab === 'submit' ? 600 : 500,
+              boxShadow: activeTab === 'submit' ? 'var(--shadow-sm)' : 'none',
+              transition: 'all var(--transition-fast)'
             }}
           >
             Submit a Ticket
@@ -180,12 +181,13 @@ const Support = () => {
             style={{ 
               padding: '8px 16px', 
               border: 'none', 
-              background: activeTab === 'my-tickets' ? 'var(--bg-card)' : 'transparent',
-              color: activeTab === 'my-tickets' ? 'var(--text-main)' : 'var(--text-muted)',
-              borderRadius: 'calc(var(--radius) - 2px)',
+              background: activeTab === 'my-tickets' ? 'var(--bg-elevated)' : 'transparent',
+              color: activeTab === 'my-tickets' ? 'var(--text-primary)' : 'var(--text-secondary)',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
-              fontWeight: activeTab === 'my-tickets' ? 600 : 400,
-              boxShadow: activeTab === 'my-tickets' ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'
+              fontWeight: activeTab === 'my-tickets' ? 600 : 500,
+              boxShadow: activeTab === 'my-tickets' ? 'var(--shadow-sm)' : 'none',
+              transition: 'all var(--transition-fast)'
             }}
           >
             My Tickets
@@ -346,8 +348,8 @@ const Support = () => {
                   </div>
                 </div>
                 
-                <div style={{ backgroundColor: 'var(--bg-main)', padding: '15px', borderRadius: 'var(--radius)', marginBottom: '15px' }}>
-                  <p style={{ margin: '0 0 10px 0', whiteSpace: 'pre-wrap', color: 'var(--text-main)' }}>{ticket.description}</p>
+                <div style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', padding: '15px', borderRadius: 'var(--radius-sm)', marginBottom: '15px' }}>
+                  <p style={{ margin: '0 0 10px 0', whiteSpace: 'pre-wrap', color: 'var(--text-primary)' }}>{ticket.description}</p>
                   
                   {ticket.pageContext && (
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '10px' }}>
@@ -378,9 +380,9 @@ const Support = () => {
                       {ticket.adminReplies.map((reply, i) => (
                         <div key={i} style={{ 
                           padding: '12px 15px', 
-                          backgroundColor: 'var(--primary-light, rgba(124, 106, 247, 0.1))', 
+                          backgroundColor: 'color-mix(in srgb, var(--primary) 10%, transparent)', 
                           borderLeft: '3px solid var(--primary)', 
-                          borderRadius: '0 var(--radius) var(--radius) 0' 
+                          borderRadius: '0 var(--radius-sm) var(--radius-sm) 0' 
                         }}>
                           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
                             {new Date(reply.createdAt).toLocaleString()}

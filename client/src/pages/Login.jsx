@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Zap, ArrowRight, BookOpen, Users, Briefcase } from 'lucide-react';
 import axiosClient from '../api/axiosClient';
 import Button from '../components/ui/Button';
 import { Input, Textarea, Select } from '../components/ui/Input';
 import { useSEO } from '../hooks/useSEO';
+import ThemeToggle from '../components/ThemeToggle';
 
 /* ---------------------------------------------------------------
    GOOGLE SIGN-IN SVG LOGO
@@ -27,16 +28,16 @@ const BlobDecoration = () => (
   <svg
     viewBox="0 0 400 400"
     xmlns="http://www.w3.org/2000/svg"
-    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0.06 }}
+    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0.08 }}
     aria-hidden="true"
   >
     <defs>
       <radialGradient id="blob1" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#7C6AF7" />
+        <stop offset="0%" stopColor="var(--primary, #E3A44E)" />
         <stop offset="100%" stopColor="transparent" />
       </radialGradient>
       <radialGradient id="blob2" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#F97316" />
+        <stop offset="0%" stopColor="var(--success, #7FB0A3)" />
         <stop offset="100%" stopColor="transparent" />
       </radialGradient>
     </defs>
@@ -128,10 +129,10 @@ function Login() {
           top: '30%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 400,
-          height: 400,
+          width: 440,
+          height: 440,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(124,106,247,0.15) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, color-mix(in srgb, var(--primary) 12%, transparent) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -151,19 +152,16 @@ function Login() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 24px rgba(124,106,247,0.5)',
+              boxShadow: '0 0 24px var(--primary-glow)',
             }}>
-              <Zap size={26} color="white" fill="white" />
+              <Zap size={26} color="#FFFFFF" fill="#FFFFFF" />
             </div>
             <h1 style={{
               margin: 0,
               fontSize: 'var(--text-3xl)',
-              fontWeight: 700,
-              letterSpacing: '-0.04em',
-              background: 'linear-gradient(135deg, #EEEEF0 0%, #9585F9 60%, #a78bfa 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
+              fontWeight: 800,
+              letterSpacing: '-0.035em',
+              color: 'var(--text-primary)',
             }}>
               TakeUForward
             </h1>
@@ -197,15 +195,15 @@ function Login() {
                 alignItems: 'center',
                 gap: 'var(--space-3)',
                 padding: 'var(--space-3) var(--space-4)',
-                background: 'rgba(124,106,247,0.07)',
+                background: 'color-mix(in srgb, var(--primary) 6%, var(--bg-surface))',
                 borderRadius: 'var(--radius-sm)',
-                border: '1px solid rgba(124,106,247,0.15)',
+                border: '1px solid var(--border)',
               }}>
                 <div style={{
                   width: 30,
                   height: 30,
                   borderRadius: 'var(--radius-xs)',
-                  background: 'rgba(124,106,247,0.15)',
+                  background: 'color-mix(in srgb, var(--primary) 14%, transparent)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -219,11 +217,28 @@ function Login() {
               </div>
             ))}
           </div>
+
+          <div style={{ marginTop: 'var(--space-6)', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span>Built with <span style={{ color: 'var(--danger)' }}>❤️</span> by</span>
+            <a
+              href="https://tushyent-portfolio.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: 600 }}
+            >
+              Tushyent
+            </a>
+            <span>&middot;</span>
+            <Link to="/tech" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Tech Specs</Link>
+          </div>
         </div>
       </div>
 
       {/* ── RIGHT: FORM PANEL ── */}
-      <div className="login-form-panel">
+      <div className="login-form-panel" style={{ position: 'relative' }}>
+        <div style={{ position: 'absolute', top: 20, right: 20 }}>
+          <ThemeToggle />
+        </div>
         <div style={{ width: '100%', maxWidth: 380 }}>
 
           {/* Mobile-only brand (shown when left panel is hidden) */}
@@ -243,11 +258,11 @@ function Login() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 16px rgba(124,106,247,0.4)',
+              boxShadow: '0 0 16px var(--primary-glow)',
             }}>
-              <Zap size={18} color="white" fill="white" />
+              <Zap size={18} color="#FFFFFF" fill="#FFFFFF" />
             </div>
-            <span style={{ fontSize: 'var(--text-lg)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+            <span style={{ fontSize: 'var(--text-lg)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
               TakeUForward
             </span>
           </div>
@@ -371,15 +386,15 @@ function Login() {
                     alignItems: 'center',
                     gap: 'var(--space-3)',
                     padding: 'var(--space-3) var(--space-4)',
-                    background: 'rgba(124,106,247,0.07)',
+                    background: 'color-mix(in srgb, var(--primary) 6%, var(--bg-surface))',
                     borderRadius: 'var(--radius-sm)',
-                    border: '1px solid rgba(124,106,247,0.15)',
+                    border: '1px solid var(--border)',
                   }}>
                     <div style={{
                       width: 30,
                       height: 30,
                       borderRadius: 'var(--radius-xs)',
-                      background: 'rgba(124,106,247,0.15)',
+                      background: 'color-mix(in srgb, var(--primary) 14%, transparent)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -395,6 +410,23 @@ function Login() {
               </div>
             </>
           )}
+
+          <div style={{ marginTop: 'var(--space-8)', textAlign: 'center', fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+            <a
+              href="https://tushyent-portfolio.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--text-secondary)', textDecoration: 'none', transition: 'color var(--transition-fast)' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+            >
+              Built with <span style={{ color: 'var(--danger)' }}>❤️</span> by <strong style={{ color: 'var(--text-primary)' }}>Tushyent</strong>
+            </a>
+            {' '}&middot;{' '}
+            <Link to="/about" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>About</Link>
+            {' '}&middot;{' '}
+            <Link to="/tech" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Architecture</Link>
+          </div>
 
         </div>
       </div>

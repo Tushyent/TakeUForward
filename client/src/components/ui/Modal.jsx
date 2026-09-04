@@ -19,9 +19,11 @@ const Modal = ({ children, onClose }) => {
       onClick={(e) => { if (e.target === e.currentTarget && onClose) onClose(); }}
     >
       <div style={{
-        background: 'var(--bg-surface-raised, var(--color-surface, #1e1e2e))',
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border-strong)',
+        color: 'var(--text-primary)',
         borderRadius: 'var(--radius-lg)', maxWidth: 520, width: '100%',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+        boxShadow: 'var(--shadow-lg)',
         maxHeight: '90vh', overflowY: 'auto'
       }}>
         {children}

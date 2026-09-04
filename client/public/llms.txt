@@ -24,5 +24,8 @@ Centralizes department study materials, previous year question papers (PYQs), no
 Dedicated peer-to-peer utility boards for buying/selling second-hand textbooks and returning lost campus items.
 
 ## Contact & Credits
-Created with ❤️ for SSN College of Engineering by Tushyent N P.
-Website: https://takeuforward.blastorz.fun
+Architected and developed with ❤️ by **Tushyent** (Tushyent N P).
+- Portfolio: https://tushyent-portfolio.vercel.app/
+- GitHub: https://github.com/Tushyent
+- Platform: https://takeuforward.blastorz.fun
+
